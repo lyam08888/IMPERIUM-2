@@ -1,0 +1,189 @@
+/* css/style.css */
+/* Ce fichier contient les styles communs à toutes les pages de l'application IMPERIUM. */
+
+:root {
+    --gold-primary: #d97706; --gold-secondary: #f59e0b; --gold-light: #fbbf24;
+    --marble-white: #f8fafc; --roman-red: #dc2626; --roman-purple: #7c3aed;
+    --dark-stone: #1e293b; --dark-marble: #334155; --dark-bg: #0f172a;
+    --text-light: #e2e8f0; --text-muted: #94a3b8;
+    --border-gold: rgba(217, 119, 6, 0.3); --shadow-gold: rgba(217, 119, 6, 0.4);
+    --success-green: #22c55e; --error-red: #ef4444;
+    --xp-color: #7c3aed;
+    --storage-full-red: #ef4444;
+    --info-blue: #3b82f6;
+    --morale-high: #22c55e; --morale-medium: #f59e0b; --morale-low: #ef4444;
+    --xp-bar: #3b82f6;
+    --loyalty-bar: #a855f7;
+    --supply-bar: #84cc16;
+    --sea-blue: #4a90e2; --sea-deep-blue: #3a5a9a;
+    --ally-blue: #3b82f6;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+html { scroll-behavior: smooth; }
+body {
+    font-family: 'Times New Roman', serif;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(217, 119, 6, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(124, 58, 237, 0.1) 0%, transparent 50%),
+        linear-gradient(135deg, var(--dark-bg) 0%, var(--dark-stone) 100%);
+    color: var(--text-light);
+    overflow-y: auto;
+}
+.imperium-ui { display: flex; flex-direction: column; min-height: 100vh; position: relative; z-index: 10; padding-bottom: 80px; }
+.imperium-body { max-width: 1200px; margin: 0 auto; width: 100%; padding: 1.5rem 2rem; }
+.view-title { font-size: 2.2rem; font-weight: bold; color: var(--gold-primary); margin-bottom: 2rem; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+
+/* --- Boutons --- */
+.imperium-btn { background: linear-gradient(145deg, var(--gold-secondary), var(--gold-primary)); color: white; border: none; border-radius: 0.5rem; padding: 0.8rem 1.2rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; font-family: 'Times New Roman', serif; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); box-shadow: 0 2px 5px rgba(0,0,0,0.2), inset 0 -2px 2px rgba(0,0,0,0.2); }
+.imperium-btn.danger { background: linear-gradient(145deg, var(--roman-red), #991b1b); }
+.imperium-btn:hover { filter: brightness(1.1); box-shadow: 0 4px 10px var(--shadow-gold), inset 0 -2px 2px rgba(0,0,0,0.2); }
+.imperium-btn:active { transform: translateY(1px); box-shadow: 0 1px 3px rgba(0,0,0,0.3), inset 0 0 2px rgba(0,0,0,0.3); filter: brightness(1); }
+.imperium-btn:disabled { background: var(--dark-marble); cursor: not-allowed; color: var(--text-muted); transform: none; box-shadow: none; filter: none; }
+.small-btn { font-size: 0.9rem; padding: 0.4rem 0.8rem; border-radius: 0.5rem; color: white; transition: transform 0.2s, background-color 0.2s; border: none; cursor: pointer; }
+.small-btn:hover { transform: scale(1.05); }
+
+/* --- Modals --- */
+.modal-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; display: flex; justify-content: center; align-items: center; pointer-events: none; }
+.modal-container.active { pointer-events: all; }
+.modal-backdrop { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease; }
+.modal-container.active .modal-backdrop { opacity: 1; }
+.modal-content { background: linear-gradient(135deg, var(--dark-stone), var(--dark-bg)); border: 2px solid var(--gold-primary); border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 90%; max-width: 600px; z-index: 1001; transform: scale(0.9) translateY(20px); opacity: 0; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); display: flex; flex-direction: column; max-height: 90vh; }
+.modal-container.active .modal-content { transform: scale(1) translateY(0); opacity: 1; }
+.modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-gold); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); }
+.modal-title { font-size: 1.8rem; color: var(--gold-light); text-shadow: 1px 1px 3px var(--shadow-gold); }
+.modal-close-btn { background: none; border: none; color: var(--text-muted); font-size: 2rem; cursor: pointer; transition: color 0.3s; }
+.modal-body { padding: 1rem; overflow-y: auto; }
+.modal-footer { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-top: 1px solid var(--border-gold); gap: 1rem; background: rgba(0,0,0,0.2); }
+
+/* --- Notifications (Toast) --- */
+#toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.toast { padding: 0.8rem 1.5rem; border-radius: 2rem; color: white; font-weight: bold; background: linear-gradient(135deg, var(--dark-marble), var(--dark-stone)); border: 1px solid var(--gold-primary); box-shadow: 0 4px 15px rgba(0,0,0,0.3); animation: toast-in 0.5s ease, toast-out 0.5s ease 3.5s; opacity: 0; }
+.toast.success { background: linear-gradient(135deg, #16a34a, #15803d); border-color: #4ade80; }
+.toast.error { background: linear-gradient(135deg, #dc2626, #b91c1c); border-color: #f87171; }
+.toast.levelup { background: linear-gradient(135deg, var(--xp-color), #a855f7); border-color: var(--gold-light); font-size: 1.2rem; padding: 1rem 2rem; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toast-out { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(20px); } }
+
+/* --- Navigation (Loaded from nav.html) --- */
+.nav-button { position: fixed; top: 20px; right: 20px; z-index: 1000; background: var(--gold-primary); color: #fff; border: none; border-radius: 50%; width: 48px; height: 48px; font-size: 1.5rem; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+.nav-popup { position: fixed; top: 70px; right: 20px; background: var(--dark-stone); border: 1px solid var(--border-gold); border-radius: 0.5rem; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: none; flex-direction: column; z-index: 1000; }
+.nav-popup a { color: var(--text-light); padding: 0.5rem 1rem; text-decoration: none; white-space: nowrap; }
+.nav-popup a:hover { background: var(--dark-marble); }
+.nav-popup.active { display: flex; }
+
+/* --- Styles spécifiques à City View (index.html) --- */
+.city-map-section { background: rgba(15, 23, 42, 0.8); border-radius: 1rem; border: 1px solid var(--border-gold); padding: 1.5rem; margin-bottom: 2rem; }
+.map-header { margin-bottom: 2rem; }
+.buildings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; min-height: 400px; }
+@media (min-width: 768px) { .buildings-grid { grid-template-columns: repeat(5, 1fr); } }
+.building-slot { background: rgba(30, 41, 59, 0.6); border: 2px dashed var(--text-muted); border-radius: 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; min-height: 120px; padding: 0.5rem; position: relative; }
+.building-slot:hover:not(.constructing) { border-color: var(--gold-light); background: rgba(217, 119, 6, 0.15); transform: translateY(-5px); }
+.building-slot.occupied { border-style: solid; border-color: var(--border-gold); }
+.building-slot.constructing { cursor: not-allowed; background: rgba(124, 58, 237, 0.2); border-color: var(--xp-color); border-style: solid;}
+.building-icon { font-size: 2.5rem; margin-bottom: 0.5rem; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5)); }
+.building-name { color: var(--text-light); font-weight: bold; font-size: 0.9rem; text-align: center; }
+.building-level { color: var(--gold-light); font-size: 0.8rem; font-weight: bold; margin-top: 0.3rem; padding: 0.2rem 0.5rem; background: rgba(217, 119, 6, 0.2); border-radius: 1rem; }
+.construction-timer { position: absolute; bottom: 5px; left: 0; right: 0; text-align: center; font-size: 0.9rem; font-weight: bold; color: var(--gold-light); background: rgba(0,0,0,0.5); padding: 2px 0; }
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+.dashboard-tile { background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-gold); border-radius: 1rem; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease; }
+.dashboard-tile:hover { transform: translateY(-5px); box-shadow: 0 5px 20px var(--shadow-gold); border-color: var(--gold-primary); }
+.tile-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.tile-icon { font-size: 2rem; }
+.tile-title { font-size: 1.3rem; font-weight: bold; color: var(--gold-light); }
+.tile-preview { font-size: 0.9rem; color: var(--text-muted); }
+
+/* --- Styles spécifiques au Simulateur --- */
+.simulator-layout { display: flex; flex-direction: column; gap: 1rem; }
+.battle-setup { display: grid; grid-template-columns: 1fr; gap: 1rem; align-items: start; }
+@media (min-width: 1024px) { .battle-setup { grid-template-columns: 1fr 1fr; } }
+/* ... (le reste des styles du simulateur peut être ajouté ici si nécessaire) ... */
+
+/* --- Styles spécifiques à World View --- */
+.world-map-container { position: relative; background: radial-gradient(ellipse at center, var(--sea-blue) 0%, var(--sea-deep-blue) 100%); border-radius: 1rem; border: 2px solid var(--border-gold); flex-grow: 1; overflow: hidden; cursor: grab; }
+.world-map-container:active { cursor: grabbing; }
+
+.world-view-ui { height: 100vh; overflow: hidden; }
+.world-view-body { height: 100%; }
+.world-view-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border-radius: 1rem; border: 2px solid var(--border-gold); overflow-y: auto; padding: 1.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.2); display: flex; flex-direction: column; }
+.world-game-layout { display: flex; flex-direction: column; gap: 1.5rem; flex-grow: 1; overflow: hidden; }
+.world-map-content { position: relative; width: 100%; height: 100%; transform-origin: 0 0; }
+.world-bottom-hud { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+.world-command-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; width: 100%; max-width: 600px; }
+.world-command-preview { color: var(--text-muted); font-style: italic; height: 1.2em; transition: opacity 0.3s; }
+
+.world-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; }
+.world-modal-content { background: linear-gradient(135deg, var(--dark-marble) 0%, var(--dark-stone) 100%); margin: auto; padding: 2rem; border: 2px solid var(--gold-primary); border-radius: 1rem; width: 90%; max-width: 600px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); text-align: center; position: relative; }
+.world-modal-close-btn { color: var(--text-muted); font-size: 28px; font-weight: bold; position: absolute; top: 10px; right: 20px; cursor: pointer; }
+.world-modal-body { color: var(--text-light); font-size: 1.1rem; line-height: 1.5; margin-bottom: 1.5rem; white-space: pre-wrap; max-height: 60vh; overflow-y: auto; text-align: left; }
+.world-modal-buttons { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; }
+.legion-marker { position: absolute; width: 24px; height: 24px; background: var(--ally-blue); border: 2px solid var(--text-light); border-radius: 0.25rem; z-index: 6; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.legion-marker:hover { transform: scale(1.5); }
+.world-marker { position: absolute; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: white; font-weight: bold; transition: all 0.3s ease; cursor: pointer; border: 2px solid rgba(255,255,255,0.7); box-shadow: 0 0 12px rgba(0,0,0,0.5); z-index: 5; }
+.world-marker:hover { transform: scale(1.4); z-index: 10; }
+.marker-icon { position: absolute; bottom: -5px; right: -5px; width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--dark-bg); font-size: 10px; display: flex; align-items: center; justify-content: center; }
+.world-marker.capital { background: var(--gold-primary); border-color: var(--gold-light); animation: pulse 2s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); } 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); } }
+.world-marker.controlled { background: var(--success-green); }
+.world-marker.enemy { background: var(--roman-red); }
+.world-marker.ally { background: var(--ally-blue); }
+.action-tile { background: rgba(30, 41, 59, 0.6); border-radius: 1rem; border: 1px solid var(--border-gold); padding: 1rem; text-align: center; cursor: pointer; transition: all 0.3s ease; }
+.action-tile:hover, .action-tile.active { border-color: var(--gold-light); transform: translateY(-2px); background: rgba(45, 55, 72, 0.8); }
+.action-tile .tile-icon { font-size: 2rem; }
+.action-tile .tile-title { font-weight: bold; margin-top: 0.5rem; }
+.notification.info { border-left-color: var(--info-blue); }
+.notification.success { border-left-color: var(--success-green); }
+.notification.error { border-left-color: var(--error-red); }
+
+/* Styles for Simulator View */
+#scout-btn { background: var(--info-blue); }
+#reset-btn { background: var(--dark-marble); }
+
+#battle-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+#battle-modal-content {
+    background: var(--dark-bg);
+    border: 2px solid var(--gold-primary);
+    border-radius: 1rem;
+    padding: 2rem;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+.battle-result {
+    display: none;
+}
+#battle-modal-footer {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.view-container {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+    border-radius: 1rem;
+    border: 1px solid var(--border-gold);
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.8);
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.8rem;
+    margin-bottom: 1rem;
+}
