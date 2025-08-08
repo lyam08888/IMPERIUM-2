@@ -440,10 +440,9 @@ function screenToWorld(px,py){
   const worldY = (gy*S.grid.ts - S.grid.h*S.grid.ts/2 + S.grid.ts/2)*S.cam.zoom;
   return {gx,gy, px:worldX, py:worldY};
 }
-canvas.addEventListener('touchstart',(ev)=>{
-  ev.preventDefault();
-  const rect=canvas.getBoundingClientRect();
-  const touches=[...ev.touches].map(t=>({id:t.identifier,x:t.clientX-rect.left,y:t.clientY-rect.top}));
+
+// Unified pointer handlers for touch and mouse
+function pointerStart(touches){
   touches.forEach(t=>S.input.touches.set(t.id,t));
   if(touches.length===1){
     S.input.longPress=setTimeout(()=>{
@@ -454,11 +453,9 @@ canvas.addEventListener('touchstart',(ev)=>{
     const dx=touches[0].x - touches[1].x, dy=touches[0].y - touches[1].y;
     S.input.pinch=Math.hypot(dx,dy);
   }
-},{passive:false});
-canvas.addEventListener('touchmove',(ev)=>{
-  ev.preventDefault();
-  const rect=canvas.getBoundingClientRect();
-  const touches=[...ev.touches].map(t=>({id:t.identifier,x:t.clientX-rect.left,y:t.clientY-rect.top}));
+}
+
+function pointerMove(touches,rect){
   if(touches.length===1 && S.input.touches.size===1){
     const prev=[...S.input.touches.values()][0], curr=touches[0];
     if(S.input.mode==='build' && S.selectedToBuild){
@@ -478,21 +475,77 @@ canvas.addEventListener('touchmove',(ev)=>{
     touches.forEach(t=>S.input.touches.set(t.id,t));
     hideGhostTip();
   }
-},{passive:false});
-canvas.addEventListener('touchend',(ev)=>{
-  ev.preventDefault();
+}
+
+function pointerEnd(changed){
   if(S.input.longPress){ clearTimeout(S.input.longPress); S.input.longPress=null; }
-  [...ev.changedTouches].forEach(t=>S.input.touches.delete(t.identifier));
-  if(ev.changedTouches.length===1){
-    const rect=canvas.getBoundingClientRect();
-    const t=ev.changedTouches[0];
-    const px=t.clientX-rect.left, py=t.clientY-rect.top;
+  changed.forEach(t=>S.input.touches.delete(t.id));
+  if(changed.length===1 && changed[0].x!==undefined){
+    const px=changed[0].x, py=changed[0].y;
     const nowT=Date.now();
     if(nowT-lastTap<250){ S.cam.x=0;S.cam.y=0; haptics(6); beep(520,0.05); hideGhostTip(); }
     else onTap(px,py);
     lastTap=nowT;
   }
+}
+
+// Touch events
+canvas.addEventListener('touchstart',(ev)=>{
+  ev.preventDefault();
+  const rect=canvas.getBoundingClientRect();
+  const touches=[...ev.touches].map(t=>({id:t.identifier,x:t.clientX-rect.left,y:t.clientY-rect.top}));
+  pointerStart(touches);
 },{passive:false});
+
+canvas.addEventListener('touchmove',(ev)=>{
+  ev.preventDefault();
+  const rect=canvas.getBoundingClientRect();
+  const touches=[...ev.touches].map(t=>({id:t.identifier,x:t.clientX-rect.left,y:t.clientY-rect.top}));
+  pointerMove(touches,rect);
+},{passive:false});
+
+canvas.addEventListener('touchend',(ev)=>{
+  ev.preventDefault();
+  const rect=canvas.getBoundingClientRect();
+  const changed=[...ev.changedTouches].map(t=>({id:t.identifier,x:t.clientX-rect.left,y:t.clientY-rect.top}));
+  pointerEnd(changed);
+},{passive:false});
+
+// Mouse events
+canvas.addEventListener('mousedown',(ev)=>{
+  if(ev.button!==0) return;
+  const rect=canvas.getBoundingClientRect();
+  pointerStart([{id:'mouse',x:ev.clientX-rect.left,y:ev.clientY-rect.top}]);
+});
+
+canvas.addEventListener('mousemove',(ev)=>{
+  if(!S.input.touches.has('mouse')) return;
+  const rect=canvas.getBoundingClientRect();
+  pointerMove([{id:'mouse',x:ev.clientX-rect.left,y:ev.clientY-rect.top}],rect);
+});
+
+canvas.addEventListener('mouseup',(ev)=>{
+  if(ev.button!==0) return;
+  const rect=canvas.getBoundingClientRect();
+  pointerEnd([{id:'mouse',x:ev.clientX-rect.left,y:ev.clientY-rect.top}]);
+});
+
+canvas.addEventListener('mouseleave',()=>{
+  if(S.input.touches.has('mouse')) pointerEnd([{id:'mouse'}]);
+});
+
+canvas.addEventListener('wheel',(ev)=>{
+  ev.preventDefault();
+  const rect=canvas.getBoundingClientRect();
+  const x=ev.clientX-rect.left, y=ev.clientY-rect.top;
+  const wx=(x - canvas.width/2)/S.cam.zoom + S.cam.x;
+  const wy=(y - canvas.height/2)/S.cam.zoom + S.cam.y;
+  S.cam.zoom=clamp(S.cam.zoom * (ev.deltaY>0?0.9:1.1), 0.85, 6);
+  S.cam.x = wx - (x - canvas.width/2)/S.cam.zoom;
+  S.cam.y = wy - (y - canvas.height/2)/S.cam.zoom;
+},{passive:false});
+
+canvas.addEventListener('contextmenu',ev=>ev.preventDefault());
 
 function onTap(px,py){
   if(S.input.mode==='build' && S.selectedToBuild){
