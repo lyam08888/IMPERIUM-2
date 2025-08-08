@@ -238,7 +238,14 @@ function getDefaultGameState() {
             legionnaire: 0, archer: 0, cavalier: 0, praetorian: 0, battering_ram: 0, ballista: 0
         },
         navalUnitPool: { // Units available for fleets
-            trireme: 0, quinquereme: 0, liburnian: 0, corvus_ship: 0, ballista_ship: 0, fire_ship: 0
+
+            trireme: 10,
+            quinquereme: 2,
+            liburnian: 5,
+            corvus_ship: 2,
+            ballista_ship: 3,
+            fire_ship: 1
+
         },
         legions: [], // from world
         fleets: [], // from world

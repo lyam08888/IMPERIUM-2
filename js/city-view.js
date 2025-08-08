@@ -26,6 +26,7 @@ function initializeCityUI() {
     console.log("Initializing City View UI...");
     recalculateCityStats();
     updateAllCityUI();
+    setupEventListeners();
 
     // Setup periodic tip display
     const TIP_INTERVAL = 90 * 1000; // Every 90 seconds
@@ -589,65 +590,38 @@ function handleTrainClick(unitId) {
     }
 }
 
-async function showTerrestrialCombatModal() {
-    const modalBody = `
-        <div id="terrestrial-combat-simulator-container" style="width: 100%; height: 100%; overflow: auto;">
-            <p>Chargement du simulateur de combat...</p>
-        </div>
-    `;
-    // We use the existing modal system from city-view.js
-    // We give it a custom class to make it full-screen
-    showModal('Simulateur de Combat Terrestre', modalBody, '', 'modal-fullscreen');
 
-    const container = document.getElementById('terrestrial-combat-simulator-container');
-    if (!container) {
-        console.error("Simulator container not found in modal.");
-        return;
-    }
+function setupEventListeners() {
+    setupDashboardToggle();
+}
 
-    try {
-        const response = await fetch('Simulateur.html');
-        if (!response.ok) throw new Error('Failed to fetch simulator HTML');
-        const htmlText = await response.text();
+function setupDashboardToggle() {
+    const container = document.querySelector('#city-view');
+    const toggleButton = document.getElementById('dashboard-toggle-btn');
 
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(htmlText, 'text/html');
+    if (!container || !toggleButton) return;
 
-        // Extract the main view and the battle result modal from the simulator page
-        const simulatorView = doc.getElementById('view-simulator');
-        const battleModal = doc.getElementById('battle-modal-overlay');
+    const isCollapsed = () => localStorage.getItem('cityDashboardCollapsed') === 'true';
 
-        if (!simulatorView || !battleModal) {
-            throw new Error('Could not find required elements in simulator HTML');
-        }
-
-        // Inject both parts into our container
-        // We also need to append the battle modal overlay to the body so it can be properly displayed full screen
-        document.body.appendChild(battleModal);
-        container.innerHTML = simulatorView.innerHTML;
-
-        // The close button of the original modal should now close the battle modal overlay as well
-        const closeModalBtn = document.querySelector('.modal-fullscreen .modal-close-btn');
-        if(closeModalBtn) {
-            closeModalBtn.onclick = () => {
-                const battleModalEl = document.getElementById('battle-modal-overlay');
-                if(battleModalEl) battleModalEl.remove();
-                closeModal();
-            };
-        }
-
-
-        // Now that the HTML is in the DOM, initialize the simulator's JavaScript
-        if (typeof initializeSimulatorUI === 'function') {
-            initializeSimulatorUI();
+    const applyState = () => {
+        if (isCollapsed()) {
+            container.classList.add('dashboard-collapsed');
+            toggleButton.innerHTML = '&laquo;';
         } else {
-            throw new Error('initializeSimulatorUI function not found. Ensure simulator-view.js is loaded.');
+            container.classList.remove('dashboard-collapsed');
+            toggleButton.innerHTML = '&raquo;';
         }
+    };
 
-    } catch (error) {
-        container.innerHTML = `<p style="color: var(--error-red);">Erreur : Impossible de charger le simulateur de combat. ${error.message}</p>`;
-        console.error("Failed to load terrestrial combat simulator:", error);
-    }
+    toggleButton.addEventListener('click', () => {
+        localStorage.setItem('cityDashboardCollapsed', !isCollapsed());
+        applyState();
+         // Dispatch a resize event to make sure any map logic dependent on size updates
+        window.dispatchEvent(new Event('resize'));
+    });
+
+    applyState(); // Apply initial state on load
+
 }
 
 function showTechModal() {
