@@ -122,6 +122,20 @@ document.addEventListener('DOMContentLoaded', () => {
         renderTutorialGrid();
         renderTutorialResources();
         runTutorialStep(0);
+        
+        // Debug - Log tutorial startup
+        console.log('Tutorial started');
+        setTimeout(() => {
+            console.log('Tutorial slots after render:', document.querySelectorAll('#tutorialBuildingsGrid .building-slot').length);
+            document.querySelectorAll('#tutorialBuildingsGrid .building-slot').forEach((slot, i) => {
+                const styles = window.getComputedStyle(slot);
+                console.log(`Slot ${i}:`, {
+                    zIndex: styles.zIndex,
+                    pointerEvents: styles.pointerEvents,
+                    position: styles.position
+                });
+            });
+        }, 100);
     }
 
     function runTutorialStep(stepIndex) {
@@ -270,6 +284,20 @@ document.addEventListener('DOMContentLoaded', () => {
             slot.className = 'building-slot';
             slot.dataset.slotId = building.slotId;
             slot.style.pointerEvents = 'auto'; // Ensure slots are always clickable
+            slot.style.zIndex = '50'; // Force high z-index
+            slot.style.position = 'relative'; // Ensure positioning context
+            
+            // Debug - add click logging
+            slot.addEventListener('click', (e) => {
+                console.log('Building slot clicked!', building.slotId);
+                e.stopPropagation();
+            });
+            
+            // Debug - add mouseover logging
+            slot.addEventListener('mouseover', () => {
+                console.log('Building slot hovered!', building.slotId);
+            });
+            
             const isConstructing = tutorialState.gameState.city.constructionQueue.some(item => item.slotId === building.slotId);
 
             if (isConstructing) {
@@ -280,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 slot.classList.add('occupied');
                 slot.innerHTML = `<div class="building-icon">${def.icon}</div><div class="building-name">${def.name}</div><div class="building-level">Niv. ${building.level}</div>`;
             } else {
-                slot.innerHTML = `<div class="building-icon" style="font-size: 2.5rem; color: var(--gold-light);">+</div>`;
+                slot.innerHTML = `<div class="building-icon" style="font-size: 2.5rem; color: var(--gold-light);">+</div><div class="building-name">Terrain Libre</div>`;
             }
             grid.appendChild(slot);
         });

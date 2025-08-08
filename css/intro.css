@@ -86,7 +86,7 @@
     height: 100%;
     background: rgba(15, 23, 42, 0.8);
     backdrop-filter: blur(5px);
-    z-index: 2001;
+    z-index: 1; /* Lower than everything else */
     pointer-events: none; /* Allow clicks to pass through the overlay */
 }
 
@@ -101,7 +101,7 @@
     border: 2px solid var(--gold-primary);
     border-radius: 1rem;
     padding: 1.5rem;
-    z-index: 2003; /* Above the game UI but below highlighted elements */
+    z-index: 20; /* Above the game UI */
     text-align: center;
     box-shadow: 0 5px 20px rgba(0,0,0,0.5);
     pointer-events: auto; /* Restore clicks for the modal */
@@ -115,7 +115,7 @@
 
 #tutorial-game-ui {
     position: relative;
-    z-index: 2002;
+    z-index: 10;
     padding: 2rem;
     max-width: 1200px;
     margin: 0 auto;
@@ -125,7 +125,7 @@
 /* For highlighting tutorial elements */
 .tutorial-highlight {
     position: relative;
-    z-index: 2004; /* Above the overlay */
+    z-index: 30; /* Above the game UI and modal */
     box-shadow: 0 0 0 4px var(--gold-light), 0 0 20px 10px var(--shadow-gold);
     border-radius: 1rem; /* Match building slot radius */
     transition: box-shadow 0.3s ease;
@@ -153,6 +153,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
+    z-index: 15; /* Above the game UI background */
     overflow: hidden;
     color: var(--text-light, #e8dcc6);
 }
@@ -196,8 +197,42 @@
 
 /* Ensure the modal container can still function during tutorial */
 .modal-container {
-    z-index: 2005 !important; /* Above tutorial elements */
+    z-index: 100 !important; /* Above all tutorial elements */
     pointer-events: all !important;
+}
+
+/* Force tutorial building slots to be clickable and visible */
+#tutorialBuildingsGrid {
+    position: relative;
+    z-index: 15; /* Same as building slots */
+}
+
+/* Force all children of tutorial game ui to be interactive */
+#tutorial-game-ui * {
+    pointer-events: auto !important;
+}
+
+/* Override any conflicting styles */
+#tutorial-screen #tutorialBuildingsGrid .building-slot {
+    pointer-events: auto !important;
+    z-index: 15 !important;
+    position: relative !important;
+}
+
+/* Debug - make building slots more visible */
+#tutorialBuildingsGrid .building-slot:hover {
+    background: rgba(212, 101, 31, 0.8) !important;
+    border-color: #f59e0b !important;
+    transform: scale(1.1) !important;
+}
+
+/* Ensure tutorial elements are above overlay */
+#tutorial-game-ui,
+#tutorial-modal,
+#tutorialBuildingsGrid,
+#tutorialBuildingsGrid .building-slot {
+    z-index: 50 !important;
+    position: relative !important;
 }
 
 
