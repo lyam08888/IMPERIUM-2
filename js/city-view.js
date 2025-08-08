@@ -155,13 +155,15 @@ function handleBuildingClick(building) {
                     prereqText = `<div style="color: var(--error-red); font-size: 0.7rem; font-style: italic; margin-top: 0.25rem;">Requiert: ${BUILDING_DEFINITIONS[def.requires.type].name} Niv. ${def.requires.level}</div>`;
                 }
             }
-            const costsHtml = costs.map(c => `<span style="color: ${gameState.resources[c.res] < c.amount ? 'var(--error-red)' : 'var(--text-light)'}">${c.amount.toLocaleString()} ${c.res}</span>`).join(', ');
-            return `<div class="build-item ${!canAfford || !prereqMet ? 'disabled' : ''}" ${canAfford && prereqMet ? `onclick="startBuild('${type}', ${building.slotId})"` : ''} style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-gold); border-radius: 0.75rem; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
-                        <div style="font-size: 1.8rem;">${def.icon}</div>
-                        <div style="font-weight: bold; margin: 0.25rem 0; color: var(--gold-light); font-size: 0.9rem;">${def.name}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted);">${costsHtml}</div>
-                        ${prereqText}
-                    </div>`;
+
+const costsHtml = costs.map(c => `<span class="cost-item ${gameState.resources[c.res] < c.amount ? 'insufficient' : ''}">${c.amount.toLocaleString()} ${c.res}</span>`).join(', ');
+return `<div class="build-item ${!canAfford || !prereqMet ? 'disabled' : ''}" ${canAfford && prereqMet ? `onclick="startBuild('${type}', ${building.slotId})"` : ''}>
+    <div class="build-item-icon">${def.icon}</div>
+    <div class="build-item-name">${def.name}</div>
+    <div class="build-item-costs">${costsHtml}</div>
+    ${prereqText}
+</div>`;
+
         }).join('');
         const body = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem;">${buildOptions}</div>`;
         showModal('Construire un bâtiment', body, '');
@@ -285,28 +287,9 @@ function showStatsModal() {
 }
 
 function showProductionModal() {
-    let body = '<div class="production-display" style="display: flex; flex-direction: column; gap: 0.5rem;">';
 
-    // Production from buildings
-    Object.entries(gameState.city.production).filter(([res]) => ['gold', 'food', 'marble'].includes(res)).forEach(([res, rate]) => {
-        const iconMap = { gold: '💰', food: '🌾', marble: '🏛️' };
-        const effectiveRate = rate * gameState.city.stats.happinessModifier;
-        const rateClass = effectiveRate >= 0 ? 'positive' : 'negative';
-        const sign = effectiveRate >= 0 ? '+' : '';
-        body += `<div class="production-item" style="display: flex; justify-content: space-between;"><span>${iconMap[res]} Production</span> <span style="color: ${rateClass === 'positive' ? 'var(--success-green)' : 'var(--error-red)'}">${sign}${Math.round(effectiveRate).toLocaleString()}/h</span></div>`;
-    });
+    let body = '...';
 
-    // Consumption by armies
-    const totalConsumption = gameState.legions.reduce((sum, legion) => {
-        return sum + Math.ceil((legion.strength / 1000) * GAME_CONFIG.SUPPLY_CONSUMPTION_PER_1000_TROOPS);
-    }, 0);
-    // Convert per-turn consumption to per-hour for consistency (assuming a turn is like an hour for now)
-    const hourlyConsumption = totalConsumption; // Simplified for now
-    if(hourlyConsumption > 0) {
-        body += `<div class="production-item" style="display: flex; justify-content: space-between;"><span>🌾 Entretien des armées</span> <span style="color: var(--error-red)">-${hourlyConsumption.toLocaleString()}/h</span></div>`;
-    }
-
-    body += '</div>';
     showModal("Rapport de Production", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
 }
 
