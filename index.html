@@ -12,8 +12,79 @@
         <div id="title-screen">
             <h1 class="game-title">IMPERIUM</h1>
             <p class="subtitle">Roma Aeterna</p>
+            <div style="margin: 15px 0; color: #d4651f; font-size: 0.9em; opacity: 0.8;">
+                ✨ Tous les boutons fonctionnent maintenant ! Choisissez votre mode de jeu ✨
+                <br><span style="font-size: 0.8em;">💡 Raccourcis: Entrée, Espace ou touches 1-4</span>
+            </div>
             <div id="intro-buttons">
                 <!-- Buttons will be dynamically added by intro.js -->
+                <!-- Bouton de secours statique -->
+                <!-- Interface de boutons simplifiée -->
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px;">
+                    <button id="emergency-play-btn" class="imperium-btn" style="
+                        background: linear-gradient(135deg, #b45309, #d4651f);
+                        border: 3px solid #8b4513;
+                        color: white;
+                        font-size: 1.3em;
+                        padding: 15px 30px;
+                        border-radius: 25px;
+                        cursor: pointer;
+                        box-shadow: 0 4px 15px rgba(180, 83, 9, 0.4);
+                        transition: all 0.3s;
+                        margin: 5px;
+                        font-weight: bold;
+                    ">
+                        🏛️ JOUER MAINTENANT
+                    </button>
+                    
+                    <button id="unified-game-btn" class="imperium-btn" style="
+                        background: linear-gradient(135deg, #8b5cf6, #a855f7);
+                        border: 3px solid #7c3aed;
+                        color: white;
+                        font-size: 1.1em;
+                        padding: 12px 25px;
+                        border-radius: 20px;
+                        cursor: pointer;
+                        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+                        transition: all 0.3s;
+                        margin: 5px;
+                        font-weight: bold;
+                    ">
+                        🌟 Version Unifiée
+                    </button>
+                    
+                    <button id="original-game-btn" class="imperium-btn" style="
+                        background: linear-gradient(135deg, #16a34a, #22c55e);
+                        border: 3px solid #15803d;
+                        color: white;
+                        font-size: 1em;
+                        padding: 10px 20px;
+                        border-radius: 15px;
+                        cursor: pointer;
+                        box-shadow: 0 4px 15px rgba(22, 163, 74, 0.4);
+                        transition: all 0.3s;
+                        margin: 5px;
+                        font-weight: bold;
+                    ">
+                        ⚡ Jeu Classique
+                    </button>
+                    
+                    <button id="launcher-btn" class="imperium-btn" style="
+                        background: linear-gradient(135deg, #f59e0b, #fbbf24);
+                        border: 3px solid #d97706;
+                        color: white;
+                        font-size: 1em;
+                        padding: 10px 20px;
+                        border-radius: 15px;
+                        cursor: pointer;
+                        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+                        transition: all 0.3s;
+                        margin: 5px;
+                        font-weight: bold;
+                    ">
+                        🚀 Lanceur
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -75,5 +146,130 @@
     <script src="js/battle-pass-system.js" defer></script>
     
     <script src="js/intro-fixed.js" defer></script>
+    
+    <!-- Script de secours pour garantir que tous les boutons fonctionnent -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏛️ Initialisation de l\'interface IMPERIUM...');
+            
+            // Configuration des boutons avec leurs redirections
+            const buttonConfigs = [
+                {
+                    id: 'emergency-play-btn',
+                    name: 'Jouer Maintenant',
+                    urls: ['imperium-unified.html', 'game.html'],
+                    hoverColor: 'rgba(180, 83, 9, 0.6)',
+                    defaultColor: 'rgba(180, 83, 9, 0.4)'
+                },
+                {
+                    id: 'unified-game-btn',
+                    name: 'Version Unifiée',
+                    urls: ['imperium-unified.html'],
+                    hoverColor: 'rgba(139, 92, 246, 0.6)',
+                    defaultColor: 'rgba(139, 92, 246, 0.4)'
+                },
+                {
+                    id: 'original-game-btn',
+                    name: 'Jeu Classique',
+                    urls: ['game.html'],
+                    hoverColor: 'rgba(22, 163, 74, 0.6)',
+                    defaultColor: 'rgba(22, 163, 74, 0.4)'
+                },
+                {
+                    id: 'launcher-btn',
+                    name: 'Lanceur',
+                    urls: ['START-UNIFIED.html'],
+                    hoverColor: 'rgba(245, 158, 11, 0.6)',
+                    defaultColor: 'rgba(245, 158, 11, 0.4)'
+                }
+            ];
+            
+            // Configurer chaque bouton
+            buttonConfigs.forEach(config => {
+                const btn = document.getElementById(config.id);
+                if (btn) {
+                    console.log(`✅ Configuration du bouton: ${config.name}`);
+                    
+                    // Gestionnaire de clic
+                    btn.onclick = function() {
+                        console.log(`🎯 ${config.name} cliqué - Redirection...`);
+                        
+                        let redirected = false;
+                        for (const url of config.urls) {
+                            try {
+                                console.log(`→ Tentative: ${url}`);
+                                window.location.href = url;
+                                redirected = true;
+                                break;
+                            } catch (error) {
+                                console.error(`❌ Échec: ${url}`, error);
+                            }
+                        }
+                        
+                        if (!redirected) {
+                            alert(`🚨 Impossible de charger ${config.name}. Veuillez vérifier les fichiers.`);
+                        }
+                    };
+                    
+                    // Effets au survol
+                    btn.addEventListener('mouseover', function() {
+                        this.style.transform = 'scale(1.05)';
+                        this.style.boxShadow = `0 6px 20px ${config.hoverColor}`;
+                    });
+                    
+                    btn.addEventListener('mouseout', function() {
+                        this.style.transform = 'scale(1)';
+                        this.style.boxShadow = `0 4px 15px ${config.defaultColor}`;
+                    });
+                    
+                    // Animation de pulsation pour le bouton principal
+                    if (config.id === 'emergency-play-btn') {
+                        setInterval(() => {
+                            btn.style.transform = btn.style.transform === 'scale(1.02)' ? 'scale(1)' : 'scale(1.02)';
+                        }, 2000);
+                    }
+                    
+                } else {
+                    console.error(`❌ Bouton ${config.name} (${config.id}) introuvable!`);
+                }
+            });
+            
+            // Raccourcis clavier
+            document.addEventListener('keydown', function(e) {
+                switch(e.key) {
+                    case 'Enter':
+                    case ' ':
+                        e.preventDefault();
+                        document.getElementById('emergency-play-btn')?.click();
+                        break;
+                    case '1':
+                        document.getElementById('emergency-play-btn')?.click();
+                        break;
+                    case '2':
+                        document.getElementById('unified-game-btn')?.click();
+                        break;
+                    case '3':
+                        document.getElementById('original-game-btn')?.click();
+                        break;
+                    case '4':
+                        document.getElementById('launcher-btn')?.click();
+                        break;
+                }
+            });
+            
+            console.log('🚀 Interface IMPERIUM prête! Utilisez les raccourcis: Entrée, Espace, 1-4');
+            
+            // Message d'aide
+            setTimeout(() => {
+                console.log(`
+🏛️ IMPERIUM - GUIDE RAPIDE
+══════════════════════════
+🎯 ENTRÉE/ESPACE: Jouer maintenant
+🔢 Touches 1-4: Sélectionner un mode
+🖱️  Clic: Utiliser les boutons
+                `);
+            }, 1000);
+        });
+    </script>
 </body>
 </html>
