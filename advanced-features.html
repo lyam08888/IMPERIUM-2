@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imperium - Fonctionnalités Avancées</title>
+    
+    <!-- CSS du jeu -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/advanced-features.css">
+</head>
+<body>
+    <div class="imperium-ui">
+        <div class="imperium-body">
+            <h1 class="view-title">🏆 Fonctionnalités Avancées</h1>
+            
+            <!-- Navigation des fonctionnalités -->
+            <div class="feature-navigation">
+                <button class="feature-tab active" data-tab="achievements">🏆 Accomplissements</button>
+                <button class="feature-tab" data-tab="events">📅 Événements</button>
+                <button class="feature-tab" data-tab="markets">📈 Marchés</button>
+                <button class="feature-tab" data-tab="competition">🏅 Classements</button>
+                <button class="feature-tab" data-tab="prestige">✨ Prestige</button>
+                <button class="feature-tab" data-tab="analytics">📊 Statistiques</button>
+            </div>
+
+            <!-- Accomplissements -->
+            <div id="achievements-tab" class="tab-content active">
+                <div class="achievements-header">
+                    <div class="achievement-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Débloqués</span>
+                            <span class="stat-value" id="achievements-unlocked">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total</span>
+                            <span class="stat-value" id="achievements-total">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Points</span>
+                            <span class="stat-value" id="achievement-points">0</span>
+                        </div>
+                    </div>
+                    <div class="achievement-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="achievement-progress-bar"></div>
+                        </div>
+                        <span class="progress-text" id="achievement-progress-text">0%</span>
+                    </div>
+                </div>
+                
+                <div class="achievement-categories">
+                    <button class="category-btn active" data-category="all">Tous</button>
+                    <button class="category-btn" data-category="economic">💰 Économie</button>
+                    <button class="category-btn" data-category="military">⚔️ Militaire</button>
+                    <button class="category-btn" data-category="construction">🏗️ Construction</button>
+                    <button class="category-btn" data-category="special">⭐ Spéciaux</button>
+                </div>
+                
+                <div class="achievements-grid" id="achievements-list">
+                    <!-- Accomplissements seront générés ici -->
+                </div>
+            </div>
+
+            <!-- Événements -->
+            <div id="events-tab" class="tab-content">
+                <div class="events-header">
+                    <div class="event-counters">
+                        <div class="counter-item">
+                            <span class="counter-label">Quotidiens</span>
+                            <span class="counter-value" id="daily-progress">0/3</span>
+                        </div>
+                        <div class="counter-item">
+                            <span class="counter-label">Hebdomadaires</span>
+                            <span class="counter-value" id="weekly-progress">0/7</span>
+                        </div>
+                    </div>
+                    <button class="refresh-events-btn" onclick="refreshEvents()">🔄 Actualiser</button>
+                </div>
+                
+                <div class="events-sections">
+                    <div class="event-section">
+                        <h3>📅 Événements Actifs</h3>
+                        <div class="events-list" id="active-events">
+                            <!-- Événements actifs -->
+                        </div>
+                    </div>
+                    
+                    <div class="event-section">
+                        <h3>✅ Récemment Complétés</h3>
+                        <div class="events-list" id="completed-events">
+                            <!-- Événements complétés -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marchés -->
+            <div id="markets-tab" class="tab-content">
+                <div class="markets-header">
+                    <div class="trading-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Niveau Trading</span>
+                            <span class="stat-value" id="trading-skill">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Transactions</span>
+                            <span class="stat-value" id="total-trades">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Profit Total</span>
+                            <span class="stat-value" id="total-profit">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="markets-grid" id="markets-list">
+                    <!-- Marchés seront générés ici -->
+                </div>
+                
+                <div class="market-news">
+                    <h3>📰 Nouvelles du Marché</h3>
+                    <div id="market-news-list">
+                        <!-- Nouvelles du marché -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compétition -->
+            <div id="competition-tab" class="tab-content">
+                <div class="competition-header">
+                    <div class="player-rank-card">
+                        <div class="rank-info">
+                            <span class="player-name" id="player-name">Imperator</span>
+                            <span class="player-tier" id="player-tier">Bronze</span>
+                        </div>
+                        <div class="rank-position">
+                            <span class="rank-label">Rang</span>
+                            <span class="rank-value" id="player-rank">#999</span>
+                        </div>
+                    </div>
+                    
+                    <div class="season-info">
+                        <span class="season-label">Saison <span id="current-season">1</span></span>
+                        <span class="season-time" id="season-time-left">29j 23h</span>
+                    </div>
+                </div>
+                
+                <div class="leaderboards-section">
+                    <div class="leaderboard-tabs">
+                        <button class="leaderboard-tab active" data-board="empire_power">👑 Puissance</button>
+                        <button class="leaderboard-tab" data-board="gold_accumulated">💰 Fortune</button>
+                        <button class="leaderboard-tab" data-board="population_growth">👥 Population</button>
+                        <button class="leaderboard-tab" data-board="military_might">⚔️ Militaire</button>
+                    </div>
+                    
+                    <div class="leaderboard-content" id="leaderboard-display">
+                        <!-- Classements seront affichés ici -->
+                    </div>
+                </div>
+                
+                <div class="challenges-section">
+                    <h3>🎯 Défis Actifs</h3>
+                    <div id="active-challenges">
+                        <!-- Défis actifs -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prestige -->
+            <div id="prestige-tab" class="tab-content">
+                <div class="prestige-header">
+                    <div class="prestige-info">
+                        <div class="prestige-level">
+                            <span class="prestige-label">Niveau de Prestige</span>
+                            <span class="prestige-value" id="prestige-level">0</span>
+                        </div>
+                        <div class="prestige-points">
+                            <span class="points-label">Points de Prestige</span>
+                            <span class="points-value" id="prestige-points">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="prestige-actions">
+                        <button class="prestige-btn" id="prestige-button" onclick="attemptPrestige()">✨ Prestige</button>
+                        <button class="requirements-btn" onclick="showPrestigeRequirements()">📋 Exigences</button>
+                    </div>
+                </div>
+                
+                <div class="prestige-bonuses">
+                    <h3>🎁 Bonus Disponibles</h3>
+                    <div class="bonuses-grid" id="prestige-bonuses">
+                        <!-- Bonus de prestige -->
+                    </div>
+                </div>
+                
+                <div class="prestige-stats">
+                    <h3>📈 Statistiques à Vie</h3>
+                    <div class="lifetime-stats" id="lifetime-stats">
+                        <!-- Statistiques à vie -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics -->
+            <div id="analytics-tab" class="tab-content">
+                <div class="analytics-header">
+                    <h3>📊 Profil du Joueur</h3>
+                </div>
+                
+                <div class="player-profile" id="player-profile">
+                    <!-- Profil du joueur -->
+                </div>
+                
+                <div class="gameplay-insights">
+                    <h3>💡 Conseils Personnalisés</h3>
+                    <div id="insights-list">
+                        <!-- Conseils basés sur les données -->
+                    </div>
+                </div>
+                
+                <div class="retention-metrics">
+                    <h3>📈 Métriques de Rétention</h3>
+                    <div id="retention-display">
+                        <!-- Métriques de rétention -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div id="nav-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="js/game.js" defer></script>
+    <script src="js/shared-utils.js" defer></script>
+    
+    <!-- Nouveaux Systèmes -->
+    <script src="js/achievement-system.js" defer></script>
+    <script src="js/events-system.js" defer></script>
+    <script src="js/prestige-system.js" defer></script>
+    <script src="js/advanced-economy.js" defer></script>
+    <script src="js/analytics-system.js" defer></script>
+    <script src="js/competition-system.js" defer></script>
+    
+    <script src="js/advanced-features-ui.js" defer></script>
+    <script src="nav.js" defer></script>
+</body>
+</html>

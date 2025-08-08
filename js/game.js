@@ -642,12 +642,111 @@ function masterGameTick() {
     // 4. Check for scenario quest completion
     checkQuestCompletion();
 
+    // 5. NOUVEAUX SYSTÈMES - Vérifications avancées
+    if (typeof checkAchievements === 'function') {
+        checkAchievements(gameState);
+    }
+    
+    if (typeof checkEventProgress === 'function') {
+        checkEventProgress(gameState);
+    }
+    
+    if (typeof updateMarketPrices === 'function') {
+        updateMarketPrices();
+    }
+    
+    if (typeof updateAnalytics === 'function') {
+        updateAnalytics(gameState);
+    }
+    
+    if (typeof updateCompetitionScores === 'function') {
+        updateCompetitionScores(gameState);
+    }
+
+    // 6. Traiter les boosts temporaires
+    processTemporaryBoosts();
+
     if (stateChanged) {
         recalculateCityStats();
         saveGameState();
+        
+        // Notifications des nouveaux systèmes
+        processSystemNotifications();
     }
 
     return stateChanged;
+}
+
+// ---------------------------------------------------------------
+// FONCTIONS POUR NOUVEAUX SYSTÈMES
+// ---------------------------------------------------------------
+
+function processTemporaryBoosts() {
+    if (!gameState.temporaryBoosts) return;
+    
+    const now = Date.now();
+    gameState.temporaryBoosts = gameState.temporaryBoosts.filter(boost => {
+        if (now > boost.expiresAt) {
+            // Boost expiré
+            console.log(`Boost temporaire expiré: ${boost.type}`);
+            return false;
+        }
+        return true;
+    });
+}
+
+function processSystemNotifications() {
+    // Collecter les notifications de tous les systèmes
+    const notifications = [];
+    
+    // Notifications d'accomplissements
+    if (typeof getAchievementNotifications === 'function') {
+        notifications.push(...getAchievementNotifications());
+    }
+    
+    // Notifications du marché
+    if (typeof getMarketNews === 'function') {
+        const marketNews = getMarketNews();
+        marketNews.forEach(news => {
+            if (Date.now() - news.timestamp < 60000) { // Dernière minute
+                notifications.push({
+                    type: 'market',
+                    title: 'Marché',
+                    message: news.headline,
+                    timestamp: news.timestamp
+                });
+            }
+        });
+    }
+    
+    // Afficher les notifications via le système existant
+    notifications.forEach(notification => {
+        if (gameController && gameController.queueNotification) {
+            gameController.queueNotification({
+                icon: notification.type === 'achievement' ? '🏆' : 
+                      notification.type === 'market' ? '📈' : '📢',
+                title: notification.title,
+                message: notification.message,
+                duration: 5000
+            });
+        }
+    });
+}
+
+function applyPrestigeBonuses() {
+    // Applique les bonus de prestige au gameState
+    if (typeof prestigeSystem === 'undefined') return;
+    
+    const bonuses = prestigeSystem.getActivePrestigeBonuses();
+    bonuses.forEach(bonus => {
+        switch (bonus.type) {
+            case 'production_multiplier':
+                if (!gameState.modifiers) gameState.modifiers = {};
+                gameState.modifiers[`${bonus.resource}_production`] = 
+                    (gameState.modifiers[`${bonus.resource}_production`] || 0) + bonus.multiplier;
+                break;
+        }
+    });
 }
 
 
