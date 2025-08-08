@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚔️ IMPERIUM - Simulateur de Combat V18 ⚔️</title>
+
+    <!-- Stylesheets centralisés -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/imperium_popup.css">
+
+    <!-- Scripts de jeu -->
+    <script src="js/game.js" defer></script>
+    <script src="js/simulator-view.js" defer></script>
+    <script src="nav.js" defer></script>
+    <script src="js/imperium_popup.js" defer></script>
+
     <style>
     :root {
         --gold-primary: #d97706; --gold-secondary: #f59e0b; --gold-light: #fbbf24;
@@ -99,6 +110,7 @@
 </style>
 </head>
 <body>
+    <!-- Le contenu de nav.html sera injecté ici par nav.js -->
 <div id="view-simulator">
     <div class="imperium-body">
         <main class="main-content">
@@ -688,5 +700,6 @@
         });
     }
 </script>
+    <!-- La popup IMPERIUM sera injectée ici par imperium_popup.js -->
 </body>
 </html>
