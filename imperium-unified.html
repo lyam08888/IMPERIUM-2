@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>IMPERIUM - Roma Aeterna V20 UNIFIED</title>
+    <meta name="description" content="Dominez l'Empire Romain - Construisez votre cité, conquérez le monde antique">
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23b45309'/><text x='16' y='20' text-anchor='middle' fill='white' font-family='serif' font-size='20' font-weight='bold'>I</text></svg>" type="image/svg+xml">
+
+    <!-- Stylesheets centralisés -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/imperium_popup.css">
+    <link rel="stylesheet" href="css/loader.css">
+    <link rel="stylesheet" href="css/simulator.css">
+
+    <!-- Scripts de jeu dans l'ordre de dépendance -->
+    <script src="js/game.js" defer></script>
+    <script src="js/shared-utils.js" defer></script>
+    <script src="js/unified-popup-system.js" defer></script>
+    <script src="js/unified-game-controller.js" defer></script>
+    <script src="js/scenario.js" defer></script>
+    <script src="js/city-view.js" defer></script>
+    <script src="js/world-view.js" defer></script>
+    <script src="js/BattleManager.js" defer></script>
+    <script src="js/simulator-view.js" defer></script>
+    <script src="js/maritime-simulator-view.js" defer></script>
+    <script src="nav.js" defer></script>
+    <script src="js/imperium_popup.js" defer></script>
+
+    <style>
+        /* Styles spécifiques pour l'interface unifiée */
+        .unified-interface {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-city-view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .floating-nav-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 9998;
+        }
+
+        .nav-floating-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #b45309, #d4651f);
+            border: 3px solid #8b4513;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(180, 83, 9, 0.4);
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .nav-floating-btn:hover {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 6px 20px rgba(180, 83, 9, 0.6);
+            color: white;
+        }
+
+        .nav-floating-btn.active {
+            background: linear-gradient(135deg, #d4651f, #ff8533);
+            animation: pulse 2s infinite;
+        }
+
+        .quick-actions-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            background: rgba(44, 24, 16, 0.9);
+            padding: 15px;
+            border-radius: 25px;
+            border: 2px solid #b45309;
+            backdrop-filter: blur(10px);
+            z-index: 9998;
+        }
+
+        .quick-action-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #b45309, #d4651f);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(180, 83, 9, 0.5);
+        }
+
+        .city-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2c1810, #1a0f08);
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(180, 83, 9, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(212, 101, 31, 0.1) 0%, transparent 50%);
+        }
+
+        .buildings-overlay {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            right: 10%;
+            bottom: 25%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .building-slot-unified {
+            aspect-ratio: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid #b45309;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .building-slot-unified:hover {
+            transform: scale(1.05);
+            border-color: #d4651f;
+            box-shadow: 0 0 20px rgba(180, 83, 9, 0.4);
+        }
+
+        .building-slot-unified.occupied {
+            background: linear-gradient(135deg, rgba(180, 83, 9, 0.2), rgba(212, 101, 31, 0.2));
+        }
+
+        .building-slot-unified .building-icon {
+            font-size: 2.5em;
+            margin-bottom: 8px;
+        }
+
+        .building-slot-unified .building-name {
+            font-size: 0.8em;
+            text-align: center;
+            color: #e8dcc6;
+            font-weight: bold;
+        }
+
+        .building-slot-unified .building-level {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #b45309;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+
+        .notification-system {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 9999;
+            max-width: 350px;
+        }
+
+        .game-notification {
+            background: rgba(44, 24, 16, 0.95);
+            border: 2px solid #b45309;
+            border-radius: 10px;
+            padding: 15px;
+            color: #e8dcc6;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transform: translateX(-100%);
+            animation: slideInNotification 0.5s forwards;
+        }
+
+        @keyframes slideInNotification {
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .stats-overlay {
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            background: rgba(44, 24, 16, 0.9);
+            border: 2px solid #b45309;
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 250px;
+            backdrop-filter: blur(10px);
+            z-index: 9997;
+        }
+
+        .resource-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            color: #e8dcc6;
+        }
+
+        .resource-icon {
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+
+        .resource-amount {
+            font-weight: bold;
+            color: #d4651f;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader -->
+    <div id="loader">
+        <div class="loader-spinner"></div>
+        <div style="color: #e8dcc6; margin-top: 20px; text-align: center;">
+            <h3>IMPERIUM V20 UNIFIED</h3>
+            <p>Chargement de votre empire...</p>
+        </div>
+    </div>
+
+    <!-- Interface unifiée principale -->
+    <div id="unified-interface" class="unified-interface">
+        <!-- Arrière-plan de la cité -->
+        <div class="city-background"></div>
+
+        <!-- Vue principale de la cité -->
+        <div class="main-city-view">
+            <!-- Grille des bâtiments superposée -->
+            <div class="buildings-overlay" id="buildingsGrid">
+                <!-- Les bâtiments seront générés dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Menu de navigation flottant -->
+        <div class="floating-nav-menu">
+            <button class="nav-floating-btn" onclick="popupSystem.showResourceManagement()" title="Ressources">
+                💰
+            </button>
+            <button class="nav-floating-btn" onclick="popupSystem.showWorldMap()" title="Monde Antique">
+                🗺️
+            </button>
+            <button class="nav-floating-btn" onclick="showCombatSimulator('land')" title="Combat Terrestre">
+                ⚔️
+            </button>
+            <button class="nav-floating-btn" onclick="showCombatSimulator('sea')" title="Combat Naval">
+                ⚓
+            </button>
+            <button class="nav-floating-btn" onclick="popupSystem.showTechnology()" title="Recherche">
+                🔬
+            </button>
+            <button class="nav-floating-btn" onclick="popupSystem.showDiplomacy()" title="Diplomatie">
+                🤝
+            </button>
+            <button class="nav-floating-btn" onclick="popupSystem.showSettings()" title="Paramètres">
+                ⚙️
+            </button>
+        </div>
+
+        <!-- Panneau d'actions rapides -->
+        <div class="quick-actions-panel">
+            <button class="quick-action-btn" onclick="popupSystem.quickBuild()">
+                🔨 Construction
+            </button>
+            <button class="quick-action-btn" onclick="popupSystem.quickRecruit()">
+                👨‍⚔️ Recruter
+            </button>
+            <button class="quick-action-btn" onclick="popupSystem.quickTrade()">
+                🚛 Commerce
+            </button>
+            <button class="quick-action-btn" onclick="popupSystem.quickExplore()">
+                🔍 Explorer
+            </button>
+        </div>
+
+        <!-- Overlay des statistiques -->
+        <div class="stats-overlay" id="statsOverlay">
+            <h4 style="color: #d4651f; margin: 0 0 15px 0; text-align: center;">📊 Empire</h4>
+            <div id="resourcesDisplay">
+                <!-- Les ressources seront affichées ici -->
+            </div>
+            <hr style="border-color: #b45309; margin: 15px 0;">
+            <div id="cityStatsDisplay">
+                <!-- Les stats de la cité seront affichées ici -->
+            </div>
+        </div>
+
+        <!-- Système de notifications -->
+        <div class="notification-system" id="notificationSystem">
+            <!-- Les notifications apparaîtront ici -->
+        </div>
+    </div>
+
+    <!-- Le système de popups sera injecté automatiquement -->
+
+    <script>
+        // Initialisation simplifiée de l'interface unifiée
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('IMPERIUM V20 UNIFIED - Starting...');
+            
+            // Le contrôleur unifié gère tout automatiquement
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('unified-interface').classList.add('loaded');
+            }, 2000);
+        });
+
+        // Fonctions globales pour l'interface (appelées par le contrôleur)
+        function renderUnifiedBuildingsGrid() {
+            const grid = document.getElementById('buildingsGrid');
+            if (!grid || typeof gameState === 'undefined') return;
+
+            grid.innerHTML = '';
+            
+            gameState.city.buildings.forEach(building => {
+                const slot = document.createElement('div');
+                slot.className = `building-slot-unified ${building.type ? 'occupied' : ''}`;
+                slot.dataset.slotId = building.slotId;
+                
+                if (building.type) {
+                    const buildingDef = BUILDING_DEFINITIONS[building.type];
+                    slot.innerHTML = `
+                        <div class="building-icon">${buildingDef.icon}</div>
+                        <div class="building-name">${buildingDef.name}</div>
+                        ${building.level > 1 ? `<div class="building-level">${building.level}</div>` : ''}
+                    `;
+                } else {
+                    slot.innerHTML = `
+                        <div class="building-icon">🏗️</div>
+                        <div class="building-name">Terrain Libre</div>
+                    `;
+                }
+                
+                slot.onclick = () => {
+                    if (building.type) {
+                        popupSystem.showBuildingDetails(building.type, building.slotId);
+                    } else {
+                        popupSystem.showBuildingSelection(building.slotId);
+                    }
+                };
+                
+                grid.appendChild(slot);
+            });
+        }
+
+        function updateResourcesDisplay() {
+            const container = document.getElementById('resourcesDisplay');
+            if (!container || typeof gameState === 'undefined') return;
+
+            const resources = ['gold', 'food', 'marble', 'wood'];
+            container.innerHTML = resources.map(res => {
+                const amount = gameState.resources[res] || 0;
+                const max = gameState.storage[res] || '∞';
+                const icon = popupSystem.getResourceIcon(res);
+                
+                return `
+                    <div class="resource-display">
+                        <span class="resource-icon">${icon}</span>
+                        <span class="resource-amount">${Math.floor(amount)}</span>
+                        <span style="color: #888;">/${max}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateCityStatsDisplay() {
+            const container = document.getElementById('cityStatsDisplay');
+            if (!container || typeof gameState === 'undefined') return;
+
+            const stats = gameState.city.stats;
+            container.innerHTML = `
+                <div class="resource-display">
+                    <span class="resource-icon">👥</span>
+                    <span>Population</span>
+                    <span class="resource-amount">${Math.floor(stats.population || 0)}</span>
+                </div>
+                <div class="resource-display">
+                    <span class="resource-icon">😊</span>
+                    <span>Bonheur</span>
+                    <span class="resource-amount">${Math.floor(stats.happiness || 0)}%</span>
+                </div>
+                <div class="resource-display">
+                    <span class="resource-icon">⚡</span>
+                    <span>Niveau</span>
+                    <span class="resource-amount">${stats.level || 1}</span>
+                </div>
+            `;
+        }
+
+        // Événements globaux
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+        });
+
+        window.addEventListener('resize', () => {
+            if (typeof renderUnifiedBuildingsGrid === 'function') {
+                renderUnifiedBuildingsGrid();
+            }
+        });
+
+        // Gestion des erreurs globales
+        window.addEventListener('error', (e) => {
+            console.error('IMPERIUM Error:', e.error);
+            if (window.unifiedController) {
+                unifiedController.showErrorMessage('Une erreur inattendue s\'est produite.');
+            }
+        });
+    </script>
+</body>
+</html>
