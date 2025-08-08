@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         {
             message: "La construction est terminée ! Votre ferme produit maintenant de la nourriture pour votre peuple.",
-            action: 'wait',
+            action: 'autoAdvance',
             showButton: false, // Will auto-advance
         },
         {
@@ -154,6 +154,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } else if (action === 'highlightElement' || action === 'wait') {
             tutorialNextBtn.onclick = () => runTutorialStep(tutorialState.currentStep + 1);
+        } else if (action === 'autoAdvance') {
+            // Auto-advance to the next step after a short delay
+            setTimeout(() => {
+                runTutorialStep(tutorialState.currentStep + 1);
+            }, 2000);
         } else if (action === 'finish') {
             tutorialNextBtn.textContent = "Aller à ma Cité";
             tutorialNextBtn.onclick = () => {
