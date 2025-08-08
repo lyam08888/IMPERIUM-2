@@ -328,25 +328,83 @@ function showToast(message, type = 'info') {
     setTimeout(() => toast.remove(), 4000);
 }
 
-function showPlayerModal() {
-    const xpForNextLevel = getXpForLevel(gameState.player.level);
+function showPlayerModal(isEditing = false) {
+    const player = gameState.player;
+    const xpForNextLevel = getXpForLevel(player.level);
+    const xpPercentage = xpForNextLevel > 0 ? (player.xp / xpForNextLevel) * 100 : 0;
+    const avatars = ['M', 'F', '🏛️', '🦅', '⚔️', '📜'];
 
-    const xpPercentage = xpForNextLevel > 0 ? (gameState.player.xp / xpForNextLevel) * 100 : 0;
-    const body = `
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <div style="width: 80px; height: 80px; font-size: 2.5rem; background: var(--dark-marble); border-radius: 50%; display: flex; align-items: center; justify-content: center;">${gameState.player.avatar}</div>
-            <div>
-                <div style="font-size: 1.5rem;">${gameState.player.name}</div>
-                <div style="font-size: 1.1rem;">Niveau ${gameState.player.level}</div>
-                <div style="width: 100%; height: 8px; background-color: #444; border-radius: 4px; margin-top: 0.5rem; overflow: hidden;">
-                    <div style="width: ${xpPercentage.toFixed(2)}%; height: 100%; background-color: var(--xp-bar);"></div>
+    let body;
+    let footer;
+
+    if (isEditing) {
+        body = `
+            <div class="player-profile-edit">
+                <div class="form-group">
+                    <label for="playerNameInput">Nom du Consul :</label>
+                    <input type="text" id="playerNameInput" class="imperium-input" value="${player.name}">
                 </div>
-                <div style="font-size: 0.8rem;">${Math.floor(gameState.player.xp)} / ${xpForNextLevel} XP</div>
+                <div class="form-group">
+                    <label>Avatar :</label>
+                    <div class="avatar-selection">
+                        ${avatars.map(avatar => `
+                            <div class="avatar-option ${player.avatar === avatar ? 'selected' : ''}" onclick="selectAvatar(this, '${avatar}')">
+                                ${avatar}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <input type="hidden" id="playerAvatarInput" value="${player.avatar}">
+                </div>
             </div>
-        </div>
-    `;
+        `;
+        footer = `
+            <button class="imperium-btn" onclick="showPlayerModal(false)">Annuler</button>
+            <button class="imperium-btn" onclick="savePlayerProfile()">Sauvegarder</button>
+        `;
+    } else {
+        body = `
+            <div class="player-profile-view">
+                <div class="profile-main-info">
+                    <div class="profile-avatar">${player.avatar}</div>
+                    <div class="profile-details">
+                        <h4 class="profile-name">${player.name}</h4>
+                        <p class="profile-title">${player.title}</p>
+                        <p class="profile-level">Niveau ${player.level}</p>
+                    </div>
+                </div>
+                <div class="xp-bar-container">
+                    <div class="xp-bar" style="width: ${xpPercentage.toFixed(2)}%;"></div>
+                </div>
+                <p class="xp-text">${Math.floor(player.xp)} / ${xpForNextLevel} XP</p>
+            </div>
+        `;
+        footer = `
+            <button class="imperium-btn" onclick="closeModal()">Fermer</button>
+            <button class="imperium-btn" onclick="showPlayerModal(true)">Personnaliser</button>
+        `;
+    }
 
-    showModal("Profil du Consul", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    showModal("Profil du Consul", body, footer);
+}
+
+function selectAvatar(element, avatar) {
+    document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+    element.classList.add('selected');
+    document.getElementById('playerAvatarInput').value = avatar;
+}
+
+function savePlayerProfile() {
+    const newName = document.getElementById('playerNameInput').value;
+    const newAvatar = document.getElementById('playerAvatarInput').value;
+
+    if (newName.trim()) {
+        gameState.player.name = newName.trim();
+    }
+    gameState.player.avatar = newAvatar;
+
+    saveGameState();
+    showToast("Profil mis à jour !", "success");
+    showPlayerModal(false); // Re-render the modal in view mode
 }
 
 function showResourcesModal() {
@@ -413,26 +471,46 @@ function showProductionModal() {
 
 function showQuestModal() {
 
-    const chapter = SCENARIO.chapters[gameState.scenario.currentChapterIndex];
-    const quest = getCurrentQuest();
+    const activeQuests = QUESTS.filter(q => !q.isComplete(gameState));
+    const completedQuests = QUESTS.filter(q => q.isComplete(gameState));
 
-    let body = '';
-    if (chapter && quest) {
-        const rewardText = (quest.reward.resources || []).map(r => `${r.amount.toLocaleString()} ${r.res}`).join(', ') + (quest.reward.xp > 0 ? ` & ${quest.reward.xp} XP` : '');
-        body = `
-            <div style="text-align: center;">
-                <h4 style="color: var(--gold-light); margin-bottom: 0.5rem;">${chapter.title}</h4>
-                <p style="margin-bottom: 1rem;">${chapter.description}</p>
-                <div style="border-top: 1px solid var(--border-gold); padding-top: 1rem;">
-                    <strong>Objectif : ${quest.description}</strong>
-                    <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">Récompense : ${rewardText}</div>
-                </div>
-            </div>`;
-    } else {
-        body = `<div style="text-align: center;"><strong>Vous avez terminé le scénario principal !</strong><p>Continuez à développer votre cité.</p></div>`;
-    }
+    let body = `
+        <div class="quest-log">
+            <div class="quest-tabs">
+                <button class="quest-tab-btn active" onclick="switchQuestTab(this, 'active')">En cours</button>
+                <button class="quest-tab-btn" onclick="switchQuestTab(this, 'completed')">Terminées</button>
+            </div>
+            <div id="quest-tab-active" class="quest-tab-content active">
+                ${activeQuests.length > 0 ? activeQuests.map(quest => renderQuest(quest, false)).join('') : '<p class="no-quests">Aucune quête active.</p>'}
+            </div>
+            <div id="quest-tab-completed" class="quest-tab-content">
+                ${completedQuests.length > 0 ? completedQuests.map(quest => renderQuest(quest, true)).join('') : '<p class="no-quests">Aucune quête terminée.</p>'}
+            </div>
+        </div>
+    `;
 
-    showModal("Scénario Principal", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    showModal("Journal des Quêtes", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+}
+
+function renderQuest(quest, isComplete) {
+    const rewardText = (quest.reward.resources || []).map(r => `${r.amount.toLocaleString()} ${r.res}`).join(', ') + (quest.reward.xp > 0 ? ` & ${quest.reward.xp} XP` : '');
+    return `
+        <div class="quest-item ${isComplete ? 'completed' : ''}">
+            <div class="quest-status-icon">${isComplete ? '✔️' : '🎯'}</div>
+            <div class="quest-details">
+                <p class="quest-description">${quest.description}</p>
+                <p class="quest-reward">Récompense : ${rewardText}</p>
+            </div>
+        </div>
+    `;
+}
+
+function switchQuestTab(btn, tabName) {
+    document.querySelectorAll('.quest-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.quest-tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(`quest-tab-${tabName}`).classList.add('active');
+
 }
 
 function showBarracksModal(building) {
