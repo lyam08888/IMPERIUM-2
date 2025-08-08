@@ -152,7 +152,9 @@ function getDefaultGameState() {
         world: {
             turn: 1,
             territories: [
+
                 { id: 'roma', name: 'Rome', x: 45, y: 40, status: 'capital', flag: '🏛️', income: {'gold': 200, 'food': 5, 'spies': 1}, garrison: 2000, loyalty: 100, governorId: null, supplyRange: GAME_CONFIG.BASE_SUPPLY_RANGE },
+
                 { id: 'carthage', name: 'Carthage', x: 35, y: 75, status: 'enemy', flag: '🐘', strength: 12000, personality: 'aggressive' },
                 { id: 'egypt', name: 'Égypte', x: 75, y: 80, status: 'neutral', flag: '🐪', relations: 10, trait: { name: 'Grenier du monde', effect: {'food': 2} } },
                 { id: 'syracuse', name: 'Syracuse', x: 55, y: 65, status: 'neutral', flag: '🏝️', relations: 0 },

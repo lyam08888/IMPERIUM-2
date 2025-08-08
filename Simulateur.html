@@ -8,8 +8,10 @@
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23b45309'/><text x='16' y='20' text-anchor='middle' fill='white' font-family='serif' font-size='20' font-weight='bold'>I</text></svg>" type="image/svg+xml">
 
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/imperium_popup.css">
+
 
     <script src="js/game.js" defer></script>
     <script src="js/simulator-view.js" defer></script>
@@ -23,29 +25,35 @@
     <div class="imperium-ui">
         <div class="imperium-body">
             <main class="main-content">
+
                 <h2 class="view-title">⚔️ IMPERIUM - Simulateur de Combat ⚔️</h2>
+
                 <div class="simulator-layout">
                     <div class="battle-setup">
                         <!-- Attacker -->
                         <div class="army-setup attacker">
+
                             <h3 class="army-title">Votre Armée</h3>
                             <div class="advanced-settings">
                                 <div class="setting-item"><label for="attacker-hero">Héros :</label><select id="attacker-hero" class="setting-select"></select></div>
                                 <div class="setting-item"><label for="attacker-formation">Formation :</label><select id="attacker-formation" class="setting-select"></select></div>
                             </div>
                             <div class="unit-selection" id="attacker-units"></div>
+
                         </div>
 
                         <!-- Defender -->
                         <div class="army-setup defender">
+
                             <h3 class="army-title">Armée Ennemie</h3>
                              <div class="advanced-settings">
                                 <div class="setting-item"><label for="defender-hero">Héros :</label><select id="defender-hero" class="setting-select"></select></div>
                                 <div class="setting-item"><label for="defender-formation">Formation :</label><select id="defender-formation" class="setting-select"></select></div>
                                 <div class="setting-item"><label for="wall-level">Niveau Muraille :</label><input type="number" id="wall-level" class="unit-input setting-input" value="5" min="0" max="20"></div>
-                            </div>
+             </div>
                             <div class="unit-selection" id="defender-units"></div>
                         </div>
+
                     </div>
 
                     <!-- Controls -->
@@ -56,11 +64,13 @@
                                 <select id="terrain" class="setting-select"></select>
                             </div>
                         </div>
+
                         <div id="simulation-status">Veuillez ajouter des unités</div>
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-top: 1rem;">
                             <button class="small-btn" id="scout-btn">Éclaireur</button>
                             <button class="simulate-btn" id="simulate-battle" disabled>LANCER L'ASSAUT</button>
                             <button class="small-btn" id="reset-btn">Réinitialiser</button>
+
                         </div>
                     </div>
                 </div>
@@ -69,20 +79,26 @@
     </div>
 
     <!-- Battle Result Modal -->
+
     <div id="battle-modal-overlay" class="battle-modal-overlay">
         <div id="battle-modal-content">
             <div id="battle-result" class="battle-result">
+
                 <div class="result-header"><div id="result-title" class="result-title"></div></div>
                 <div class="result-details">
                     <div id="loot-section"><h4 class="result-section-title">Butin</h4><div id="battle-loot" class="loot-list"></div></div>
                 </div>
             </div>
+
             <div id="battle-modal-footer" class="battle-modal-footer">
+
                 <button class="small-btn" id="close-modal-btn">Fermer</button>
             </div>
         </div>
     </div>
 
+
     <!-- La popup IMPERIUM sera injectée ici par imperium_popup.js -->
+
 </body>
 </html>

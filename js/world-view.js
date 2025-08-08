@@ -63,10 +63,12 @@ function renderMap() {
         marker.style.left = `calc(${territory.x}% + 5px)`;
         marker.style.top = `calc(${territory.y}% + 5px)`;
 
+
         // Change color if out of supply
         if (legion.supply <= 25) {
             marker.style.background = 'var(--roman-red)';
         }
+
 
         marker.addEventListener('click', (e) => { e.stopPropagation(); showLegionModal(legion); });
         mapContent.appendChild(marker);
@@ -164,6 +166,7 @@ function showLegionModal(legion) {
     const modalTitle = document.getElementById('modalTitle');
     const modalBody = document.getElementById('modalBody');
     const modalButtons = document.getElementById('modalButtons');
+
     const territory = gameState.world.territories.find(t => t.id === legion.locationId);
 
     modalTitle.innerHTML = legion.name;
@@ -218,6 +221,7 @@ function attackTerritory(legionId, territoryId) {
     saveGameState();
 }
 
+
 function showResourcesModal() {
     const modalTitle = document.getElementById('modalTitle');
     const modalBody = document.getElementById('modalBody');
@@ -256,8 +260,10 @@ function recruitLegion(territoryId) {
         general: "Genericus",
         strength: 2500,
         locationId: territoryId,
+
         action: 'idle',
         supply: 100 // Nouvelle propriété
+
     };
     gameState.legions.push(newLegion);
     showNotification(`${newLegion.name} a été levée !`, 'success');
@@ -285,6 +291,7 @@ function isLegionInSupply(legion) {
 
 function endTurn() {
     // 1. Income
+
     gameState.world.territories.forEach(t => {
         if ((t.status === 'capital' || t.status === 'controlled') && t.income) {
             Object.entries(t.income).forEach(([res, val]) => {
@@ -330,9 +337,11 @@ function endTurn() {
         gameState.resources.food = 0;
     }
 
+
     gameState.world.turn++;
     saveGameState();
     rerenderWorldView();
+
     showNotification(`Tour ${gameState.world.turn} terminé. Nourriture consommée: ${totalConsumption}`, 'success');
 }
 
@@ -340,6 +349,7 @@ function showNotification(message, type = 'info') {
     if (!message || message.trim() === '') {
         return; // Do not show empty notifications
     }
+
     const container = document.getElementById('notifications-container');
     if (!container) return;
     const notif = document.createElement('div');

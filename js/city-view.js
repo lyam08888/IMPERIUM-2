@@ -155,6 +155,7 @@ function handleBuildingClick(building) {
                     prereqText = `<div style="color: var(--error-red); font-size: 0.7rem; font-style: italic; margin-top: 0.25rem;">Requiert: ${BUILDING_DEFINITIONS[def.requires.type].name} Niv. ${def.requires.level}</div>`;
                 }
             }
+          
             const costsHtml = costs.map(c => `<span style="color: ${gameState.resources[c.res] < c.amount ? 'var(--error-red)' : 'var(--text-light)'}">${c.amount.toLocaleString()} ${c.res}</span>`).join(', ');
             return `<div class="build-item ${!canAfford || !prereqMet ? 'disabled' : ''}" ${canAfford && prereqMet ? `onclick="startBuild('${type}', ${building.slotId})"` : ''} style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-gold); border-radius: 0.75rem; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
                         <div style="font-size: 1.8rem;">${def.icon}</div>
@@ -162,6 +163,7 @@ function handleBuildingClick(building) {
                         <div style="font-size: 0.75rem; color: var(--text-muted);">${costsHtml}</div>
                         ${prereqText}
                     </div>`;
+
         }).join('');
         const body = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem;">${buildOptions}</div>`;
         showModal('Construire un bâtiment', body, '');
@@ -269,6 +271,7 @@ function showToast(message, type = 'info') {
 
 function showPlayerModal() {
     const xpForNextLevel = getXpForLevel(gameState.player.level);
+
     const xpPercentage = xpForNextLevel > 0 ? (gameState.player.xp / xpForNextLevel) * 100 : 0;
     const body = `
         <div style="display: flex; align-items: center; gap: 1rem;">
@@ -283,10 +286,12 @@ function showPlayerModal() {
             </div>
         </div>
     `;
+
     showModal("Profil du Consul", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
 }
 
 function showResourcesModal() {
+
     let body = '<div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem; align-items: center;">';
     const resourceIcons = { gold: '💰', food: '🌾', marble: '🏛️', wood: '🌲', stone: '🪨', spies: '👁️', divineFavor: '🙏' };
     for (const res in resourceIcons) {
@@ -297,10 +302,12 @@ function showResourcesModal() {
         }
     }
     body += '</div>';
+
     showModal("Inventaire des Ressources", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
 }
 
 function showStatsModal() {
+
     const body = `
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: center;">
             <div>
@@ -313,10 +320,12 @@ function showStatsModal() {
             </div>
         </div>
     `;
+
     showModal("Statistiques de la Cité", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
 }
 
 function showProductionModal() {
+
     let body = '<div class="production-display" style="display: flex; flex-direction: column; gap: 0.5rem;">';
 
     // Production from buildings
@@ -339,11 +348,13 @@ function showProductionModal() {
     }
 
     body += '</div>';
+
     showModal("Rapport de Production", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
 }
 
 function showQuestModal() {
     const quest = QUESTS[gameState.city.activeQuestId];
+
     let body = '';
     if (quest) {
         const rewardText = (quest.reward.resources || []).map(r => `${r.amount.toLocaleString()} ${r.res}`).join(', ') + (quest.reward.xp > 0 ? ` & ${quest.reward.xp} XP` : '');
@@ -351,5 +362,6 @@ function showQuestModal() {
     } else {
         body = `<div style="text-align: center;"><strong>Toutes les quêtes sont terminées !</strong></div>`;
     }
+
     showModal("Objectif Actuel", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
 }
