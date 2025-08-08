@@ -137,14 +137,6 @@ function renderTimers() {
     }
 }
 
-function formatTime(ms) {
-    if (ms <= 0) return "00:00:00";
-    const seconds = Math.floor((ms / 1000) % 60);
-    const minutes = Math.floor((ms / (1000 * 60)) % 60);
-    const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
-
 function updateDashboardPreviews() {
     document.getElementById('player-tile-preview').textContent = `Niveau ${gameState.player.level}`;
     document.getElementById('resources-tile-preview').textContent = `Or : ${Math.floor(gameState.resources.gold).toLocaleString()}`;
@@ -170,10 +162,6 @@ function updateDashboardPreviews() {
 function updateAllCityUI() {
     renderCityGrid();
     updateDashboardPreviews();
-}
-
-function getCost(baseCosts, multiplier, level) {
-    return baseCosts.map(cost => ({ res: cost.res, amount: Math.floor(cost.amount * Math.pow(multiplier, level)) }));
 }
 
 function getBuildTime(baseTime, level) {
@@ -305,29 +293,6 @@ function completeConstruction(item) {
         addXp(item.xpGain);
         // checkQuestCompletion is now called in the master tick
     }
-}
-
-function showModal(title, body, footer, customClass = '') {
-    const container = document.getElementById('modal-container');
-    const customClassStr = customClass ? ` ${customClass}` : '';
-    container.innerHTML = `<div class="modal-backdrop" onclick="closeModal()"></div><div class="modal-content${customClassStr}"><div class="modal-header"><h3 class="modal-title">${title}</h3><button class="modal-close-btn" onclick="closeModal()">&times;</button></div><div class="modal-body">${body}</div><div class="modal-footer">${footer}</div></div>`;
-    setTimeout(() => container.classList.add('active'), 10);
-}
-
-function closeModal() {
-    const container = document.getElementById('modal-container');
-    container.classList.remove('active');
-    setTimeout(() => container.innerHTML = '', 300);
-}
-
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    container.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
 }
 
 function showPlayerModal(isEditing = false) {
