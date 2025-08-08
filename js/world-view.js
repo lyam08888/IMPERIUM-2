@@ -322,96 +322,87 @@ function orderLegionMove(legionId, targetTerritoryId) {
     }
 }
 
-function attackTerritory(legionId, territoryId) {
+async function attackTerritory(legionId, territoryId) {
     const attackerLegion = gameState.legions.find(l => l.id === legionId);
     const defenderTerritory = gameState.world.territories.find(t => t.id === territoryId);
     if (!attackerLegion || !defenderTerritory || !defenderTerritory.units) return;
 
-    // --- Setup Combat ---
-    const createArmy = (units, supply) => {
-        let army = {};
-        for (const unitId in units) {
-            army[unitId] = { ...UNITS_CONFIG[unitId], count: units[unitId] };
-            // Apply supply modifier to stats
-            if (supply) {
-                const supplyModifier = Math.max(0.2, supply / 100);
-                army[unitId].attack *= supplyModifier;
-                army[unitId].defense *= supplyModifier;
-            }
-        }
-        return army;
+    // Préparer les données pour le simulateur de combat
+    const attacker = {
+        army: {},
+        formation: FORMATIONS_CONFIG.balanced, // ou une valeur par défaut
+        hero: HEROES_CONFIG.none, // ou une valeur par défaut
+        morale: 100,
+        supply: attackerLegion.supply
     };
 
-    let attackerArmy = createArmy(attackerLegion.units, attackerLegion.supply);
-    let defenderArmy = createArmy(defenderTerritory.units);
-
-    const initialAttackerCount = Object.values(attackerArmy).reduce((s, u) => s + u.count, 0);
-    const initialDefenderCount = Object.values(defenderArmy).reduce((s, u) => s + u.count, 0);
-
-    // --- Combat Loop ---
-    const MAX_ROUNDS = 20;
-    for (let i = 0; i < MAX_ROUNDS; i++) {
-        const attackerUnitTypes = Object.keys(attackerArmy).filter(id => attackerArmy[id].count > 0);
-        const defenderUnitTypes = Object.keys(defenderArmy).filter(id => defenderArmy[id].count > 0);
-
-        if (attackerUnitTypes.length === 0 || defenderUnitTypes.length === 0) break;
-
-        const roundDamage = { attacker: {}, defender: {} };
-
-        // Calculate damage from attacker
-        attackerUnitTypes.forEach(atkId => {
-            const unitGroup = attackerArmy[atkId];
-            const targetType = unitGroup.priority;
-            const targetId = defenderUnitTypes.includes(targetType) ? targetType : defenderUnitTypes[Math.floor(Math.random() * defenderUnitTypes.length)];
-            const totalDamage = unitGroup.attack * unitGroup.count;
-            roundDamage.defender[targetId] = (roundDamage.defender[targetId] || 0) + totalDamage;
-        });
-
-        // Calculate damage from defender
-        defenderUnitTypes.forEach(atkId => {
-            const unitGroup = defenderArmy[atkId];
-            const targetType = unitGroup.priority;
-            const targetId = attackerUnitTypes.includes(targetType) ? targetType : attackerUnitTypes[Math.floor(Math.random() * attackerUnitTypes.length)];
-            const totalDamage = unitGroup.attack * unitGroup.count;
-            roundDamage.attacker[targetId] = (roundDamage.attacker[targetId] || 0) + totalDamage;
-        });
-
-        // Apply damage and calculate losses
-        Object.entries(roundDamage.defender).forEach(([defId, totalDamage]) => {
-            const targetGroup = defenderArmy[defId];
-            const losses = Math.floor(totalDamage / (targetGroup.defense + targetGroup.hp));
-            targetGroup.count = Math.max(0, targetGroup.count - losses);
-        });
-        Object.entries(roundDamage.attacker).forEach(([defId, totalDamage]) => {
-            const targetGroup = attackerArmy[defId];
-            const losses = Math.floor(totalDamage / (targetGroup.defense + targetGroup.hp));
-            targetGroup.count = Math.max(0, targetGroup.count - losses);
-        });
+    for (const unitId in attackerLegion.units) {
+        if (attackerLegion.units[unitId] > 0) {
+            const rank = getRank(playerState.units[unitId].xp);
+            const veteranBonus = 1 + rank.bonus;
+            attacker.army[unitId] = {
+                ...JSON.parse(JSON.stringify(UNITS_CONFIG[unitId])),
+                count: attackerLegion.units[unitId],
+                hasCharged: false,
+                xp: playerState.units[unitId].xp
+            };
+            attacker.army[unitId].attack = Math.round(attacker.army[unitId].attack * veteranBonus);
+            attacker.army[unitId].defense = Math.round(attacker.army[unitId].defense * veteranBonus);
+        }
     }
 
-    // --- Outcome ---
-    const finalAttackerCount = Object.values(attackerArmy).reduce((s, u) => s + u.count, 0);
-    const finalDefenderCount = Object.values(defenderArmy).reduce((s, u) => s + u.count, 0);
-    const victory = finalAttackerCount > 0 && finalDefenderCount === 0;
+    const defender = {
+        army: {},
+        formation: FORMATIONS_CONFIG.balanced,
+        hero: HEROES_CONFIG.none,
+        morale: 100
+    };
 
-    // Update gameState
-    for (const unitId in attackerLegion.units) { attackerLegion.units[unitId] = Math.floor(attackerArmy[unitId].count); }
-    for (const unitId in defenderTerritory.units) { defenderTerritory.units[unitId] = Math.floor(defenderArmy[unitId].count); }
+    for (const unitId in defenderTerritory.units) {
+        if (defenderTerritory.units[unitId] > 0) {
+            defender.army[unitId] = {
+                ...JSON.parse(JSON.stringify(UNITS_CONFIG[unitId])),
+                count: defenderTerritory.units[unitId],
+                hasCharged: false,
+                xp: Math.random() * 500
+            };
+        }
+    }
 
+    // Lancer le simulateur de combat
+    const result = await simulateBattle(attacker, defender);
+
+    // Mettre à jour l'état du jeu en fonction des résultats
+    const { victory, finalAttacker, finalDefender } = result;
+
+    const initialAttackerCount = Object.values(attacker.army).reduce((s, u) => s + u.count, 0);
+    const finalAttackerCount = Object.values(finalAttacker).reduce((s, u) => s + u.count, 0);
     const attackerLosses = initialAttackerCount - finalAttackerCount;
+
+    const initialDefenderCount = Object.values(defender.army).reduce((s, u) => s + u.count, 0);
+    const finalDefenderCount = Object.values(finalDefender).reduce((s, u) => s + u.count, 0);
     const defenderLosses = initialDefenderCount - finalDefenderCount;
+
+    // Mettre à jour les unités de la légion attaquante
+    for (const unitId in attackerLegion.units) {
+        attackerLegion.units[unitId] = finalAttacker[unitId] ? finalAttacker[unitId].count : 0;
+    }
+
+    // Mettre à jour les unités du territoire défenseur
+    for (const unitId in defenderTerritory.units) {
+        defenderTerritory.units[unitId] = finalDefender[unitId] ? finalDefender[unitId].count : 0;
+    }
 
     if (victory) {
         defenderTerritory.status = 'controlled';
         defenderTerritory.loyalty = 50;
-        delete defenderTerritory.units; // No more garrison
+        delete defenderTerritory.units;
         showNotification(`Victoire ! ${defenderTerritory.name} a été conquise ! Pertes: ${attackerLosses} (A) vs ${defenderLosses} (D)`, 'success');
         addXp(100);
     } else {
         showNotification(`Défaite... La légion a été repoussée de ${defenderTerritory.name}. Pertes: ${attackerLosses} (A) vs ${defenderLosses} (D)`, 'error');
     }
 
-    // Clean up empty legions
     gameState.legions = gameState.legions.filter(l => Object.values(l.units).reduce((s, u) => s + u, 0) > 0);
 
     hideModal();
