@@ -1,45 +1,49 @@
 // ===============================================================
-// IMPERIUM V19 - SIMULATOR-VIEW.JS
+// IMPERIUM V19 - MARITIME-SIMULATOR-VIEW.JS
 // ===============================================================
-// Ce fichier contient la logique d'interface pour le simulateur de combat terrestre.
+// Ce fichier contient la logique d'interface pour le simulateur de combat maritime.
 // Il utilise le BattleManager pour exécuter la simulation.
 // ===============================================================
 
-let isSkipped = false;
+let isMaritimeBattleSkipped = false;
 
-function initializeSimulatorUI() {
-    const landUnits = Object.fromEntries(Object.entries(UNITS_CONFIG).filter(([_, unit]) => unit.domain === 'land'));
-    console.log("Initialisation de l'interface du simulateur terrestre...");
-    populateSelects(HEROES_CONFIG, TERRAINS_CONFIG, FORMATIONS_CONFIG);
-    generateUnitSelectors(landUnits);
+function initializeMaritimeSimulatorUI() {
+    const navalUnits = Object.fromEntries(Object.entries(UNITS_CONFIG).filter(([_, unit]) => unit.domain === 'sea'));
+    console.log("Initializing Maritime Simulator UI...");
+
+    // Assuming HEROES_CONFIG and NAVAL_FORMATIONS_CONFIG are global
+    populateMaritimeSelects(HEROES_CONFIG, NAVAL_FORMATIONS_CONFIG);
+    generateMaritimeUnitSelectors(navalUnits);
 
     const simulateBtn = document.getElementById('simulate-battle');
-    if (simulateBtn) simulateBtn.addEventListener('click', () => startSimulation(landUnits));
+    if (simulateBtn) simulateBtn.addEventListener('click', () => startMaritimeSimulation(navalUnits));
 
     const resetBtn = document.getElementById('reset-btn');
-    if(resetBtn) resetBtn.addEventListener('click', () => resetSimulator(landUnits));
+    if(resetBtn) resetBtn.addEventListener('click', () => resetMaritimeSimulator(navalUnits));
 
     const scoutBtn = document.getElementById('scout-btn');
-    if(scoutBtn) scoutBtn.addEventListener('click', () => scoutEnemy(landUnits));
+    if(scoutBtn) scoutBtn.addEventListener('click', () => scoutEnemyFleet(navalUnits));
+
+    const skipBtn = document.getElementById('skip-battle-btn');
+    if(skipBtn) skipBtn.addEventListener('click', () => { isMaritimeBattleSkipped = true; });
 
     const closeModalBtn = document.getElementById('close-modal-btn');
-    if(closeModalBtn) closeModalBtn.addEventListener('click', hideBattleModal);
+    if(closeModalBtn) closeModalBtn.addEventListener('click', () => {
+        const overlay = document.getElementById('battle-modal-overlay');
+        if (overlay) overlay.style.display = 'none';
+    });
 
-    const skipBattleBtn = document.getElementById('skip-battle-btn');
-    if(skipBattleBtn) skipBattleBtn.addEventListener('click', () => { isSkipped = true; });
-
-    const layout = document.querySelector('.simulator-layout');
-    if (layout) {
-        layout.addEventListener('input', () => calculateArmyStats(landUnits));
+    const container = document.querySelector('#view-simulator') || document.querySelector('#maritime-combat-simulator-container');
+    if (container) {
+        container.addEventListener('input', () => calculateMaritimeArmyStats(navalUnits));
     }
 
-    resetSimulator(landUnits);
+    resetMaritimeSimulator(navalUnits);
 }
 
-function populateSelects(heroes, terrains, formations) {
+function populateMaritimeSelects(heroes, formations) {
     const selects = {
         'attacker-hero': heroes, 'defender-hero': heroes,
-        'terrain': terrains,
         'attacker-formation': formations, 'defender-formation': formations,
     };
     for (const [selectId, config] of Object.entries(selects)) {
@@ -50,24 +54,24 @@ function populateSelects(heroes, terrains, formations) {
     }
 }
 
-function generateUnitSelectors(landUnits) {
+function generateMaritimeUnitSelectors(navalUnits) {
     const attackerContainer = document.getElementById('attacker-units');
     const defenderContainer = document.getElementById('defender-units');
     if (!attackerContainer || !defenderContainer) return;
     attackerContainer.innerHTML = '';
     defenderContainer.innerHTML = '';
-    Object.keys(landUnits).forEach(unitType => {
-        attackerContainer.appendChild(createUnitSelector(unitType, 'attacker'));
-        defenderContainer.appendChild(createUnitSelector(unitType, 'defender'));
+    Object.keys(navalUnits).forEach(unitType => {
+        attackerContainer.appendChild(createMaritimeUnitSelector(unitType, 'attacker'));
+        defenderContainer.appendChild(createMaritimeUnitSelector(unitType, 'defender'));
     });
     document.querySelectorAll('#defender-units .unit-selector').forEach(el => {
         el.style.display = 'none';
     });
 }
 
-function createUnitSelector(unitType, side) {
+function createMaritimeUnitSelector(unitType, side) {
     const config = UNITS_CONFIG[unitType];
-    const available = side === 'attacker' ? (gameState.unitPool[unitType] || 0) : 0;
+    const available = side === 'attacker' ? (gameState.navalUnitPool[unitType] || 0) : 0;
     const xp = side === 'attacker' ? (gameState.units[unitType]?.xp || 0) : 0;
     const rank = getRank(xp);
     const selector = document.createElement('div');
@@ -83,44 +87,44 @@ function createUnitSelector(unitType, side) {
     return selector;
 }
 
-function calculateArmyStats(landUnits) {
+function calculateMaritimeArmyStats(navalUnits) {
     let attackerUnits = 0;
     let defenderUnits = 0;
     document.querySelectorAll('.unit-input[data-unit]').forEach(input => {
         const unitKey = input.dataset.unit;
-        if (!landUnits[unitKey]) return;
+        if (!navalUnits[unitKey]) return;
         const count = parseInt(input.value) || 0;
         if (input.dataset.side === 'attacker') attackerUnits += count;
         else defenderUnits += count;
     });
     const canSimulate = attackerUnits > 0 && defenderUnits > 0;
     document.getElementById('simulate-battle').disabled = !canSimulate;
-    document.getElementById('simulation-status').textContent = !canSimulate ? "Ajoutez des troupes et espionnez l'ennemi." : "Prêt à lancer l'assaut !";
+    document.getElementById('simulation-status').textContent = !canSimulate ? "Ajoutez des navires et espionnez l'ennemi" : "Prêt pour la bataille navale !";
 }
 
-async function scoutEnemy(landUnits) {
+async function scoutEnemyFleet(navalUnits) {
     const statusEl = document.getElementById('simulation-status');
-    if (statusEl) statusEl.textContent = "Espionnage en cours...";
+    if(statusEl) statusEl.textContent = "Espionnage en cours...";
     await new Promise(resolve => setTimeout(resolve, 800));
-    if (statusEl) statusEl.textContent = "Rapport d'espionnage reçu !";
+    if(statusEl) statusEl.textContent = "Rapport d'espionnage reçu !";
     document.querySelectorAll('#defender-units .unit-selector').forEach(el => {
         const unitKey = el.querySelector('input').dataset.unit;
-        if(landUnits[unitKey]) {
+        if (navalUnits[unitKey]) {
             el.style.display = 'block';
-            el.querySelector('input').value = Math.floor(Math.random() * 150) + 20;
+            el.querySelector('input').value = Math.floor(Math.random() * 20) + 5;
         }
     });
-    calculateArmyStats(landUnits);
+    calculateMaritimeArmyStats(navalUnits);
 }
 
-function getArmiesFromUI(landUnits) {
+function getMaritimeArmiesFromUI(navalUnits) {
     const getArmy = (side) => {
         const army = { army: {}, morale: 100 };
         army.hero = HEROES_CONFIG[document.getElementById(`${side}-hero`).value];
-        army.formation = FORMATIONS_CONFIG[document.getElementById(`${side}-formation`).value];
+        army.formation = NAVAL_FORMATIONS_CONFIG[document.getElementById(`${side}-formation`).value];
         document.querySelectorAll(`.unit-input[data-side="${side}"]`).forEach(input => {
             const unitKey = input.dataset.unit;
-            if (!landUnits[unitKey]) return;
+            if (!navalUnits[unitKey]) return;
             const count = parseInt(input.value) || 0;
             if (count > 0) {
                 const rank = (side === 'attacker') ? getRank(gameState.units[unitKey]?.xp || 0) : { bonus: 0 };
@@ -139,19 +143,21 @@ function getArmiesFromUI(landUnits) {
     return { attacker: getArmy('attacker'), defender: getArmy('defender') };
 }
 
-async function startSimulation(landUnits) {
-    isSkipped = false;
-    showBattleModal();
-    document.getElementById('battle-report').innerHTML = '';
+async function startMaritimeSimulation(navalUnits) {
+    isMaritimeBattleSkipped = false;
+    const overlay = document.getElementById('battle-modal-overlay');
+    if (overlay) overlay.style.display = 'flex';
+
+    document.getElementById('battle-result').style.display = 'none';
     document.getElementById('skip-battle-btn').style.display = 'inline-block';
     document.getElementById('close-modal-btn').style.display = 'none';
+    document.getElementById('battle-report').innerHTML = '';
 
-    const { attacker, defender } = getArmiesFromUI(landUnits);
+    const { attacker, defender } = getMaritimeArmiesFromUI(navalUnits);
     const initialAttackerState = JSON.parse(JSON.stringify(attacker.army));
 
-    const battleManager = new BattleManager(attacker, defender, 'land', {
-        terrain: document.getElementById('terrain').value,
-        wallLevel: document.getElementById('wall-level').value
+    const battleManager = new BattleManager(attacker, defender, 'sea', {
+        seaCondition: document.getElementById('sea-condition').value
     });
 
     const battleResult = await battleManager.run();
@@ -162,29 +168,37 @@ async function startSimulation(landUnits) {
         entry.className = 'log-entry' + (log.isSpecial ? ' special' : '');
         entry.textContent = log.message;
         reportEl.appendChild(entry);
-        if(!isSkipped) await new Promise(resolve => setTimeout(resolve, 50));
+        if(!isMaritimeBattleSkipped) await new Promise(resolve => setTimeout(resolve, 50));
     }
     reportEl.scrollTop = reportEl.scrollHeight;
 
-    displayBattleResult(battleResult.victory, initialAttackerState, battleResult.finalAttacker.army, defender.army, battleResult.finalDefender.army);
+    displayMaritimeBattleResult(battleResult.victory, initialAttackerState, battleResult.finalAttacker.army, defender.army, battleResult.finalDefender.army, navalUnits);
 
     document.getElementById('skip-battle-btn').style.display = 'none';
     document.getElementById('close-modal-btn').style.display = 'inline-block';
 }
 
-function displayBattleResult(victory, initialAttacker, finalAttacker, initialDefender, finalDefender) {
+function displayMaritimeBattleResult(victory, initialAttacker, finalAttacker, initialDefender, finalDefender, navalUnits) {
     const resultContainer = document.getElementById('battle-result');
+    resultContainer.style.display = 'block';
     resultContainer.className = `battle-result show ${victory ? 'victory' : 'defeat'}`;
-    document.getElementById('result-title').textContent = victory ? 'VICTOIRE !' : 'DÉFAITE !';
+    document.getElementById('result-title').textContent = victory ? 'VICTOIRE NAVALE !' : 'DÉFAITE NAVALE !';
 
     const attackerLosses = calculateLosses(initialAttacker, finalAttacker);
     const defenderLosses = calculateLosses(initialDefender, finalDefender);
+
     document.getElementById('attacker-losses').innerHTML = formatLosses(attackerLosses, UNITS_CONFIG);
     document.getElementById('defender-losses').innerHTML = formatLosses(defenderLosses, UNITS_CONFIG);
 
     Object.keys(attackerLosses).forEach(unitKey => {
-        if (gameState.unitPool[unitKey] !== undefined) {
-            gameState.unitPool[unitKey] = Math.max(0, gameState.unitPool[unitKey] - attackerLosses[unitKey]);
+        if (gameState.navalUnitPool[unitKey] !== undefined) {
+            gameState.navalUnitPool[unitKey] = Math.max(0, gameState.navalUnitPool[unitKey] - attackerLosses[unitKey]);
+        }
+    });
+
+    Object.keys(finalAttacker).forEach(unitKey => {
+        if (gameState.units[unitKey]) {
+            gameState.units[unitKey].xp += Math.round(Object.keys(defenderLosses).length * 15 / (finalAttacker[unitKey].count || 1));
         }
     });
 
@@ -192,49 +206,37 @@ function displayBattleResult(victory, initialAttacker, finalAttacker, initialDef
     const lootSection = document.getElementById('loot-section');
     lootList.innerHTML = '';
     if (victory) {
-        const goldLoot = Math.floor(Math.random() * 2500) + 500;
-        const xpGain = 120;
+        const goldLoot = Math.floor(Math.random() * 8000) + 2000;
+        const woodLoot = Math.floor(Math.random() * 5000) + 1000;
         gameState.resources.gold += goldLoot;
-        addXp(xpGain);
-        lootList.innerHTML = `<div class="loot-item"><span>💰 Or</span><span class="loot-amount">+${goldLoot.toLocaleString()}</span></div>`;
-        lootList.innerHTML += `<div class="loot-item"><span>✨ XP</span><span class="loot-amount">+${xpGain}</span></div>`;
+        gameState.resources.wood += woodLoot;
+        addXp(150);
+        lootList.innerHTML = `
+            <div class="loot-item"><span>💰 Or</span><span class="loot-amount">+${goldLoot.toLocaleString()}</span></div>
+            <div class="loot-item"><span>🌲 Bois</span><span class="loot-amount">+${woodLoot.toLocaleString()}</span></div>`;
         if (lootSection) lootSection.style.display = 'block';
     } else {
-        addXp(30);
-        lootList.innerHTML = `<div class="loot-item"><span>✨ XP</span><span class="loot-amount">+30</span></div>`;
-        if (lootSection) lootSection.style.display = 'block';
+        addXp(40);
+        if (lootSection) lootSection.style.display = 'none';
     }
 
     saveGameState();
-    generateUnitSelectors(Object.fromEntries(Object.entries(UNITS_CONFIG).filter(([_, unit]) => unit.domain === 'land')));
-    calculateArmyStats(Object.fromEntries(Object.entries(UNITS_CONFIG).filter(([_, unit]) => unit.domain === 'land')));
+    generateMaritimeUnitSelectors(navalUnits);
+    calculateMaritimeArmyStats(navalUnits);
 }
 
-function resetSimulator(landUnits) {
+function resetMaritimeSimulator(navalUnits) {
     document.querySelectorAll('.unit-input').forEach(input => input.value = 0);
-    document.getElementById('wall-level').value = 5;
+    const coastalFort = document.getElementById('coastal-fortifications');
+    if(coastalFort) coastalFort.value = 0;
     document.getElementById('attacker-hero').value = 'none';
     document.getElementById('defender-hero').value = 'none';
-    document.getElementById('terrain').value = 'plains';
-    document.getElementById('attacker-formation').value = 'balanced';
-    document.getElementById('defender-formation').value = 'balanced';
-    const battleResultEl = document.getElementById('battle-result');
-    if (battleResultEl) battleResultEl.className = 'battle-result';
+    document.getElementById('battle-result').classList.remove('show');
     document.querySelectorAll('#defender-units .unit-selector').forEach(el => {
         el.style.display = 'none';
         el.querySelector('input').value = 0;
     });
-    calculateArmyStats(landUnits);
-}
-
-function showBattleModal() {
-    const overlay = document.getElementById('battle-modal-overlay');
-    if (overlay) overlay.style.display = 'flex';
-}
-
-function hideBattleModal() {
-    const overlay = document.getElementById('battle-modal-overlay');
-    if (overlay) overlay.style.display = 'none';
+    calculateMaritimeArmyStats(navalUnits);
 }
 
 function getRank(xp) {

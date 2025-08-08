@@ -306,9 +306,10 @@ function completeConstruction(item) {
     }
 }
 
-function showModal(title, body, footer) {
+function showModal(title, body, footer, customClass = '') {
     const container = document.getElementById('modal-container');
-    container.innerHTML = `<div class="modal-backdrop" onclick="closeModal()"></div><div class="modal-content"><div class="modal-header"><h3 class="modal-title">${title}</h3><button class="modal-close-btn" onclick="closeModal()">&times;</button></div><div class="modal-body">${body}</div><div class="modal-footer">${footer}</div></div>`;
+    const customClassStr = customClass ? ` ${customClass}` : '';
+    container.innerHTML = `<div class="modal-backdrop" onclick="closeModal()"></div><div class="modal-content${customClassStr}"><div class="modal-header"><h3 class="modal-title">${title}</h3><button class="modal-close-btn" onclick="closeModal()">&times;</button></div><div class="modal-body">${body}</div><div class="modal-footer">${footer}</div></div>`;
     setTimeout(() => container.classList.add('active'), 10);
 }
 
@@ -585,6 +586,67 @@ function handleTrainClick(unitId) {
         showBarracksModal(building); // Refresh modal
     } else {
         showToast(result.message, "error");
+    }
+}
+
+async function showTerrestrialCombatModal() {
+    const modalBody = `
+        <div id="terrestrial-combat-simulator-container" style="width: 100%; height: 100%; overflow: auto;">
+            <p>Chargement du simulateur de combat...</p>
+        </div>
+    `;
+    // We use the existing modal system from city-view.js
+    // We give it a custom class to make it full-screen
+    showModal('Simulateur de Combat Terrestre', modalBody, '', 'modal-fullscreen');
+
+    const container = document.getElementById('terrestrial-combat-simulator-container');
+    if (!container) {
+        console.error("Simulator container not found in modal.");
+        return;
+    }
+
+    try {
+        const response = await fetch('Simulateur.html');
+        if (!response.ok) throw new Error('Failed to fetch simulator HTML');
+        const htmlText = await response.text();
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlText, 'text/html');
+
+        // Extract the main view and the battle result modal from the simulator page
+        const simulatorView = doc.getElementById('view-simulator');
+        const battleModal = doc.getElementById('battle-modal-overlay');
+
+        if (!simulatorView || !battleModal) {
+            throw new Error('Could not find required elements in simulator HTML');
+        }
+
+        // Inject both parts into our container
+        // We also need to append the battle modal overlay to the body so it can be properly displayed full screen
+        document.body.appendChild(battleModal);
+        container.innerHTML = simulatorView.innerHTML;
+
+        // The close button of the original modal should now close the battle modal overlay as well
+        const closeModalBtn = document.querySelector('.modal-fullscreen .modal-close-btn');
+        if(closeModalBtn) {
+            closeModalBtn.onclick = () => {
+                const battleModalEl = document.getElementById('battle-modal-overlay');
+                if(battleModalEl) battleModalEl.remove();
+                closeModal();
+            };
+        }
+
+
+        // Now that the HTML is in the DOM, initialize the simulator's JavaScript
+        if (typeof initializeSimulatorUI === 'function') {
+            initializeSimulatorUI();
+        } else {
+            throw new Error('initializeSimulatorUI function not found. Ensure simulator-view.js is loaded.');
+        }
+
+    } catch (error) {
+        container.innerHTML = `<p style="color: var(--error-red);">Erreur : Impossible de charger le simulateur de combat. ${error.message}</p>`;
+        console.error("Failed to load terrestrial combat simulator:", error);
     }
 }
 

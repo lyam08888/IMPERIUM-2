@@ -40,21 +40,39 @@ const BUILDING_DEFINITIONS = {
     'barracks': { name: 'Caserne', icon: '⚔️', description: 'Entraînez des unités pour vos légions. Améliorez pour débloquer des unités plus fortes.',
         baseCost: [{ res: 'gold', amount: 200 }, { res: 'food', amount: 150 }], upgradeCostMultiplier: 1.8,
         baseBuildTime: 120, xpGain: 80, isInteractive: true },
+    'shipyard': { name: 'Chantier Naval', icon: '⚓', description: 'Construisez et entretenez votre flotte de guerre.',
+        baseCost: [{ res: 'gold', amount: 300 }, { res: 'wood', amount: 250 }], upgradeCostMultiplier: 1.9,
+        baseBuildTime: 180, xpGain: 100, isInteractive: true, requires: { type: 'market', level: 3 } },
 };
 
 const UNITS_CONFIG = {
-    legionnaire: { name: 'Légionnaire', icon: '🛡️', attack: 50, defense: 70, hp: 100, type: 'infantry', priority: 'cavalry', ability: 'testudo',
-        cost: [{ res: 'gold', amount: 50 }, { res: 'food', amount: 20 }], trainTime: 60 },
-    archer: { name: 'Archer', icon: '🏹', attack: 60, defense: 40, hp: 80, type: 'ranged', priority: 'infantry', ability: 'volley',
-        cost: [{ res: 'gold', amount: 80 }, { res: 'food', amount: 10 }], trainTime: 90 },
-    cavalier: { name: 'Cavalier', icon: '🐎', attack: 80, defense: 60, hp: 120, type: 'cavalry', priority: 'ranged', ability: 'charge',
-        cost: [{ res: 'gold', amount: 120 }, { res: 'food', amount: 40 }], trainTime: 180 },
-    praetorian: { name: 'Prétorien', icon: '🦅', attack: 90, defense: 90, hp: 150, type: 'infantry', priority: 'infantry', ability: 'elite',
+    // --- Unités Terrestres ---
+    legionnaire: { name: 'Légionnaire', icon: '🛡️', attack: 50, defense: 70, hp: 100, type: 'infantry', priority: 'cavalry', ability: 'testudo', domain: 'land',
+        cost: [{ res: 'gold', amount: 50 }, { res: 'food', amount: 20 }], trainTime: 60, requires: { building: 'barracks', level: 1 } },
+    archer: { name: 'Archer', icon: '🏹', attack: 60, defense: 40, hp: 80, type: 'ranged', priority: 'infantry', ability: 'volley', domain: 'land',
+        cost: [{ res: 'gold', amount: 80 }, { res: 'food', amount: 10 }], trainTime: 90, requires: { building: 'barracks', level: 1 } },
+    cavalier: { name: 'Cavalier', icon: '🐎', attack: 80, defense: 60, hp: 120, type: 'cavalry', priority: 'ranged', ability: 'charge', domain: 'land',
+        cost: [{ res: 'gold', amount: 120 }, { res: 'food', amount: 40 }], trainTime: 180, requires: { building: 'barracks', level: 2 } },
+    praetorian: { name: 'Prétorien', icon: '🦅', attack: 90, defense: 90, hp: 150, type: 'infantry', priority: 'infantry', ability: 'elite', domain: 'land',
         cost: [{ res: 'gold', amount: 200 }, { res: 'marble', amount: 50 }], trainTime: 300, requires: { building: 'barracks', level: 3 } },
-    battering_ram: { name: 'Bélier', icon: '💣', attack: 200, defense: 100, hp: 300, type: 'siege', priority: 'wall', ability: 'ram',
+    battering_ram: { name: 'Bélier', icon: '💣', attack: 200, defense: 100, hp: 300, type: 'siege', priority: 'wall', ability: 'ram', domain: 'land',
         cost: [{ res: 'gold', amount: 300 }, { res: 'marble', amount: 100 }], trainTime: 600, requires: { building: 'barracks', level: 5 } },
-    ballista: { name: 'Baliste', icon: '🎯', attack: 150, defense: 30, hp: 120, type: 'siege', priority: 'infantry', ability: 'pierce',
-        cost: [{ res: 'gold', amount: 250 }, { res: 'marble', amount: 150 }], trainTime: 450, requires: { building: 'barracks', level: 5 } }
+    ballista: { name: 'Baliste', icon: '🎯', attack: 150, defense: 30, hp: 120, type: 'siege', priority: 'infantry', ability: 'pierce', domain: 'land',
+        cost: [{ res: 'gold', amount: 250 }, { res: 'marble', amount: 150 }], trainTime: 450, requires: { building: 'barracks', level: 5 } },
+
+    // --- Unités Maritimes ---
+    trireme: { name: 'Trirème', icon: '🛶', attack: 60, defense: 60, hp: 150, type: 'standard', priority: 'ballista_ship', ability: 'ram', domain: 'sea',
+        cost: [{ res: 'gold', amount: 100 }, { res: 'wood', amount: 80 }], trainTime: 120, requires: { building: 'shipyard', level: 1 } },
+    quinquereme: { name: 'Quinquérème', icon: '⛵', attack: 90, defense: 90, hp: 250, type: 'heavy', priority: 'trireme', ability: 'heavy_ram', domain: 'sea',
+        cost: [{ res: 'gold', amount: 200 }, { res: 'wood', amount: 150 }], trainTime: 240, requires: { building: 'shipyard', level: 2 } },
+    liburnian: { name: 'Liburne', icon: '🚤', attack: 40, defense: 30, hp: 100, type: 'light', priority: 'quinquereme', ability: 'flank', domain: 'sea',
+        cost: [{ res: 'gold', amount: 70 }, { res: 'wood', amount: 50 }], trainTime: 80, requires: { building: 'shipyard', level: 1 } },
+    corvus_ship: { name: 'Navire à Corvus', icon: '🦅', attack: 50, defense: 70, hp: 180, type: 'boarding', priority: 'standard', ability: 'board', domain: 'sea',
+        cost: [{ res: 'gold', amount: 150 }, { res: 'wood', amount: 100 }], trainTime: 180, requires: { building: 'shipyard', level: 3 } },
+    ballista_ship: { name: 'Navire à Baliste', icon: '🎯', attack: 120, defense: 20, hp: 100, type: 'ranged', priority: 'heavy', ability: 'long_shot', domain: 'sea',
+        cost: [{ res: 'gold', amount: 220 }, { res: 'wood', amount: 180 }], trainTime: 300, requires: { building: 'shipyard', level: 4 } },
+    fire_ship: { name: 'Brûlot', icon: '🔥', attack: 150, defense: 10, hp: 50, type: 'special', priority: 'heavy', ability: 'ignite', domain: 'sea',
+        cost: [{ res: 'gold', amount: 180 }, { res: 'wood', amount: 40 }], trainTime: 150, requires: { building: 'shipyard', level: 2 } }
 };
 
 const HEROES_CONFIG = {
@@ -202,18 +220,28 @@ function getDefaultGameState() {
         },
 
         // --- Unités et Armées ---
-        units: { // This seems to be for the simulator, let's keep it separate
-            legionnaire: { count: 100, xp: 0 },
-            archer: { count: 80, xp: 0 },
-            cavalier: { count: 50, xp: 0 },
-            praetorian: { count: 10, xp: 0 },
-            battering_ram: { count: 5, xp: 0 },
-            ballista: { count: 5, xp: 0 }
+        units: { // This tracks XP and other persistent stats for all unit types
+            legionnaire: { xp: 0 },
+            archer: { xp: 0 },
+            cavalier: { xp: 0 },
+            praetorian: { xp: 0 },
+            battering_ram: { xp: 0 },
+            ballista: { xp: 0 },
+            trireme: { xp: 0 },
+            quinquereme: { xp: 0 },
+            liburnian: { xp: 0 },
+            corvus_ship: { xp: 0 },
+            ballista_ship: { xp: 0 },
+            fire_ship: { xp: 0 }
         },
         unitPool: { // Units available for legions
             legionnaire: 0, archer: 0, cavalier: 0, praetorian: 0, battering_ram: 0, ballista: 0
         },
+        navalUnitPool: { // Units available for fleets
+            trireme: 0, quinquereme: 0, liburnian: 0, corvus_ship: 0, ballista_ship: 0, fire_ship: 0
+        },
         legions: [], // from world
+        fleets: [], // from world
 
         // --- City View ---
         city: {
