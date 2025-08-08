@@ -5,6 +5,14 @@
 // ===============================================================
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Only initialize the full city view if we are on the main game page,
+    // not on the intro/tutorial page.
+    const mainBuildingsGrid = document.getElementById('buildingsGrid');
+    if (!mainBuildingsGrid) {
+        console.log("City View: Main buildings grid not found. Assuming this is the intro page. Skipping full UI initialization.");
+        return; // Do not initialize game loop on intro page
+    }
+
     if (typeof gameState === 'undefined' || !gameState) {
         console.error("GameState not found. Make sure game.js is loaded first.");
         return;
