@@ -1,0 +1,14 @@
+127.0.0.1 - - [08/Aug/2025 12:35:33] "GET /game.html HTTP/1.1" 200 -
+127.0.0.1 - - [08/Aug/2025 12:35:33] "GET /css/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [08/Aug/2025 12:35:33] "GET /css/imperium_popup.css HTTP/1.1" 200 -
+127.0.0.1 - - [08/Aug/2025 12:35:33] "GET /css/loader.css HTTP/1.1" 200 -
+127.0.0.1 - - [08/Aug/2025 12:35:33] "GET /js/game.js HTTP/1.1" 200 -
+127.0.0.1 - - [08/Aug/2025 12:35:33] "GET /js/scenario.js HTTP/1.1" 200 -
+127.0.0.1 - - [08/Aug/2025 12:35:33] "GET /nav.js HTTP/1.1" 200 -
+127.0.0.1 - - [08/Aug/2025 12:35:33] "GET /js/imperium_popup.js HTTP/1.1" 200 -
+127.0.0.1 - - [08/Aug/2025 12:35:33] "GET /js/city-view.js HTTP/1.1" 200 -
+127.0.0.1 - - [08/Aug/2025 12:35:34] "GET /nav.html HTTP/1.1" 200 -
+127.0.0.1 - - [08/Aug/2025 12:35:34] "GET /imperium_popup.html HTTP/1.1" 200 -
+127.0.0.1 - - [08/Aug/2025 12:35:36] "GET /MondeAntique.html HTTP/1.1" 200 -
+127.0.0.1 - - [08/Aug/2025 12:35:36] "GET /css/style.css HTTP/1.1" 304 -
+127.0.0.1 - - [08/Aug/2025 12:35:36] "GET /js/world-view.js HTTP/1.1" 200 -

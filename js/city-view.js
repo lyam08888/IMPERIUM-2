@@ -26,6 +26,7 @@ function initializeCityUI() {
     console.log("Initializing City View UI...");
     recalculateCityStats();
     updateAllCityUI();
+    setupEventListeners();
 
     // Setup periodic tip display
     const TIP_INTERVAL = 90 * 1000; // Every 90 seconds
@@ -586,6 +587,38 @@ function handleTrainClick(unitId) {
     } else {
         showToast(result.message, "error");
     }
+}
+
+function setupEventListeners() {
+    setupDashboardToggle();
+}
+
+function setupDashboardToggle() {
+    const container = document.querySelector('#city-view');
+    const toggleButton = document.getElementById('dashboard-toggle-btn');
+
+    if (!container || !toggleButton) return;
+
+    const isCollapsed = () => localStorage.getItem('cityDashboardCollapsed') === 'true';
+
+    const applyState = () => {
+        if (isCollapsed()) {
+            container.classList.add('dashboard-collapsed');
+            toggleButton.innerHTML = '&laquo;';
+        } else {
+            container.classList.remove('dashboard-collapsed');
+            toggleButton.innerHTML = '&raquo;';
+        }
+    };
+
+    toggleButton.addEventListener('click', () => {
+        localStorage.setItem('cityDashboardCollapsed', !isCollapsed());
+        applyState();
+         // Dispatch a resize event to make sure any map logic dependent on size updates
+        window.dispatchEvent(new Event('resize'));
+    });
+
+    applyState(); // Apply initial state on load
 }
 
 function showTechModal() {

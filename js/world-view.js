@@ -712,7 +712,7 @@ function showNotification(message, type = 'info') {
 }
 
 function setupDashboardToggle() {
-    const container = document.querySelector('.world-view-container');
+    const container = document.querySelector('.view-container');
     const toggleButton = document.getElementById('dashboard-toggle-btn');
 
     if (!container || !toggleButton) return;
