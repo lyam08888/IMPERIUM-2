@@ -111,6 +111,7 @@ function updatePreview(action) {
 }
 
 function setupEventListeners() {
+    setupDashboardToggle();
     const modal = document.getElementById('customModal');
     const closeButton = modal.querySelector('.close-button');
     const modalButtons = document.getElementById('modalButtons');
@@ -710,6 +711,33 @@ function showNotification(message, type = 'info') {
     setTimeout(() => notif.remove(), 5000);
 }
 
+function setupDashboardToggle() {
+    const container = document.querySelector('.world-view-container');
+    const toggleButton = document.getElementById('dashboard-toggle-btn');
+
+    if (!container || !toggleButton) return;
+
+    const isCollapsed = () => localStorage.getItem('dashboardCollapsed') === 'true';
+
+    const applyState = () => {
+        if (isCollapsed()) {
+            container.classList.add('dashboard-collapsed');
+            toggleButton.innerHTML = '&laquo;';
+        } else {
+            container.classList.remove('dashboard-collapsed');
+            toggleButton.innerHTML = '&raquo;';
+        }
+    };
+
+    toggleButton.addEventListener('click', () => {
+        localStorage.setItem('dashboardCollapsed', !isCollapsed());
+        applyState();
+         // Dispatch a resize event to make sure any map logic dependent on size updates
+        window.dispatchEvent(new Event('resize'));
+    });
+
+    applyState(); // Apply initial state on load
+}
 
 const MapManager = {
     scale: 1, posX: 0, posY: 0, isPanning: false,
