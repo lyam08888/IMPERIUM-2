@@ -78,7 +78,81 @@
                                 <span class="tile-icon">⚔️</span>
                                 <h3 class="tile-title">Simulateur de Combat</h3>
                              </div>
-                             <div class="tile-preview">Testez la puissance de vos légions.</div>
+
+                             <div class="tile-preview">Tester vos armées</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="view-simulator" class="view-container">
+                    <div class="top-bar">
+                        <h2 class="view-title" style="margin: 0;">⚔️ IMPERIUM - Simulateur de Combat V18 ⚔️</h2>
+                        <div id="resources-display" class="resources-display"></div>
+                    </div>
+                    <div class="simulator-layout">
+                        <div class="battle-setup">
+                            <div class="army-setup attacker">
+                                <h3 class="army-title army-title-attacker">Armée Attaquante</h3>
+                                <label>Moral:</label><div class="stat-bar-container"><div id="attacker-morale-bar" class="stat-bar"></div></div>
+                                <label>Loyauté du Général:</label><div class="stat-bar-container"><div id="attacker-loyalty-bar" class="stat-bar"></div></div>
+                                <div class="advanced-settings">
+                                    <div class="setting-item">
+                                        <label for="attacker-hero">Héros :</label>
+                                        <select id="attacker-hero" class="setting-select"></select>
+                                    </div>
+                                    <button id="attacker-hero-ability" class="hero-ability-btn">Utiliser Compétence</button>
+                                    <div class="setting-item">
+                                        <label for="attacker-formation">Formation :</label>
+                                        <select id="attacker-formation" class="setting-select"></select>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label for="attacker-artefact">Artefact :</label>
+                                        <select id="attacker-artefact" class="setting-select"></select>
+                                    </div>
+                                </div>
+                                <div class="unit-selection" id="attacker-units"></div>
+                            </div>
+
+                            <div class="army-setup defender">
+                                <h3 class="army-title army-title-defender">Armée Défenseure</h3>
+                                <label>Moral:</label><div class="stat-bar-container"><div id="defender-morale-bar" class="stat-bar"></div></div>
+                                 <div class="advanced-settings">
+                                    <div class="setting-item">
+                                        <label for="defender-hero">Héros :</label>
+                                        <select id="defender-hero" class="setting-select"></select>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label for="defender-formation">Formation :</label>
+                                        <select id="defender-formation" class="setting-select"></select>
+                                    </div>
+                                    <div class="setting-item">
+                                        <label for="wall-level">Niveau Muraille :</label>
+                                        <input type="number" id="wall-level" class="unit-input setting-input" value="5" min="0" max="20">
+                                    </div>
+                                </div>
+                                <div class="unit-selection" id="defender-units"></div>
+                            </div>
+                        </div>
+
+                        <div class="battle-controls">
+                            <div class="global-conditions">
+                                <div id="weather-indicator">☀️ Temps Clair</div>
+                                <div class="setting-item" style="flex-direction: column; gap: 0.5rem; width:180px;">
+                                    <label for="terrain">Terrain :</label>
+                                    <select id="terrain" class="setting-select"></select>
+                                </div>
+                                <div class="setting-item" style="flex-direction: column; gap: 0.5rem; width:180px;">
+                                    <label for="decree">Décret Impérial :</label>
+                                    <select id="decree" class="setting-select"></select>
+                                </div>
+                            </div>
+                            <button class="simulate-btn" id="simulate-battle" disabled>LANCER L'ASSAUT</button>
+                            <div id="simulation-status">Veuillez ajouter des unités</div>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-top: 1rem;">
+                                <button class="small-btn" id="scout-btn">Éclaireur</button>
+                                <button class="small-btn" id="random-config-btn">Aléatoire</button>
+                                <button class="small-btn" id="reset-btn">Réinitialiser</button>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -91,7 +165,992 @@
     <div id="modal-container" class="modal-container"></div>
     <div id="toast-container"></div>
     
-    <!-- La popup IMPERIUM sera injectée ici par imperium_popup.js -->
+
+    const QUESTS = [
+        { id: 0, description: "Construisez votre première Ferme.", isComplete: () => gameState.buildings.some(b => b.type === 'farm'), reward: { xp: 50, resources: [{res: 'gold', amount: 100}] } },
+        { id: 1, description: "Atteignez le niveau 2.", isComplete: () => gameState.player.level >= 2, reward: { xp: 0, resources: [{res: 'marble', amount: 50}] } },
+        { id: 2, description: "Construisez une Insula pour votre peuple.", isComplete: () => gameState.buildings.some(b => b.type === 'insula'), reward: { xp: 100, resources: [{res: 'food', amount: 200}] } },
+        { id: 3, description: "Construisez un Marché pour commercer.", isComplete: () => gameState.buildings.some(b => b.type === 'market'), reward: { xp: 150, resources: [{res: 'gold', amount: 300}] } },
+    ];
+
+    function getDefaultGameState() {
+        return {
+            player: { name: 'Marcus Aurelius', title: 'Consul', level: 1, xp: 0, avatar: 'M' },
+            resources: { gold: 500, food: 200, marble: 100, divineFavor: 0 },
+            storage: { gold: 1000, food: 1500, marble: 500, divineFavor: 100 },
+            stats: { population: 50, populationCapacity: 50, happiness: 75, happinessModifier: 1.0 },
+            production: { gold: 5, food: 10, marble: 2, happiness: 0, divineFavor: 0 },
+            buildings: Array.from({ length: 15 }, (_, i) => ({ slotId: i, type: null, level: 0 })),
+            constructionQueue: [],
+            activeQuestId: 0,
+            lastUpdate: Date.now()
+        };
+    }
+    let gameState = getDefaultGameState();
+
+    // ===============================================================
+    // MOTEUR DE JEU
+    // ===============================================================
+    function getXpForLevel(level) { return Math.floor(100 * Math.pow(1.5, level - 1)); }
+
+    function addXp(amount) {
+        if (!amount || amount === 0) return;
+        gameState.player.xp += amount;
+        const xpForNextLevel = getXpForLevel(gameState.player.level);
+        if (gameState.player.xp >= xpForNextLevel) {
+            gameState.player.xp -= xpForNextLevel;
+            gameState.player.level++;
+            showToast(`🎉 NIVEAU SUPÉRIEUR ! Vous êtes maintenant niveau ${gameState.player.level} !`, 'levelup');
+        }
+        checkQuestCompletion();
+    }
+
+    function saveGameState() {
+        gameState.lastUpdate = Date.now();
+        localStorage.setItem('imperiumCityState_v18', JSON.stringify(gameState));
+    }
+
+    function loadGameState() {
+        const savedState = localStorage.getItem('imperiumCityState_v18');
+        if (savedState) {
+            gameState = { ...getDefaultGameState(), ...JSON.parse(savedState) };
+            processOfflineProgress();
+        }
+        recalculateGameStats();
+        updateAllUI();
+    }
+
+    function processOfflineProgress() {
+        const now = Date.now();
+        const offlineTime = (now - gameState.lastUpdate) / 1000;
+        
+        const processQueue = (queue, onComplete) => {
+            const completedItems = [];
+            (queue || []).forEach(item => {
+                if (item.endTime <= now) {
+                    onComplete(item);
+                    completedItems.push(item);
+                }
+            });
+            return (queue || []).filter(item => !completedItems.includes(item));
+        };
+        gameState.constructionQueue = processQueue(gameState.constructionQueue, completeConstruction);
+
+        recalculateGameStats();
+        for (const res in gameState.production) {
+            if (gameState.resources[res] !== undefined) {
+                const gain = (gameState.production[res] / 3600) * offlineTime;
+                gameState.resources[res] = Math.min(gameState.resources[res] + gain, gameState.storage[res] || Infinity);
+            }
+        }
+        showToast(`Bienvenue, Consul !`, 'success');
+    }
+
+    function gameTick() {
+        const now = Date.now();
+        const processQueue = (queue, onComplete) => {
+            if (queue.length > 0 && now >= queue[0].endTime) {
+                onComplete(queue[0]);
+                queue.shift();
+                recalculateGameStats();
+                updateAllUI();
+                saveGameState();
+            }
+        };
+        processQueue(gameState.constructionQueue, completeConstruction);
+
+        for (const res in gameState.production) {
+            if (gameState.resources[res] !== undefined) {
+                const gainPerSecond = (gameState.production[res] * gameState.stats.happinessModifier) / 3600;
+                const currentRes = gameState.resources[res];
+                const maxStorage = gameState.storage[res] || Infinity;
+                if (currentRes < maxStorage && gainPerSecond > 0) {
+                    gameState.resources[res] = Math.min(currentRes + gainPerSecond, maxStorage);
+                } else if (gainPerSecond < 0) {
+                    gameState.resources[res] += gainPerSecond;
+                }
+            }
+        }
+        
+        if (gameState.stats.population < gameState.stats.populationCapacity && gameState.stats.happiness > 50) {
+            const growthRate = (gameState.stats.happiness / 100) * 0.1; 
+            gameState.stats.population = Math.min(gameState.stats.population + growthRate, gameState.stats.populationCapacity);
+        } else if (gameState.stats.happiness < 20) {
+            gameState.stats.population = Math.max(0, gameState.stats.population - 0.05);
+        }
+
+        updateDashboardPreviews();
+        renderTimers();
+    }
+
+    function recalculateGameStats() {
+        const baseProduction = { gold: 5, food: 10, marble: 2, happiness: 0, divineFavor: 0 };
+        const baseStorage = { gold: 1000, food: 1500, marble: 500, divineFavor: 100 };
+        let populationCapacity = 0;
+
+        gameState.buildings.forEach(building => {
+            if (building.type && building.level > 0) {
+                const def = BUILDING_DEFINITIONS[building.type];
+                if (def.production) {
+                    for (const res in def.production) { baseProduction[res] += def.production[res] * building.level; }
+                }
+                if (def.storage) {
+                    for (const res in def.storage) { baseStorage[res] += def.storage[res] * building.level; }
+                }
+                if (def.housing) {
+                    populationCapacity += def.housing * building.level;
+                }
+            }
+        });
+        
+        baseProduction.food -= Math.floor(gameState.stats.population / 10);
+
+        gameState.production = baseProduction;
+        gameState.storage = baseStorage;
+        gameState.stats.populationCapacity = populationCapacity;
+        
+        if (gameState.stats.happiness > 90) {
+            gameState.stats.happinessModifier = 1.1;
+        } else if (gameState.stats.happiness < 30) {
+            gameState.stats.happinessModifier = 0.75;
+        } else {
+            gameState.stats.happinessModifier = 1.0;
+        }
+    }
+
+    // ===============================================================
+    // FONCTIONS DE RENDU DE L'UI
+    // ===============================================================
+    function renderCityGrid() {
+        const grid = document.getElementById('buildingsGrid');
+        grid.innerHTML = '';
+        gameState.buildings.forEach(building => {
+            const slot = document.createElement('div');
+            const isConstructing = gameState.constructionQueue.some(item => item.slotId === building.slotId);
+            slot.className = `building-slot ${building.type ? 'occupied' : ''} ${isConstructing ? 'constructing' : ''}`;
+            slot.dataset.slotId = building.slotId;
+            
+            if (isConstructing) {
+                slot.innerHTML = `<div class="building-icon">🔨</div><div class="building-name">Construction...</div><div class="construction-timer"></div>`;
+            } else if (building.type) {
+                const def = BUILDING_DEFINITIONS[building.type];
+                slot.innerHTML = `<div class="building-icon">${def.icon}</div><div class="building-name">${def.name}</div><div class="building-level">Niv. ${building.level}</div>`;
+                slot.onclick = () => handleBuildingClick(building);
+            } else {
+                slot.innerHTML = `<div class="building-icon" style="font-size: 2.5rem; color: var(--gold-light);">+</div>`;
+                slot.onclick = () => handleBuildingClick(building);
+            }
+            grid.appendChild(slot);
+        });
+        renderTimers();
+    }
+    
+    function renderTimers() {
+        const now = Date.now();
+        document.querySelectorAll('.construction-timer').forEach(timerEl => {
+            const slotEl = timerEl.closest('.building-slot');
+            const slotId = parseInt(slotEl.dataset.slotId);
+            const build = gameState.constructionQueue.find(item => item.slotId === slotId);
+            if (build) {
+                const remaining = Math.max(0, build.endTime - now);
+                const seconds = Math.floor((remaining / 1000) % 60);
+                const minutes = Math.floor((remaining / (1000 * 60)) % 60);
+                const hours = Math.floor((remaining / (1000 * 60 * 60)) % 24);
+                timerEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        });
+    }
+    
+    function updateDashboardPreviews() {
+        document.getElementById('player-tile-preview').textContent = `Niveau ${gameState.player.level}`;
+        document.getElementById('resources-tile-preview').textContent = `Or : ${Math.floor(gameState.resources.gold).toLocaleString()}`;
+        document.getElementById('stats-tile-preview').textContent = `Population : ${Math.floor(gameState.stats.population).toLocaleString()}`;
+        document.getElementById('production-tile-preview').textContent = `Or/h : ${Math.round(gameState.production.gold * gameState.stats.happinessModifier).toLocaleString()}`;
+        const quest = QUESTS[gameState.activeQuestId];
+        document.getElementById('quest-tile-preview').textContent = quest ? quest.description : "Terminé";
+    }
+
+    function updateAllUI() {
+        renderCityGrid();
+        updateDashboardPreviews();
+    }
+
+    // ===============================================================
+    // ACTIONS DE JEU
+    // ===============================================================
+    function getCost(baseCosts, multiplier, level) { 
+        return baseCosts.map(cost => ({ res: cost.res, amount: Math.floor(cost.amount * Math.pow(multiplier, level)) })); 
+    }
+    function getBuildTime(baseTime, level) { return baseTime * Math.pow(1.6, level); }
+
+    function handleBuildingClick(building) {
+        if (gameState.constructionQueue.some(item => item.slotId === building.slotId)) {
+            showToast("Ce bâtiment est en cours de construction.", "error"); return;
+        }
+        if (BUILDING_DEFINITIONS[building.type]?.isInteractive) {
+            // Future interactive buildings will go here
+            return;
+        }
+        if (building.type) { // Occupied
+            const def = BUILDING_DEFINITIONS[building.type];
+            const upgradeCosts = getCost(def.baseCost, def.upgradeCostMultiplier, building.level);
+            const canAfford = upgradeCosts.every(c => gameState.resources[c.res] >= c.amount);
+            const costsHtml = upgradeCosts.map(c => `<span class="cost-item ${gameState.resources[c.res] < c.amount ? 'insufficient' : ''}">${c.amount.toLocaleString()} ${c.res}</span>`).join(', ');
+            const time = getBuildTime(def.baseBuildTime, building.level);
+            let bonusHtml = '';
+            if (def.production) bonusHtml += `Production: ${Object.entries(def.production).map(([res, val]) => `+${val} ${res}/h`).join(', ')}`;
+            if (def.storage) { if(bonusHtml) bonusHtml += '<br>'; bonusHtml += `Stockage: ${Object.entries(def.storage).map(([res, val]) => `+${val.toLocaleString()} ${res}`).join(', ')}`; }
+            if (def.housing) { if(bonusHtml) bonusHtml += '<br>'; bonusHtml += `Logements: +${def.housing.toLocaleString()}`; }
+            const body = `<p>${def.description}</p><p>Niveau actuel : <strong>${building.level}</strong></p>
+                        <div class="upgrade-info">
+                            <p><strong>Amélioration (Niv. ${building.level + 1}) :</strong></p>
+                            <p>Coût : ${costsHtml}</p>
+                            <p>Temps : ${Math.floor(time)} secondes</p>
+                            <p>Bonus : ${bonusHtml}</p>
+                        </div>`;
+            const footer = `<button class="imperium-btn danger" onclick="demolishBuilding(${building.slotId})">Détruire</button>
+                           <div>
+                               <button class="imperium-btn" onclick="closeModal()">Fermer</button>
+                               <button class="imperium-btn" onclick="startUpgrade(${building.slotId})" ${!canAfford || gameState.constructionQueue.length > 0 ? 'disabled' : ''}>Améliorer</button>
+                           </div>`;
+            showModal(`Gérer ${def.name}`, body, footer);
+        } else { // Empty
+            const buildOptions = Object.entries(BUILDING_DEFINITIONS).map(([type, def]) => {
+                const costs = getCost(def.baseCost, def.upgradeCostMultiplier, 0);
+                let canAfford = true;
+                let missingRes = "";
+                for(const cost of costs) {
+                    if(gameState.resources[cost.res] < cost.amount) {
+                        canAfford = false;
+                        missingRes = `${cost.amount - Math.floor(gameState.resources[cost.res])} ${cost.res}`;
+                        break;
+                    }
+                }
+
+                let prereqMet = true;
+                let prereqText = '';
+                if (def.requires) {
+                    const requiredBuilding = gameState.buildings.find(b => b.type === def.requires.type);
+                    if (!requiredBuilding || requiredBuilding.level < def.requires.level) {
+                        prereqMet = false;
+                        prereqText = `<div class="build-item-prereq">Requiert: ${BUILDING_DEFINITIONS[def.requires.type].name} Niv. ${def.requires.level}</div>`;
+                    }
+                }
+                const costsHtml = costs.map(c => `<span class="cost-item ${gameState.resources[c.res] < c.amount ? 'insufficient' : ''}">${c.amount.toLocaleString()} ${c.res}</span>`).join(', ');
+                return `<div class="build-item ${!canAfford || !prereqMet ? 'disabled' : ''}" ${canAfford && prereqMet ? `onclick="startBuild('${type}', ${building.slotId})"` : ''}>
+                            <div class="build-item-icon">${def.icon}</div>
+                            <div class="build-item-name">${def.name}</div>
+                            <div class="build-item-costs">${costsHtml}</div>
+                            ${prereqText}
+                        </div>`;
+            }).join('');
+            const body = `<div class="build-grid">${buildOptions}</div>`;
+            showModal('Construire un bâtiment', body, '');
+        }
+    }
+
+    function startBuild(type, slotId) {
+        if (gameState.constructionQueue.length > 0) { showToast("File de construction occupée.", "error"); return; }
+        const def = BUILDING_DEFINITIONS[type];
+        const costs = getCost(def.baseCost, def.upgradeCostMultiplier, 0);
+        
+        for(const cost of costs) {
+            if(gameState.resources[cost.res] < cost.amount) {
+                showToast(`Ressources insuffisantes : il vous manque ${cost.amount - Math.floor(gameState.resources[cost.res])} ${cost.res}.`, "error");
+                return;
+            }
+        }
+
+        costs.forEach(c => gameState.resources[c.res] -= c.amount);
+        const buildTime = getBuildTime(def.baseBuildTime, 0);
+        gameState.constructionQueue.push({ slotId, type, level: 1, endTime: Date.now() + buildTime * 1000, xpGain: def.xpGain });
+        updateAllUI();
+        saveGameState();
+        closeModal();
+    }
+
+    function startUpgrade(slotId) {
+        if (gameState.constructionQueue.length > 0) { showToast("File de construction occupée.", "error"); return; }
+        const building = gameState.buildings.find(b => b.slotId === slotId);
+        const def = BUILDING_DEFINITIONS[building.type];
+        const costs = getCost(def.baseCost, def.upgradeCostMultiplier, building.level);
+
+        for(const cost of costs) {
+            if(gameState.resources[cost.res] < cost.amount) {
+                showToast(`Ressources insuffisantes : il vous manque ${cost.amount - Math.floor(gameState.resources[cost.res])} ${cost.res}.`, "error");
+                return;
+            }
+        }
+        
+        costs.forEach(c => gameState.resources[c.res] -= c.amount);
+        const buildTime = getBuildTime(def.baseBuildTime, building.level);
+        gameState.constructionQueue.push({ slotId, type: building.type, level: building.level + 1, endTime: Date.now() + buildTime * 1000, xpGain: def.xpGain * (building.level + 1) });
+        updateAllUI();
+        saveGameState();
+        closeModal();
+    }
+    
+    function demolishBuilding(slotId) {
+        const building = gameState.buildings.find(b => b.slotId === slotId);
+        if (!building || !building.type) return;
+        const def = BUILDING_DEFINITIONS[building.type];
+        for(let i=0; i < building.level; i++){
+            const costs = getCost(def.baseCost, def.upgradeCostMultiplier, i);
+            costs.forEach(c => { gameState.resources[c.res] += c.amount * 0.5; });
+        }
+        building.type = null;
+        building.level = 0;
+        recalculateGameStats();
+        updateAllUI();
+        saveGameState();
+        closeModal();
+        showToast("Bâtiment détruit.", "success");
+    }
+
+    function completeConstruction(item) {
+        const building = gameState.buildings.find(b => b.slotId === item.slotId);
+        building.type = item.type;
+        building.level = item.level;
+        const message = `${BUILDING_DEFINITIONS[item.type].name} (Niv. ${item.level}) terminé !`;
+        showToast(message, "success");
+        if (typeof addNotification === 'function') addNotification('index', message);
+        addXp(item.xpGain);
+    }
+
+    function checkQuestCompletion() {
+        const quest = QUESTS[gameState.activeQuestId];
+        if (quest && quest.isComplete()) {
+            showToast(`Objectif atteint : ${quest.description}`, "success");
+            gameState.activeQuestId++;
+            addXp(quest.reward.xp);
+            quest.reward.resources.forEach(r => {
+                gameState.resources[r.res] = Math.min(gameState.resources[r.res] + r.amount, gameState.storage[r.res] || Infinity);
+            });
+        }
+    }
+
+    function collectTaxes() {
+        const gain = 500 + (gameState.stats.population * 0.5);
+        if (gameState.resources.gold + gain > gameState.storage.gold) {
+            showToast("L'entrepôt d'or est plein !", "error");
+            gameState.resources.gold = gameState.storage.gold;
+        } else {
+            gameState.resources.gold += gain;
+            showToast(`+${Math.floor(gain)} Or collecté !`, 'success');
+            addXp(10);
+        }
+        saveGameState();
+    }
+
+    function organizeGames() {
+        const cost = 200;
+        if (gameState.resources.gold < cost) { showToast("Pas assez d'or pour organiser des jeux.", "error"); return; }
+        gameState.resources.gold -= cost;
+        gameState.stats.happiness = Math.min(100, gameState.stats.happiness + 5);
+        showToast(`Bonheur +5% !`, 'success');
+        addXp(20);
+        saveGameState();
+    }
+    
+    // ===============================================================
+    // UTILITAIRES
+    // ===============================================================
+    function showModal(title, body, footer) {
+        const container = document.getElementById('modal-container');
+        container.innerHTML = `<div class="modal-backdrop" onclick="closeModal()"></div><div class="modal-content"><div class="modal-header"><h3 class="modal-title">${title}</h3><button class="modal-close-btn" onclick="closeModal()">&times;</button></div><div class="modal-body">${body}</div><div class="modal-footer">${footer}</div></div>`;
+        setTimeout(() => container.classList.add('active'), 10);
+    }
+
+    function closeModal() {
+        const container = document.getElementById('modal-container');
+        container.classList.remove('active');
+        setTimeout(() => container.innerHTML = '', 300);
+    }
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+    
+    // ===============================================================
+    // MODAL FUNCTIONS
+    // ===============================================================
+    function showPlayerModal() {
+        const xpForNextLevel = getXpForLevel(gameState.player.level);
+        const xpPercentage = (gameState.player.xp / xpForNextLevel) * 100;
+        const body = `
+            <div class="player-info" style="justify-content: center; background: none; border: none; padding: 0;">
+                <div class="player-avatar" style="width: 80px; height: 80px; font-size: 2.5rem;">${gameState.player.avatar}</div>
+                <div class="player-details" style="width: auto;">
+                    <div class="player-name" style="font-size: 1.5rem;">${gameState.player.name}</div>
+                    <div class="player-level" style="font-size: 1.1rem;">Niveau ${gameState.player.level}</div>
+                    <div class="xp-bar-container" style="width: 200px;">
+                        <div class="xp-bar-fill" style="width: ${xpPercentage}%;"></div>
+                    </div>
+                    <div class="xp-bar-text">${Math.floor(gameState.player.xp)} / ${xpForNextLevel} XP</div>
+                </div>
+            </div>
+        `;
+        showModal("Profil du Consul", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    }
+
+    function showResourcesModal() {
+        let body = '<div class="resources-display">';
+        for (const res in gameState.resources) {
+            const current = Math.floor(gameState.resources[res]);
+            const max = gameState.storage[res] || Infinity;
+            const icon = {'gold':'💰','food':'🌾','marble':'🏛️','divineFavor':'🙏'}[res];
+            body += `
+                <div class="resource-item">
+                    <span class="resource-icon">${icon}</span>
+                    <span>${res.charAt(0).toUpperCase() + res.slice(1)}</span>
+                    <span class="resource-value ${current >= max ? 'full' : ''}">${current.toLocaleString()}/${max.toLocaleString()}</span>
+                </div>
+            `;
+        }
+        body += '</div>';
+        showModal("Inventaire des Ressources", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    }
+
+    function showStatsModal() {
+        const body = `
+            <div class="city-stats">
+                <div class="stat-item">
+                    <div class="stat-value">${Math.floor(gameState.stats.population).toLocaleString()}/${gameState.stats.populationCapacity.toLocaleString()}</div>
+                    <div class="stat-label">👥 Population</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${gameState.stats.happiness}%</div>
+                    <div class="stat-label">😊 Bonheur</div>
+                </div>
+            </div>
+        `;
+        showModal("Statistiques de la Cité", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    }
+
+    function showProductionModal() {
+        let body = '<div class="production-display">';
+        body += Object.entries(gameState.production).filter(([res]) => ['gold', 'food', 'marble'].includes(res)).map(([res, rate]) => {
+            const iconMap = { gold: '�', food: '🌾', marble: '🏛️' };
+            const effectiveRate = rate * gameState.stats.happinessModifier;
+            const rateClass = effectiveRate >= 0 ? 'positive' : 'negative';
+            const sign = effectiveRate >= 0 ? '+' : '';
+            return `<div class="production-item"><div class="production-resource"><span>${iconMap[res]}</span> ${res.charAt(0).toUpperCase() + res.slice(1)}</div><div class="production-rate ${rateClass}">${sign}${Math.round(effectiveRate).toLocaleString()}</div></div>`;
+        }).join('');
+        body += '</div>';
+        showModal("Rapport de Production", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    }
+    
+    function showQuestModal() {
+        const quest = QUESTS[gameState.activeQuestId];
+        let body = '';
+        if (quest) {
+            const rewardText = quest.reward.resources.map(r => `${r.amount.toLocaleString()} ${r.res}`).join(', ') + (quest.reward.xp > 0 ? ` & ${quest.reward.xp} XP` : '');
+            body = `<div class="quest-panel"><div class="quest-title">${quest.description}</div><div class="quest-reward">Récompense : ${rewardText}</div></div>`;
+        } else {
+            body = `<div class="quest-panel"><div class="quest-title">Toutes les quêtes sont terminées !</div></div>`;
+        }
+        showModal("Objectif Actuel", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    }
+    
+    function showActionsModal() {
+        const body = `
+            <div class="quick-actions" style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+                <button class="imperium-btn" onclick="collectTaxes(); closeModal();">💰 Collecter Impôts</button>
+                <button class="imperium-btn" onclick="organizeGames(); closeModal();">🎪 Organiser Jeux</button>
+            </div>
+        `;
+        showModal("Actions Rapides", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    }
+
+    // ===============================================================
+    // INITIALISATION
+    // ===============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        loadGameState();
+
+    setInterval(gameTick, 1000);
+    setInterval(saveGameState, 30000);
+});
+    </script>
+
+    <script>
+    // ===============================================================
+    // MOTEUR DE SIMULATION DE COMBAT V18
+    // ===============================================================
+    const UNITS_CONFIG = {
+        legionnaire: { name: 'Légionnaire', icon: '🛡️', attack: 50, defense: 70, hp: 100, type: 'infantry', priority: 'cavalry', ability: 'testudo' },
+        archer: { name: 'Archer', icon: '🏹', attack: 60, defense: 40, hp: 80, type: 'ranged', priority: 'infantry', ability: 'volley' },
+        cavalier: { name: 'Cavalier', icon: '🐎', attack: 80, defense: 60, hp: 120, type: 'cavalry', priority: 'ranged', ability: 'charge' },
+        praetorian: { name: 'Prétorien', icon: '🦅', attack: 90, defense: 90, hp: 150, type: 'infantry', priority: 'infantry', ability: 'elite' },
+        battering_ram: { name: 'Bélier', icon: '💣', attack: 200, defense: 100, hp: 300, type: 'siege', priority: 'wall', ability: 'ram' },
+        ballista: { name: 'Baliste', icon: '🎯', attack: 150, defense: 30, hp: 120, type: 'siege', priority: 'infantry', ability: 'pierce' }
+    };
+    
+    const HEROES_CONFIG = {
+        none: { name: 'Aucun Héros', bonus: {} },
+        cesar: { name: 'Jules César', bonus: { type: 'attack', unitType: 'infantry', value: 0.15 }, ability: { type: 'morale_boost', value: 30, used: false } },
+        vercingetorix: { name: 'Vercingétorix', bonus: { type: 'defense', unitType: 'all', value: 0.10 } },
+        hannibal: { name: 'Hannibal Barca', bonus: { type: 'morale_debuff', value: 0.15 } },
+        scipio: { name: 'Scipion l\'Africain', bonus: { type: 'scout_and_breach', scout_bonus: 0.25, breach_attack: 0.20 } },
+        fabius: { name: 'Fabius Maximus', bonus: { type: 'defensive_stance', value: 0.30 } }
+    };
+
+    const TERRAINS_CONFIG = {
+        plains: { name: 'Plaines' },
+        forest: { name: 'Forêt' },
+        mountains: { name: 'Montagnes' }
+    };
+
+    const FORMATIONS_CONFIG = {
+        balanced: { name: 'Équilibrée' },
+        offensive: { name: 'Offensive' },
+        defensive: { name: 'Défensive' }
+    };
+    
+    const WEATHER_CONFIG = {
+        clear: { name: "Temps Clair", icon: "☀️", modifiers: { all: 1 } },
+        rain: { name: "Pluie", icon: "🌧️", modifiers: { ranged: 0.7, siege: 0.8, all: 1 } },
+        fog: { name: "Brouillard", icon: "🌫️", modifiers: { all: 0.9 } }
+    };
+
+    const ARTEFACTS_CONFIG = {
+        none: { name: "Aucun" },
+        aegis: { name: "Égide de Minerve", bonus: { type: 'defense', value: 0.2 } },
+        blade: { name: "Lame de Mars", bonus: { type: 'attack', value: 0.2 } }
+    };
+    const DECREES_CONFIG = {
+        none: { name: "Aucun" },
+        double_rations: { name: "Double Rations", effect: { type: 'morale_boost', value: 20 } },
+        forced_conscription: { name: "Conscription Forcée", effect: { type: 'add_units', unit: 'legionnaire', count: 100 } }
+    };
+
+    let playerState = {};
+    let battleState = {};
+    let isSkipped = false;
+    let combatHistory = [];
+    let currentOpponent = null;
+
+    function initializePlayerState() {
+        const savedState = localStorage.getItem('imperiumPlayerStateV18');
+        if (savedState) {
+            playerState = JSON.parse(savedState);
+        } else {
+            playerState = {
+                resources: { gold: 20000, food: 5000 },
+                units: { 
+                    legionnaire: { count: 100, xp: 0 }, 
+                    archer: { count: 80, xp: 0 }, 
+                    cavalier: { count: 50, xp: 0 },
+                    praetorian: { count: 10, xp: 0 },
+                    battering_ram: { count: 5, xp: 0 },
+                    ballista: { count: 5, xp: 0 }
+                },
+                generals: {
+                    cesar: { loyalty: 80, xp: 0, level: 1 },
+                    scipio: { loyalty: 95, xp: 0, level: 1 },
+                    hannibal: { loyalty: 60, xp: 0, level: 1 }
+                }
+            };
+        }
+    }
+    
+    function savePlayerState() {
+        localStorage.setItem('imperiumPlayerStateV18', JSON.stringify(playerState));
+    }
+
+    function updateStatBar(id, value, max) {
+        const bar = document.getElementById(id);
+        if (!bar) return;
+        const percentage = max > 0 ? (value / max) * 100 : 0;
+        bar.style.width = `${percentage}%`;
+
+        if (id.includes('morale')) {
+            if (percentage > 66) bar.style.backgroundColor = 'var(--morale-high)';
+            else if (percentage > 33) bar.style.backgroundColor = 'var(--morale-medium)';
+            else bar.style.backgroundColor = 'var(--morale-low)';
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        initializePlayerState();
+        populateSelects();
+        generateUnitSelectors();
+        
+        document.getElementById('simulate-battle').addEventListener('click', () => simulateBattle(false));
+        document.getElementById('reset-btn').addEventListener('click', resetSimulator);
+        document.getElementById('scout-btn').addEventListener('click', scoutEnemy);
+        document.getElementById('random-config-btn').addEventListener('click', () => {
+            Object.keys(playerState.units).forEach(unit => {
+                const unitInput = document.querySelector(`[data-side="attacker"][data-unit="${unit}"]`);
+                if(unitInput) unitInput.value = Math.floor(Math.random() * (playerState.units[unit].count + 1));
+            });
+            scoutEnemy();
+            calculateArmyStats();
+        });
+        document.querySelector('#view-simulator').addEventListener('input', (e) => {
+            if (e.target.id === 'attacker-hero') {
+                setupHeroAbilityButton();
+            }
+            calculateArmyStats();
+        });
+        document.getElementById('attacker-hero-ability').addEventListener('click', useHeroAbility);
+        document.getElementById('skip-battle-btn').addEventListener('click', () => { isSkipped = true; });
+        document.getElementById('close-modal-btn').addEventListener('click', () => {
+            document.getElementById('battle-modal-overlay').style.display = 'none';
+        });
+        
+        resetSimulator();
+
+    });
+
+    function setupHeroAbilityButton() {
+        const heroKey = document.getElementById('attacker-hero').value;
+        const hero = HEROES_CONFIG[heroKey];
+        const btn = document.getElementById('attacker-hero-ability');
+        if (hero && hero.ability) {
+            btn.style.display = 'block';
+            btn.disabled = hero.ability.used;
+            btn.textContent = hero.ability.used ? "Compétence utilisée" : "Utiliser Compétence";
+        } else {
+            btn.style.display = 'none';
+        }
+    }
+
+    async function useHeroAbility() {
+        if (!battleState.attacker) return;
+        const heroKey = document.getElementById('attacker-hero').value;
+        const hero = HEROES_CONFIG[heroKey];
+        const btn = document.getElementById('attacker-hero-ability');
+        const addLog = async (message, isSpecial = false) => {
+            const reportEl = document.getElementById('battle-report');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry' + (isSpecial ? ' special' : '');
+            entry.textContent = message;
+            reportEl.appendChild(entry);
+            reportEl.scrollTop = reportEl.scrollHeight;
+            await new Promise(resolve => setTimeout(resolve, 100));
+        };
+
+        if (hero && hero.ability && !hero.ability.used) {
+            if (hero.ability.type === 'morale_boost') {
+                battleState.attacker.morale = Math.min(100, battleState.attacker.morale + hero.ability.value);
+                updateStatBar('attacker-morale-bar', battleState.attacker.morale, 100);
+                await addLog("César inspire ses troupes ! Le moral remonte !", true);
+            }
+            hero.ability.used = true;
+            btn.disabled = true;
+            btn.textContent = "Compétence utilisée";
+        }
+    }
+
+    function populateSelects() {
+        const selects = {
+            'attacker-hero': HEROES_CONFIG, 'defender-hero': HEROES_CONFIG,
+            'terrain': TERRAINS_CONFIG,
+            'attacker-formation': FORMATIONS_CONFIG, 'defender-formation': FORMATIONS_CONFIG,
+            'attacker-artefact': ARTEFACTS_CONFIG,
+            'decree': DECREES_CONFIG
+        };
+        for (const [selectId, config] of Object.entries(selects)) {
+            const select = document.getElementById(selectId);
+            if(select) {
+                select.innerHTML = Object.entries(config).map(([key, value]) => `<option value="${key}">${value.name}</option>`).join('');
+            }
+        }
+    }
+    
+    function createUnitSelector(unitType, side) {
+        const config = UNITS_CONFIG[unitType];
+        const available = side === 'attacker' ? (playerState.units[unitType]?.count || 0) : 0;
+        const xp = side === 'attacker' ? (playerState.units[unitType]?.xp || 0) : 0;
+        const rank = getRank(xp);
+        const selector = document.createElement('div');
+        selector.className = 'unit-selector';
+        selector.innerHTML = `
+                <div class="unit-icon">${config.icon}</div>
+                <div class="unit-name">${config.name}</div>
+                <div class="rank-indicator">${rank.name}</div>
+                <div class="xp-bar"><div class="xp-bar-inner" style="width:${rank.percent}%"></div></div>
+                <input type="number" class="unit-input" data-side="${side}" data-unit="${unitType}" value="0" min="0" ${side === 'attacker' ? `max="${available}"` : ''}>
+                ${side === 'attacker' ? `<div class="unit-available">Dispo: ${available}</div>` : ''}
+            `;
+        return selector;
+    }
+
+    function getRank(xp) {
+        if (xp >= 1000) return { name: 'Élite', bonus: 0.2, percent: 100 };
+        if (xp >= 300) return { name: 'Vétéran', bonus: 0.1, percent: (xp - 300) / 7 };
+        return { name: 'Recrue', bonus: 0, percent: xp / 3 };
+    }
+
+    function generateUnitSelectors() {
+        const attackerContainer = document.getElementById('attacker-units');
+        const defenderContainer = document.getElementById('defender-units');
+        if(!attackerContainer || !defenderContainer) return;
+        attackerContainer.innerHTML = '';
+        defenderContainer.innerHTML = '';
+        
+        Object.keys(UNITS_CONFIG).forEach(unitType => {
+            attackerContainer.appendChild(createUnitSelector(unitType, 'attacker'));
+            defenderContainer.appendChild(createUnitSelector(unitType, 'defender'));
+        });
+        document.querySelectorAll('#defender-units .unit-selector').forEach(el => {
+            el.style.display = 'none';
+        });
+    }
+    
+    function calculateArmyStats() {
+        let attackerUnits = 0;
+        let defenderUnits = 0;
+        document.querySelectorAll('.unit-input[data-unit]').forEach(input => {
+            const { side } = input.dataset;
+            const count = parseInt(input.value) || 0;
+            if (side === 'attacker') {
+                attackerUnits += count;
+            } else {
+                defenderUnits += count;
+            }
+        });
+        const canSimulate = attackerUnits > 0 && defenderUnits > 0;
+        document.getElementById('simulate-battle').disabled = !canSimulate;
+        document.getElementById('simulation-status').textContent = !canSimulate ? "Ajoutez des troupes et espionnez l'ennemi" : "";
+    }
+
+    async function scoutEnemy() { 
+        const statusEl = document.getElementById('simulation-status');
+        statusEl.textContent = "Espionnage en cours...";
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        statusEl.textContent = "Rapport d'espionnage reçu !";
+        document.querySelectorAll('#defender-units .unit-selector').forEach(el => {
+            el.style.display = 'block';
+            el.querySelector('input').value = Math.floor(Math.random() * 50);
+        });
+        calculateArmyStats();
+    }
+    
+    function getArmiesFromUI() {
+        const attacker = { army: {}, formation: FORMATIONS_CONFIG[document.getElementById('attacker-formation').value], hero: HEROES_CONFIG[document.getElementById('attacker-hero').value], morale: 100 };
+        const defender = { army: {}, formation: FORMATIONS_CONFIG[document.getElementById('defender-formation').value], hero: HEROES_CONFIG[document.getElementById('defender-hero').value], morale: 100 };
+        
+        Object.keys(UNITS_CONFIG).forEach(unitKey => {
+            const attackerCount = parseInt(document.querySelector(`[data-side="attacker"][data-unit="${unitKey}"]`).value) || 0;
+            if (attackerCount > 0) {
+                const rank = getRank(playerState.units[unitKey].xp);
+                const veteranBonus = 1 + rank.bonus;
+                attacker.army[unitKey] = { ...JSON.parse(JSON.stringify(UNITS_CONFIG[unitKey])), count: attackerCount, hasCharged: false, xp: playerState.units[unitKey].xp };
+                attacker.army[unitKey].attack = Math.round(attacker.army[unitKey].attack * veteranBonus);
+                attacker.army[unitKey].defense = Math.round(attacker.army[unitKey].defense * veteranBonus);
+            }
+            
+            const defenderCount = parseInt(document.querySelector(`[data-side="defender"][data-unit="${unitKey}"]`).value) || 0;
+            if (defenderCount > 0) defender.army[unitKey] = { ...JSON.parse(JSON.stringify(UNITS_CONFIG[unitKey])), count: defenderCount, hasCharged: false, xp: Math.random() * 500 };
+        });
+
+        return { attacker, defender };
+    }
+
+    async function simulateBattle() {
+        isSkipped = false;
+        document.getElementById('battle-modal-overlay').style.display = 'flex';
+        document.getElementById('battle-result').style.display = 'none';
+        document.getElementById('skip-battle-btn').style.display = 'inline-block';
+        document.getElementById('close-modal-btn').style.display = 'none';
+        document.getElementById('battle-report').innerHTML = '';
+
+        battleState = getArmiesFromUI();
+        let { attacker, defender } = battleState;
+        
+        const initialAttackerState = JSON.parse(JSON.stringify(attacker.army));
+        const initialDefenderState = JSON.parse(JSON.stringify(defender.army));
+        
+        let weather = 'clear';
+
+        const addLog = async (message, isSpecial = false) => {
+            const reportEl = document.getElementById('battle-report');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry' + (isSpecial ? ' special' : '');
+            entry.textContent = message;
+            reportEl.appendChild(entry);
+            reportEl.scrollTop = reportEl.scrollHeight;
+            await new Promise(resolve => setTimeout(resolve, isSkipped ? 0 : 200));
+        };
+        
+        await addLog("La bataille commence !", true);
+
+        for (let round = 1; round <= 30; round++) {
+            if (Object.keys(attacker.army).length === 0 || Object.keys(defender.army).length === 0) break;
+            
+            await addLog(`--- Tour ${round} ---`);
+            
+            await executeTurn(attacker, defender, initialDefenderState, 'Attaquant', addLog, weather);
+            if (Object.keys(defender.army).length === 0) break;
+            
+            await executeTurn(defender, attacker, initialAttackerState, 'Défenseur', addLog, weather);
+            if (Object.keys(attacker.army).length === 0) break;
+            
+            updateStatBar('attacker-morale-bar', attacker.morale, 100);
+            updateStatBar('defender-morale-bar', defender.morale, 100);
+        }
+        
+        const victory = Object.keys(defender.army).length === 0 && Object.keys(attacker.army).length > 0;
+        displayBattleResult(victory, initialAttackerState, attacker.army, initialDefenderState, defender.army);
+        
+        document.getElementById('skip-battle-btn').style.display = 'none';
+        document.getElementById('close-modal-btn').style.display = 'inline-block';
+    }
+
+    async function executeTurn(currentAttacker, currentDefender, initialDefenderState, attackerSide, addLog, weather) {
+        const initialDefenderSize = Object.values(initialDefenderState).reduce((sum, unit) => sum + unit.count, 0);
+        const weatherMod = WEATHER_CONFIG[weather].modifiers;
+
+        for (const unitName in currentAttacker.army) {
+            if (Object.keys(currentDefender.army).length === 0) break;
+            
+            const unit = currentAttacker.army[unitName];
+            if (!unit || unit.count <= 0) continue;
+            
+            if (currentAttacker.morale < 33 && Math.random() > currentAttacker.morale / 100) {
+                await addLog(`${attackerSide} : ${unit.name} x${unit.count} sont démoralisés et fuient !`, true);
+                delete currentAttacker.army[unitName];
+                continue;
+            }
+            const moraleModifier = currentAttacker.morale < 50 ? 0.75 : 1;
+            const weatherModifier = weatherMod[unit.type] || weatherMod.all || 1;
+            
+            let damage = unit.count * unit.attack * moraleModifier * weatherModifier;
+
+            if (unit.ability === 'charge' && !unit.hasCharged) {
+                damage *= 1.75;
+                unit.hasCharged = true;
+                await addLog(`${attackerSide} : ${unit.name} chargent avec fureur !`, true);
+            }
+            
+            let targetKey = unit.priority;
+            if (!currentDefender.army[targetKey] || currentDefender.army[targetKey].count <= 0) {
+                targetKey = Object.keys(currentDefender.army)[0];
+            }
+            if (!targetKey) continue;
+            const target = currentDefender.army[targetKey];
+
+            let defenseModifier = 1;
+            if (target.ability === 'testudo' && unit.type === 'ranged') {
+                defenseModifier = 3;
+                await addLog(`Défenseur : Les ${target.name} forment la Tortue !`, true);
+            }
+
+            const unitsLost = Math.min(target.count, Math.floor(damage / (target.hp * defenseModifier)));
+            if (unitsLost > 0) {
+                target.count -= unitsLost;
+                await addLog(`${attackerSide} : ${unit.name} x${unit.count} tuent ${unitsLost} ${target.name}.`);
+                if (target.count <= 0) {
+                    delete currentDefender.army[targetKey];
+                    await addLog(`${target.name} ont été anéantis !`, true);
+                }
+            }
+        }
+
+        const finalDefenderSize = Object.values(currentDefender.army).reduce((sum, unit) => sum + unit.count, 0);
+        if (initialDefenderSize > 0) {
+            const totalLosses = initialDefenderSize - finalDefenderSize;
+            const lossesPercent = totalLosses / initialDefenderSize;
+            currentDefender.morale -= lossesPercent * 20;
+            currentDefender.morale = Math.max(0, currentDefender.morale);
+        }
+    }
+    
+    function displayBattleResult(victory, initialAttacker, finalAttacker, initialDefender, finalDefender) {
+        const resultContainer = document.getElementById('battle-result');
+        const resultTitle = document.getElementById('result-title');
+        
+        resultContainer.style.display = 'block';
+        resultContainer.classList.add('show', victory ? 'victory' : 'defeat');
+        resultTitle.textContent = victory ? 'VICTOIRE !' : 'DÉFAITE !';
+
+        const attackerLosses = calculateLosses(initialAttacker, finalAttacker);
+        const defenderLosses = calculateLosses(initialDefender, finalDefender);
+
+        document.getElementById('attacker-losses').innerHTML = formatLosses(attackerLosses);
+        document.getElementById('defender-losses').innerHTML = formatLosses(defenderLosses);
+        
+        Object.keys(finalAttacker).forEach(unitKey => {
+            const survived = finalAttacker[unitKey].count;
+            if (survived > 0) {
+                playerState.units[unitKey].xp += Math.round(Object.keys(defenderLosses).length * 10 / survived);
+            }
+        });
+
+        Object.keys(attackerLosses).forEach(unitKey => {
+            playerState.units[unitKey].count = Math.max(0, (playerState.units[unitKey].count || 0) - attackerLosses[unitKey]);
+        });
+        
+        if (victory) {
+            const goldLoot = Math.floor(Math.random() * 5000) + 1000;
+            document.getElementById('loot-section').style.display = 'block';
+            document.getElementById('battle-loot').innerHTML = `<div class="loot-item"><span>💰 Or</span><span class="loot-amount">+${goldLoot.toLocaleString()}</span></div>`;
+        } else {
+            document.getElementById('loot-section').style.display = 'none';
+        }
+        
+        savePlayerState();
+        generateUnitSelectors();
+    }
+
+    function calculateLosses(initial, final) {
+        const losses = {};
+        Object.keys(initial).forEach(unit => {
+            const initialCount = initial[unit].count;
+            const finalCount = final[unit] ? final[unit].count : 0;
+            const lost = initialCount - finalCount;
+            if(lost > 0) losses[unit] = lost;
+        });
+        return losses;
+    }
+
+    function formatLosses(losses) {
+        let html = '';
+        Object.keys(losses).forEach(unit => {
+            if (losses[unit] > 0) {
+                html += `<div class="loss-item"><span>${UNITS_CONFIG[unit].icon} ${UNITS_CONFIG[unit].name}</span><span class="loss-count">-${losses[unit]}</span></div>`;
+            }
+        });
+        return html || '<div class="loss-item">Aucune perte</div>';
+    }
+    
+    function resetSimulator() {
+        document.querySelectorAll('.unit-input').forEach(input => input.value = 0);
+        document.getElementById('wall-level').value = 5;
+        document.getElementById('attacker-hero').value = 'none';
+        document.getElementById('defender-hero').value = 'none';
+        document.getElementById('terrain').value = 'plains';
+        document.getElementById('attacker-formation').value = 'balanced';
+        document.getElementById('defender-formation').value = 'balanced';
+        document.getElementById('attacker-artefact').value = 'none';
+        document.getElementById('decree').value = 'none';
+
+        document.getElementById('battle-result').classList.remove('show');
+
+        document.querySelectorAll('#defender-units .unit-selector').forEach(el => {
+            el.style.display = 'none';
+            el.querySelector('input').value = 0;
+        });
+        
+        updateStatBar('attacker-morale-bar', 100, 100);
+        updateStatBar('defender-morale-bar', 100, 100);
+        updateStatBar('attacker-loyalty-bar', 100, 100);
+        document.getElementById('weather-indicator').textContent = '☀️ Temps Clair';
+        calculateArmyStats();
+        setupHeroAbilityButton();
+    }
+
+    function clearCombatHistory() {
+        combatHistory = [];
+        localStorage.removeItem('imperiumCombatHistory');
+        displayCombatHistory();
+    }
 
 </body>
 </html>
