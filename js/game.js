@@ -159,6 +159,19 @@ const EVENTS = [
     }
 ];
 
+const TIPS = [
+    "Construisez plus de fermes pour augmenter votre production de nourriture et nourrir une plus grande population.",
+    "Le bonheur de votre peuple est crucial ! Un peuple heureux est plus productif.",
+    "N'oubliez pas d'améliorer vos bâtiments pour augmenter leur efficacité.",
+    "Les entrepôts et les greniers augmentent votre capacité de stockage. Indispensable pour les grands projets !",
+    "Chaque bâtiment que vous construisez ou améliorez vous rapporte de l'expérience (XP) pour monter de niveau.",
+    "Consultez l'arbre technologique pour débloquer de puissantes améliorations pour votre cité.",
+    "Les quêtes sont un excellent moyen de gagner des ressources supplémentaires et de l'XP.",
+    "Une population plus importante consomme plus de nourriture. Gardez un œil sur votre production !",
+    "Le Forum est le cœur de votre cité, il augmente le bonheur de vos citoyens.",
+    "La construction d'une caserne vous permettra de former des troupes pour défendre votre cité et conquérir de nouveaux territoires."
+];
+
 
 // ---------------------------------------------------------------
 // ÉTAT GLOBAL DU JEU (GAMESTATE)
@@ -251,7 +264,11 @@ function getDefaultGameState() {
         },
 
         // --- Meta Data ---
-        lastUpdate: Date.now()
+        lastUpdate: Date.now(),
+        lastEventTimestamp: 0,
+
+        // --- System ---
+        pendingEvents: [],
     };
 }
 
@@ -494,6 +511,20 @@ function completeTraining(trainingItem) {
     return trainingItem;
 }
 
+function triggerRandomEvent() {
+    if (!EVENTS || EVENTS.length === 0) return;
+
+    const event = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+    const effectMessage = event.effect(gameState);
+
+    gameState.pendingEvents.push({
+        title: event.title,
+        description: event.description,
+        effectMessage: effectMessage,
+    });
+    console.log(`Event triggered: ${event.title}`);
+}
+
 function masterGameTick() {
     const now = Date.now();
     let stateChanged = false;
@@ -517,6 +548,17 @@ function masterGameTick() {
         const item = gameState.city.trainingQueue.shift();
         completeTraining(item);
         stateChanged = true;
+    }
+
+    // --- Random Event Trigger ---
+    const MIN_EVENT_INTERVAL = 4 * 60 * 1000; // 4 minutes
+    const EVENT_CHANCE_PER_TICK = 0.002; // 0.2% chance per second -> ~8.3 min avg
+    if (now - (gameState.lastEventTimestamp || 0) > MIN_EVENT_INTERVAL) {
+        if (Math.random() < EVENT_CHANCE_PER_TICK) {
+            triggerRandomEvent();
+            gameState.lastEventTimestamp = now;
+            stateChanged = true;
+        }
     }
 
     if (stateChanged) {

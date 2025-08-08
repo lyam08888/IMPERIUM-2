@@ -26,6 +26,15 @@ function initializeCityUI() {
     console.log("Initializing City View UI...");
     recalculateCityStats();
     updateAllCityUI();
+
+    // Setup periodic tip display
+    const TIP_INTERVAL = 90 * 1000; // Every 90 seconds
+    setInterval(() => {
+        if (typeof TIPS !== 'undefined' && TIPS.length > 0) {
+            const randomTip = TIPS[Math.floor(Math.random() * TIPS.length)];
+            showToast(`💡 Astuce : ${randomTip}`, 'info');
+        }
+    }, TIP_INTERVAL);
 }
 
 function cityGameTick() {
@@ -42,6 +51,17 @@ function cityGameTick() {
             if(unitDef) showToast(`${trainingInProgress.amount} ${unitDef.name}(s) ont terminé leur formation !`, "success");
         }
         updateAllCityUI();
+    }
+
+    // --- Handle Pending Events ---
+    if (gameState.pendingEvents && gameState.pendingEvents.length > 0) {
+        // Only show if no modal is currently active
+        if (!document.querySelector('#modal-container.active')) {
+            const event = gameState.pendingEvents.shift(); // Get the first event and remove it
+            const body = `<p>${event.description}</p><div style="margin-top: 1rem; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 0.25rem;"><strong>Effet :</strong> ${event.effectMessage}</div>`;
+            const footer = `<button class="imperium-btn" onclick="closeModal()">Compris</button>`;
+            showModal(`Événement : ${event.title}`, body, footer);
+        }
     }
 
     for (const res in gameState.city.production) {
@@ -403,17 +423,46 @@ function showProductionModal() {
 }
 
 function showQuestModal() {
-    const quest = QUESTS[gameState.city.activeQuestId];
+    let body = '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
 
-    let body = '';
-    if (quest) {
-        const rewardText = (quest.reward.resources || []).map(r => `${r.amount.toLocaleString()} ${r.res}`).join(', ') + (quest.reward.xp > 0 ? ` & ${quest.reward.xp} XP` : '');
-        body = `<div style="text-align: center;"><div><strong>${quest.description}</strong></div><div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">Récompense : ${rewardText}</div></div>`;
+    if (QUESTS && QUESTS.length > 0) {
+        QUESTS.forEach(quest => {
+            let statusIcon = '';
+            let statusClass = '';
+
+            // The quest is complete if its ID is less than the active one.
+            if (quest.id < gameState.city.activeQuestId) {
+                statusIcon = '✅';
+                statusClass = 'completed';
+            // The quest is the current one.
+            } else if (quest.id === gameState.city.activeQuestId) {
+                statusIcon = '▶️';
+                statusClass = 'inprogress';
+            // The quest is not yet available.
+            } else {
+                statusIcon = '🔒';
+                statusClass = 'locked';
+            }
+
+            const rewardText = (quest.reward.resources || []).map(r => `${r.amount.toLocaleString()} ${r.res}`).join(', ') + (quest.reward.xp > 0 ? ` & ${quest.reward.xp} XP` : '');
+
+            body += `
+                <div class="quest-item ${statusClass}" style="border: 1px solid var(--border-gold); padding: 1rem; border-radius: 0.5rem; display: flex; align-items: center; gap: 1rem; opacity: ${statusClass === 'locked' ? 0.6 : 1}; background: ${statusClass === 'completed' ? 'rgba(44, 160, 44, 0.1)' : 'transparent'};">
+                    <div style="font-size: 1.5rem;">${statusIcon}</div>
+                    <div>
+                        <div style="font-weight: bold; color: var(--text-light);">${quest.description}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Récompense : ${rewardText}</div>
+                    </div>
+                </div>
+            `;
+        });
     } else {
-        body = `<div style="text-align: center;"><strong>Toutes les quêtes sont terminées !</strong></div>`;
+        body += '<p>Aucun objectif défini pour le moment.</p>';
     }
 
-    showModal("Objectif Actuel", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    body += '</div>';
+
+    showModal("Objectifs", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
 }
 
 function showBarracksModal(building) {
