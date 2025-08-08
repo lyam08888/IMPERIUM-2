@@ -710,7 +710,9 @@
         const building = gameState.buildings.find(b => b.slotId === item.slotId);
         building.type = item.type;
         building.level = item.level;
-        showToast(`${BUILDING_DEFINITIONS[item.type].name} (Niv. ${item.level}) terminé !`, "success");
+        const message = `${BUILDING_DEFINITIONS[item.type].name} (Niv. ${item.level}) terminé !`;
+        showToast(message, "success");
+        if (typeof addNotification === 'function') addNotification('simulateur', message);
         addXp(item.xpGain);
     }
 
