@@ -104,10 +104,10 @@ body {
 .world-map-container:active { cursor: grabbing; }
 
 
-.world-view-ui { height: 100vh; overflow: hidden; }
-.world-view-body { height: 100%; }
-.world-view-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border-radius: 1rem; border: 2px solid var(--border-gold); overflow-y: auto; padding: 1.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.2); display: flex; flex-direction: column; }
-.world-game-layout { display: flex; flex-direction: column; gap: 1.5rem; flex-grow: 1; overflow: hidden; }
+.world-view-ui { min-height: 100vh; }
+.world-view-body { }
+.world-view-container { background: rgba(15, 23, 42, 0.6); border-radius: 1rem; border: 2px solid var(--border-gold); padding: 1.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.2); display: flex; flex-direction: column; }
+.world-game-layout { display: flex; flex-direction: column; gap: 1.5rem; flex-grow: 1; }
 .world-map-content { position: relative; width: 100%; height: 100%; transform-origin: 0 0; }
 .world-bottom-hud { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; flex-shrink: 0; }
 .world-command-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; width: 100%; max-width: 600px; }
