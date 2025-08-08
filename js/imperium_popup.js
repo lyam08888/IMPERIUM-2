@@ -1,8 +1,8 @@
 // ===============================================================
 // IMPERIUM V19 - POPUP.JS
 // ===============================================================
-// Ce fichier gère l'injection et l'interactivité de la popup
-// "IMPERIUM" qui affiche les informations générales du joueur.
+// Ce fichier gère l'injection et l'interactivité des popups
+// d'information du joueur (Profil, Ressources, Actions).
 // ===============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     link.href = 'css/imperium_popup.css';
     document.head.appendChild(link);
 
-    // 2. Injecter le HTML de la popup
+    // 2. Injecter le HTML des popups
     fetch('imperium_popup.html')
         .then(response => {
             if (!response.ok) {
@@ -23,62 +23,100 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(html => {
             document.body.insertAdjacentHTML('beforeend', html);
             // Une fois le HTML chargé, on initialise les fonctionnalités
-            initializePopup();
+            initializePopups();
         })
         .catch(err => console.error('Failed to load imperium_popup.html:', err));
 });
 
-function initializePopup() {
-    const popup = document.getElementById('imperium-popup');
-    const openBtn = document.getElementById('imperium-popup-button');
-    const closeBtn = document.getElementById('imperium-popup-close-btn');
+function initializePopups() {
+    // 3. Initialiser chaque popup individuellement
+    setupPopup('profile');
+    setupPopup('resources');
+    setupPopup('actions');
+
+    // 4. Déplacer les tuiles d'actions
+    moveDashboardTiles();
+
+    // 5. Mettre à jour les données des popups périodiquement
+    setInterval(() => {
+        updateActivePopups();
+    }, 1000); // M-à-j toutes les secondes
+}
+
+function setupPopup(name) {
+    const popup = document.getElementById(`${name}-popup`);
+    const openBtn = document.getElementById(`${name}-popup-button`);
+    const closeBtn = document.getElementById(`${name}-popup-close-btn`);
 
     if (!popup || !openBtn || !closeBtn) {
-        console.error('Popup elements not found!');
+        console.error(`Elements for popup "${name}" not found!`);
         return;
     }
 
-    moveDashboardTiles();
-
-    // 3. Gérer l'ouverture et la fermeture
-    openBtn.addEventListener('click', () => {
+    // Gérer l'ouverture
+    openBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const isActive = popup.classList.toggle('active');
+        // Optionnel: fermer les autres popups quand on en ouvre une
+        closeOtherPopups(name);
         if (isActive) {
-            updateImperiumPopup();
+            updatePopupByName(name);
         }
     });
 
+    // Gérer la fermeture
     closeBtn.addEventListener('click', () => {
         popup.classList.remove('active');
     });
 
-    // Fermer si on clique en dehors
+    // Fermer si on clique en dehors de la popup
     document.addEventListener('click', (e) => {
         if (!popup.contains(e.target) && !openBtn.contains(e.target)) {
             popup.classList.remove('active');
         }
     });
-
-    // 4. Mettre à jour les données de la popup périodiquement
-    setInterval(() => {
-        if (popup.classList.contains('active')) {
-            updateImperiumPopup();
-        }
-    }, 1000); // M-à-j toutes les secondes
 }
 
-function updateImperiumPopup() {
-    // S'assurer que gameState est disponible
-    if (typeof gameState === 'undefined') {
-        console.error('gameState is not available to the popup.');
-        return;
-    }
+function closeOtherPopups(currentPopupName) {
+    const popupNames = ['profile', 'resources', 'actions'];
+    popupNames.forEach(name => {
+        if (name !== currentPopupName) {
+            const popup = document.getElementById(`${name}-popup`);
+            if (popup) {
+                popup.classList.remove('active');
+            }
+        }
+    });
+}
 
-    // 5. Mettre à jour les infos du joueur
+function updateActivePopups() {
+    const popupNames = ['profile', 'resources', 'actions'];
+    popupNames.forEach(name => {
+        const popup = document.getElementById(`${name}-popup`);
+        if (popup && popup.classList.contains('active')) {
+            updatePopupByName(name);
+        }
+    });
+}
+
+function updatePopupByName(name) {
+    if (name === 'profile') {
+        updateProfilePopup();
+    } else if (name === 'resources') {
+        updateResourcesPopup();
+    }
+    // 'actions' popup does not need dynamic updates
+}
+
+function updateProfilePopup() {
+    if (typeof gameState === 'undefined') return;
     document.getElementById('popup-player-name').textContent = gameState.player.name;
     document.getElementById('popup-player-level').textContent = gameState.player.level;
+}
 
-    // 6. Mettre à jour les ressources
+function updateResourcesPopup() {
+    if (typeof gameState === 'undefined') return;
+
     const resourcesList = document.getElementById('imperium-resources-list');
     resourcesList.innerHTML = ''; // Vider la liste
 
@@ -108,14 +146,10 @@ function moveDashboardTiles() {
     const actionsGrid = document.getElementById('imperium-actions-grid');
 
     if (dashboardGrid && actionsGrid) {
-        // Move all tiles from the dashboard to the popup
         while (dashboardGrid.firstChild) {
             actionsGrid.appendChild(dashboardGrid.firstChild);
         }
-        // Remove the now-empty dashboard grid
         dashboardGrid.remove();
-
-        // Add a class to the popup actions grid for styling
         actionsGrid.classList.add('dashboard-grid-popup');
     }
 }

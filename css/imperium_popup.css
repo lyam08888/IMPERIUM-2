@@ -1,10 +1,18 @@
 /* css/imperium_popup.css */
 
-#imperium-popup-button {
+/* =============================================================== */
+/* POPUP BUTTONS */
+/* =============================================================== */
+#imperium-popups-buttons-container {
     position: fixed;
     bottom: 20px;
     right: 20px;
     z-index: 1050;
+    display: flex;
+    gap: 10px;
+}
+
+.imperium-popup-button {
     background: linear-gradient(145deg, var(--gold-secondary), var(--gold-primary));
     color: white;
     border: 2px solid var(--gold-light);
@@ -20,15 +28,17 @@
     transition: all 0.3s ease;
 }
 
-#imperium-popup-button:hover {
+.imperium-popup-button:hover {
     transform: scale(1.1);
     box-shadow: 0 6px 20px var(--shadow-gold);
 }
 
+
+/* =============================================================== */
+/* POPUP CONTAINERS (COMMON STYLES) */
+/* =============================================================== */
 .imperium-popup-container {
     position: fixed;
-    bottom: 80px;
-    right: 20px;
     width: 300px;
     z-index: 1040;
     background: linear-gradient(135deg, var(--dark-bg), var(--dark-stone));
@@ -45,6 +55,28 @@
     display: flex;
 }
 
+/* =============================================================== */
+/* INDIVIDUAL POPUP POSITIONING */
+/* =============================================================== */
+#profile-popup {
+    bottom: 80px;
+    right: 20px;
+}
+
+#resources-popup {
+    bottom: 80px;
+    right: 80px; /* Positioned to the left of the profile popup */
+}
+
+#actions-popup {
+    bottom: 80px;
+    right: 140px; /* Positioned to the left of the resources popup */
+}
+
+
+/* =============================================================== */
+/* POPUP HEADER & BODY (COMMON STYLES) */
+/* =============================================================== */
 .imperium-popup-header {
     padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--border-gold);
@@ -61,7 +93,7 @@
     margin: 0;
 }
 
-#imperium-popup-close-btn {
+.imperium-popup-close-btn {
     background: none;
     border: none;
     color: var(--text-muted);
@@ -71,7 +103,7 @@
     line-height: 1;
 }
 
-#imperium-popup-close-btn:hover {
+.imperium-popup-close-btn:hover {
     color: var(--gold-light);
 }
 
@@ -117,7 +149,9 @@
     }
 }
 
-/* Styling for the moved dashboard grid */
+/* =============================================================== */
+/* ACTIONS GRID STYLING (INSIDE POPUP) */
+/* =============================================================== */
 #imperium-actions-grid.dashboard-grid-popup {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -126,7 +160,6 @@
 }
 
 #imperium-actions-grid.dashboard-grid-popup .dashboard-tile {
-    /* Reuse some styling from the original dashboard-tile */
     background: var(--dark-marble);
     border: 1px solid var(--border-gold);
     border-radius: 0.5rem;
@@ -152,7 +185,7 @@
     font-size: 1.2rem;
 }
 
-#imperim-actions-grid.dashboard-grid-popup .tile-title {
+#imperium-actions-grid.dashboard-grid-popup .tile-title {
     font-size: 0.9rem;
     font-weight: bold;
     color: var(--gold-light);

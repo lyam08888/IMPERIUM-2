@@ -1,22 +1,57 @@
 <!-- imperium_popup.html -->
-<div id="imperium-popup-button">👑</div>
-<div id="imperium-popup" class="imperium-popup-container">
+
+<!-- =============================================================== -->
+<!-- POPUP BUTTONS CONTAINER -->
+<!-- =============================================================== -->
+<div id="imperium-popups-buttons-container">
+    <div id="profile-popup-button" class="imperium-popup-button">👤</div>
+    <div id="resources-popup-button" class="imperium-popup-button">💰</div>
+    <div id="actions-popup-button" class="imperium-popup-button">⚡️</div>
+</div>
+
+
+<!-- =============================================================== -->
+<!-- PROFILE POPUP -->
+<!-- =============================================================== -->
+<div id="profile-popup" class="imperium-popup-container">
     <div class="imperium-popup-header">
-        <h2 class="imperium-popup-title">IMPERIUM</h2>
-        <button id="imperium-popup-close-btn">&times;</button>
+        <h2 class="imperium-popup-title">Profil</h2>
+        <button id="profile-popup-close-btn" class="imperium-popup-close-btn">&times;</button>
     </div>
     <div class="imperium-popup-body">
         <div id="imperium-player-info">
             <p><strong>Consul:</strong> <span id="popup-player-name"></span></p>
             <p><strong>Niveau:</strong> <span id="popup-player-level"></span></p>
         </div>
-        <hr>
-        <h3>Ressources</h3>
+    </div>
+</div>
+
+
+<!-- =============================================================== -->
+<!-- RESOURCES POPUP -->
+<!-- =============================================================== -->
+<div id="resources-popup" class="imperium-popup-container">
+    <div class="imperium-popup-header">
+        <h2 class="imperium-popup-title">Ressources</h2>
+        <button id="resources-popup-close-btn" class="imperium-popup-close-btn">&times;</button>
+    </div>
+    <div class="imperium-popup-body">
         <div id="imperium-resources-list">
             <!-- Les ressources seront injectées ici par JS -->
         </div>
-        <hr>
-        <h3>Actions</h3>
+    </div>
+</div>
+
+
+<!-- =============================================================== -->
+<!-- ACTIONS POPUP -->
+<!-- =============================================================== -->
+<div id="actions-popup" class="imperium-popup-container">
+    <div class="imperium-popup-header">
+        <h2 class="imperium-popup-title">Actions Rapides</h2>
+        <button id="actions-popup-close-btn" class="imperium-popup-close-btn">&times;</button>
+    </div>
+    <div class="imperium-popup-body">
         <div id="imperium-actions-grid">
             <!-- Les tuiles d'actions seront injectées ici -->
         </div>
