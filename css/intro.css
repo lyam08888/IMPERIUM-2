@@ -1,0 +1,144 @@
+/* css/intro.css */
+
+#intro-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    text-align: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* --- Title Screen --- */
+#title-screen {
+    animation: fadeIn 2s ease-in-out;
+}
+
+.game-title {
+    font-size: 6rem;
+    font-weight: bold;
+    color: var(--gold-primary);
+    text-shadow: 4px 4px 8px rgba(0,0,0,0.7);
+    animation: slideInFromTop 1s ease-out;
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    margin-bottom: 3rem;
+    animation: slideInFromBottom 1s ease-out;
+}
+
+#intro-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+/* --- Cinematic Screen --- */
+#cinematic-screen {
+    width: 100%;
+    max-width: 600px;
+}
+
+#cinematic-content {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+}
+
+#loading-bar-container {
+    width: 100%;
+    height: 20px;
+    background-color: var(--dark-marble);
+    border-radius: 10px;
+    margin: 2rem 0;
+    border: 1px solid var(--border-gold);
+}
+
+#loading-bar {
+    width: 0%;
+    height: 100%;
+    background-color: var(--gold-primary);
+    border-radius: 10px;
+    transition: width 2s ease-in-out;
+}
+
+/* --- Tutorial Screen --- */
+#tutorial-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+}
+
+#tutorial-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 2001;
+}
+
+#tutorial-modal {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 500px;
+    background: var(--dark-stone);
+    border: 2px solid var(--gold-primary);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    z-index: 2003; /* Above the game UI but below highlighted elements */
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+}
+
+#tutorial-message {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+
+#tutorial-game-ui {
+    position: relative;
+    z-index: 2002;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* For highlighting tutorial elements */
+.tutorial-highlight {
+    position: relative;
+    z-index: 2004; /* Above the overlay */
+    box-shadow: 0 0 0 4px var(--gold-light), 0 0 20px 10px var(--shadow-gold);
+    border-radius: 1rem; /* Match building slot radius */
+    transition: box-shadow 0.3s ease;
+}
+
+
+/* --- Animations --- */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInFromTop {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInFromBottom {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
