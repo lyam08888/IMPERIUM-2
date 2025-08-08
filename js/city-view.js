@@ -155,6 +155,7 @@ function handleBuildingClick(building) {
                     prereqText = `<div style="color: var(--error-red); font-size: 0.7rem; font-style: italic; margin-top: 0.25rem;">Requiert: ${BUILDING_DEFINITIONS[def.requires.type].name} Niv. ${def.requires.level}</div>`;
                 }
             }
+
 const costsHtml = costs.map(c => `<span class="cost-item ${gameState.resources[c.res] < c.amount ? 'insufficient' : ''}">${c.amount.toLocaleString()} ${c.res}</span>`).join(', ');
 return `<div class="build-item ${!canAfford || !prereqMet ? 'disabled' : ''}" ${canAfford && prereqMet ? `onclick="startBuild('${type}', ${building.slotId})"` : ''}>
     <div class="build-item-icon">${def.icon}</div>
@@ -162,6 +163,7 @@ return `<div class="build-item ${!canAfford || !prereqMet ? 'disabled' : ''}" ${
     <div class="build-item-costs">${costsHtml}</div>
     ${prereqText}
 </div>`;
+
         }).join('');
         const body = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem;">${buildOptions}</div>`;
         showModal('Construire un bâtiment', body, '');
@@ -285,7 +287,9 @@ function showStatsModal() {
 }
 
 function showProductionModal() {
+
     let body = '...';
+
     showModal("Rapport de Production", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
 }
 

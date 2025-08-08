@@ -62,6 +62,8 @@ function renderMap() {
         marker.innerHTML = 'I';
         marker.style.left = `calc(${territory.x}% + 5px)`;
         marker.style.top = `calc(${territory.y}% + 5px)`;
+
+
         marker.addEventListener('click', (e) => { e.stopPropagation(); showLegionModal(legion); });
         mapContent.appendChild(marker);
     });
@@ -158,6 +160,7 @@ function showLegionModal(legion) {
     const modalTitle = document.getElementById('modalTitle');
     const modalBody = document.getElementById('modalBody');
     const modalButtons = document.getElementById('modalButtons');
+
     modalTitle.innerHTML = legion.name;
     let body = `<p>Général: ${legion.general}</p><p>Force: ${legion.strength} hommes</p>`;
     modalBody.innerHTML = body;
@@ -203,7 +206,9 @@ function recruitLegion(territoryId) {
         general: "Genericus",
         strength: 2500,
         locationId: territoryId,
+
         action: 'idle'
+
     };
     gameState.legions.push(newLegion);
     showNotification(`${newLegion.name} a été levée !`, 'success');
@@ -213,6 +218,7 @@ function recruitLegion(territoryId) {
 
 function endTurn() {
     // Income
+
     gameState.world.territories.forEach(t => {
         if ((t.status === 'capital' || t.status === 'controlled') && t.income) {
             Object.entries(t.income).forEach(([res, val]) => {
@@ -223,10 +229,12 @@ function endTurn() {
         }
     });
 
+
     gameState.world.turn++;
     saveGameState();
     rerenderWorldView();
     showNotification(`Tour ${gameState.world.turn} terminé.`, 'success');
+
 }
 
 function showNotification(message, type = 'info') {
