@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMPERIUM - Monde Antique v11</title>
-    <meta name="description" content="Dominez le monde antique par la conquête, la diplomatie, la technologie, l'espionnage et le commerce.">
+    <title>IMPERIUM - Monde Antique v19</title>
+    <meta name="description" content="Dominez le monde antique par la conquête, la diplomatie, la technologie et le commerce.">
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23b45309'/><text x='16' y='20' text-anchor='middle' fill='white' font-family='serif' font-size='20' font-weight='bold'>I</text></svg>" type="image/svg+xml">
+
 
     <script src="nav.js" defer></script>
 
@@ -21,7 +22,12 @@
             --border-gold: rgba(217, 119, 6, 0.3); --shadow-gold: rgba(217, 119, 6, 0.4);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+    <!-- Scripts de jeu -->
+    <script src="js/game.js" defer></script>
+    <script src="js/world-view.js" defer></script>
+    <script src="nav.js" defer></script>
+    <script src="js/imperium_popup.js" defer></script>
+
 
         body {
             font-family: 'Times New Roman', serif;
@@ -78,21 +84,27 @@
         @keyframes slideInFadeOut { 0% { opacity: 0; transform: translateX(100%); } 15% { opacity: 1; transform: translateX(0); } 85% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; transform: translateX(100%); } }
 
     </style>
+
 </head>
 <body>
     <div id="notifications-container"></div>
 
     <div class="imperium-ui">
         <div class="imperium-body">
+
             <main class="main-content">
-                <div class="view-container">
-                    <div class="game-layout">
+                <div class="view-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border-radius: 1rem; border: 2px solid var(--border-gold); overflow-y: auto; padding: 1.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.2); display: flex; flex-direction: column;">
+                    <div class="game-layout" style="display: flex; flex-direction: column; gap: 1.5rem; flex-grow: 1; overflow: hidden;">
                         <div class="world-map-container" id="world-map">
-                            <div id="map-content"></div>
+                            <div id="map-content" style="position: relative; width: 100%; height: 100%; transform-origin: 0 0;">
+                                <!-- La carte est générée par world-view.js -->
+                            </div>
                         </div>
-                        <div class="bottom-hud">
-                            <div class="command-grid" id="command-grid"></div>
-                            <div id="command-preview-text"></div>
+                        <div class="bottom-hud" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; flex-shrink: 0;">
+                            <div class="command-grid" id="command-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; width: 100%; max-width: 600px;">
+                                <!-- Les commandes sont générées par world-view.js -->
+                            </div>
+                            <div id="command-preview-text" style="color: var(--text-muted); font-style: italic; height: 1.2em; transition: opacity 0.3s;"></div>
                         </div>
                     </div>
                 </div>
@@ -100,398 +112,16 @@
         </div>
     </div>
 
-    <div id="customModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
+    <!-- Modale personnalisée pour la vue du monde -->
+    <div id="customModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center;">
+        <div class="modal-content" style="background: linear-gradient(135deg, var(--dark-marble) 0%, var(--dark-stone) 100%); margin: auto; padding: 2rem; border: 2px solid var(--gold-primary); border-radius: 1rem; width: 90%; max-width: 600px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); text-align: center; position: relative;">
+            <span class="close-button" style="color: var(--text-muted); font-size: 28px; font-weight: bold; position: absolute; top: 10px; right: 20px; cursor: pointer;">&times;</span>
             <h3 class="modal-title" id="modalTitle"></h3>
-            <div class="modal-body" id="modalBody"></div>
-            <div class="modal-buttons" id="modalButtons"></div>
+            <div class="modal-body" id="modalBody" style="color: var(--text-light); font-size: 1.1rem; line-height: 1.5; margin-bottom: 1.5rem; white-space: pre-wrap; max-height: 60vh; overflow-y: auto; text-align: left;"></div>
+            <div class="modal-buttons" id="modalButtons" style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem;"></div>
         </div>
     </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const navButton = document.getElementById('navButton');
-        const navPopup = document.getElementById('navPopup');
-        navButton.addEventListener('click', () => navPopup.classList.toggle('active'));
-        document.addEventListener('click', (e) => {
-            if (!navPopup.contains(e.target) && e.target !== navButton) {
-                navPopup.classList.remove('active');
-            }
-        });
-
-        const config = {
-            actionCosts: { recruit: { '💰': 200, '🌾': 5 }, gift: { '💰': 500 }, sabotage: { '👁️': 20, '💰': 300 }, trade_route: { '💰': 1000 } },
-            maintenanceCost: { perTroop: { '🌾': 0.2 }, perSpy: { '💰': 50 } },
-            eventChance: 0.3, relationsDecay: 1, threatIncrease: 5, loyaltyDecay: 1, siegeAttrition: 0.1,
-        };
-
-        const gameState = {
-            turn: 1,
-            resources: { '🌲': 3000, '🪨': 2500, '⚔️': 0, '💰': 20000, '🌾': 5000, '👁️': 10 },
-            player: { name: 'Caesar', title: 'Dictator', level: 1, avatar: 'C', threat: 0, espionageEnabled: false },
-            senate: { militarists: 50, economists: 50 },
-            activeEdict: null,
-            edicts: {
-                'war_tax': { id: 'war_tax', name: 'Impôt de Guerre', description: '+500 💰/tour, -5 Loyauté/tour.', duration: 5, effect: (gs) => { UIManager.updateResource('💰', 500); gs.world.territories.forEach(t => { if(t.status === 'controlled') t.loyalty -= 5; }); } },
-                'grain_dole': { id: 'grain_dole', name: 'Distribution de Grain', description: '+5 Loyauté/tour, -100 🌾/tour.', duration: 5, effect: (gs) => { UIManager.updateResource('🌾', -100); gs.world.territories.forEach(t => { if(t.status === 'controlled') t.loyalty += 5; }); } },
-            },
-            technologies: {
-                'professional_army': { name: 'Armée professionnelle', description: 'Légions +10% plus fortes.', cost: {'💰': 2000}, researched: false, bonus: { attack_modifier: 1.1 } },
-                'espionage_agency': { name: 'Agence d\'espionnage', description: 'Débloque l\'espionnage, +2 👁️/tour.', cost: {'💰': 1500}, researched: false, effect: (gs) => { gs.player.espionageEnabled = true; } },
-            },
-            missions: [
-                { id: 'raise_legion', title: 'Levez une Légion', description: 'Recruter votre première légion à Rome.', isComplete: (gs) => gs.legions.length > 0, reward: {'�': 1000} },
-            ],
-            legions: [],
-            governors: [
-                { id: 'gov1', name: 'Fabius', trait: { name: 'Intendant', effect: (income) => { income['🌾'] = (income['🌾'] || 0) + 2; return income; } }, assignedTerritory: null },
-                { id: 'gov2', name: 'Brutus', trait: { name: 'Homme du Peuple', effect: (loyalty) => loyalty + 2 }, assignedTerritory: null },
-            ],
-            world: {
-                territories: [
-                    { id: 'roma', name: 'Rome', x: 45, y: 40, status: 'capital', flag: '🏛️', income: {'💰': 200, '🌾': 5, '👁️': 1}, garrison: 2000, loyalty: 100, governorId: null },
-                    { id: 'carthage', name: 'Carthage', x: 35, y: 75, status: 'enemy', flag: '🐘', strength: 12000, personality: 'aggressive' },
-                    { id: 'egypt', name: 'Égypte', x: 75, y: 80, status: 'neutral', flag: '🐪', relations: 10, trait: { name: 'Grenier du monde', effect: {'🌾': 2} } },
-                    { id: 'syracuse', name: 'Syracuse', x: 55, y: 65, status: 'neutral', flag: '🏝️', relations: 0 },
-                    { id: 'athens', name: 'Athènes', x: 65, y: 50, status: 'neutral', flag: '🏺', relations: 20 },
-                    { id: 'byzantium', name: 'Byzance', x: 75, y: 40, status: 'neutral', flag: '🌊', relations: 0 },
-                    { id: 'gaul_cisalpina', name: 'Gaule Cisalpine', x: 40, y: 25, status: 'enemy', flag: '🌲', strength: 4000 },
-                    { id: 'massilia', name: 'Massilia', x: 30, y: 35, status: 'neutral', flag: '🍇', relations: 15 },
-                    { id: 'hispania_tarra', name: 'Hispanie Tarraconaise', x: 15, y: 45, status: 'enemy', flag: '⛰️', strength: 6000 },
-                    { id: 'dacia', name: 'Dacie', x: 70, y: 25, status: 'enemy', flag: '🐺', strength: 7000 },
-                    { id: 'asia_minor', name: 'Asie Mineure', x: 80, y: 55, status: 'neutral', flag: '🕌', relations: -10 },
-                    { id: 'syria', name: 'Syrie', x: 90, y: 65, status: 'neutral', flag: '🏜️', relations: -5 },
-                ]
-            },
-        };
-
-        const statusTexts = { 'capital': 'Capitale', 'controlled': 'Contrôlé', 'ally': 'Allié', 'neutral': 'Neutre', 'enemy': 'Ennemi' };
-
-        const GameLoop = {
-            endTurn() {
-                // Edict
-                if (gameState.activeEdict) {
-                    const edict = gameState.edicts[gameState.activeEdict.id];
-                    edict.effect(gameState);
-                    gameState.activeEdict.turnsLeft--;
-                    if (gameState.activeEdict.turnsLeft <= 0) { UIManager.showNotification(`L'édit "${edict.name}" a expiré.`, 'success'); gameState.activeEdict = null; }
-                }
-
-                // AI & World State
-                gameState.world.territories.forEach(t => {
-                    if (t.status === 'controlled') {
-                        t.loyalty -= config.loyaltyDecay;
-                        if (gameState.governors.find(g => g.assignedTerritory === t.id)?.trait.name === 'Homme du Peuple') t.loyalty += 2;
-                        if (t.loyalty < 25 && Math.random() < 0.3) GameLogic.triggerRebellion(t);
-                    }
-                });
-                
-                // Income & Maintenance
-                if (gameState.technologies.espionage_agency.researched) UIManager.updateResource('👁️', 2);
-                gameState.world.territories.forEach(t => {
-                    if ((t.status === 'capital' || t.status === 'controlled') && t.income) {
-                        let currentIncome = { ...t.income };
-                        const governor = gameState.governors.find(g => g.assignedTerritory === t.id);
-                        if (governor?.trait.name === 'Intendant') currentIncome = governor.trait.effect(currentIncome);
-                        Object.entries(currentIncome).forEach(([res, val]) => UIManager.updateResource(res, val));
-                    }
-                });
-                const totalTroops = gameState.legions.reduce((sum, leg) => sum + leg.strength, 0);
-                const foodConsumption = Math.floor(totalTroops * config.maintenanceCost.perTroop['🌾']);
-                UIManager.updateResource('🌾', -foodConsumption);
-                if (gameState.resources['🌾'] < 0) {
-                    const attrition = Math.min(totalTroops, Math.abs(Math.floor(gameState.resources['🌾'] / config.maintenanceCost.perTroop['🌾'])));
-                    gameState.legions.forEach(leg => leg.strength = Math.max(0, leg.strength - Math.floor(attrition / gameState.legions.length)));
-                    UIManager.showNotification(`Famine ! Vos légions ont perdu ${attrition} hommes.`, 'error');
-                    gameState.resources['🌾'] = 0;
-                }
-                
-                // Mission Check
-                gameState.missions.forEach(m => {
-                    if (!m.completed && m.isComplete(gameState)) {
-                        m.completed = true;
-                        UIManager.showNotification(`Mission accomplie : ${m.title} !`, 'success');
-                        Object.entries(m.reward).forEach(([res, val]) => UIManager.updateResource(res, val, true));
-                    }
-                });
-
-                gameState.turn++;
-                UIManager.rerender();
-            }
-        };
-
-        const GameLogic = {
-            hasEnoughResources(cost) { return Object.entries(cost).every(([res, val]) => gameState.resources[res] >= val); },
-            spendResources(cost) { if (!this.hasEnoughResources(cost)) return false; Object.entries(cost).forEach(([res, val]) => UIManager.updateResource(res, -val)); return true; },
-            
-            recruitLegion(territoryId, generalName) {
-                const cost = { '💰': 1000 };
-                const strength = 2500;
-                if (!this.hasEnoughResources(cost)) { UIManager.showNotification(`Ressources insuffisantes.`, 'error'); return; }
-                this.spendResources(cost);
-                const newLegion = {
-                    id: `legio_${gameState.legions.length + 1}`,
-                    name: `Legio ${gameState.legions.length + 1} ${generalName}`,
-                    general: generalName,
-                    strength: strength,
-                    locationId: territoryId,
-                    action: 'idle'
-                };
-                gameState.legions.push(newLegion);
-                UIManager.showNotification(`${newLegion.name} a été levée à Rome !`, 'success');
-                UIManager.rerender();
-            },
-            
-            assignGovernor(governorId, territoryId) {
-                const governor = gameState.governors.find(g => g.id === governorId);
-                const territory = gameState.world.territories.find(t => t.id === territoryId);
-                const oldTerritory = gameState.world.territories.find(t => t.governorId === governorId);
-                if (oldTerritory) oldTerritory.governorId = null;
-                
-                governor.assignedTerritory = territoryId;
-                territory.governorId = governorId;
-                UIManager.showNotification(`${governor.name} a été nommé gouverneur de ${territory.name}.`, 'success');
-                UIManager.rerender();
-            },
-        };
-
-        const UIManager = {
-            elements: {},
-            init() {
-                this.elements = {
-                    worldMap: document.getElementById('world-map'),
-                    mapContent: document.getElementById('map-content'),
-                    commandGrid: document.getElementById('command-grid'),
-                    previewText: document.getElementById('command-preview-text'),
-                    modal: document.getElementById('customModal'), modalTitle: document.getElementById('modalTitle'),
-                    modalBody: document.getElementById('modalBody'), modalButtons: document.getElementById('modalButtons'), 
-                    closeButton: document.querySelector('.close-button'), notificationsContainer: document.getElementById('notifications-container'),
-                };
-                MapManager.init(this.elements.worldMap, this.elements.mapContent);
-                this.renderAll();
-                this.setupEventListeners();
-            },
-            rerender() { this.renderMap(); this.renderCommandGrid(); this.updatePreview('command'); },
-            renderAll() { this.rerender(); },
-            renderMap() {
-                this.elements.mapContent.innerHTML = '';
-                gameState.world.territories.forEach(territory => {
-                    const marker = document.createElement('div');
-                    marker.className = `world-marker ${territory.status}`;
-                    marker.innerHTML = territory.flag;
-                    if (territory.status === 'controlled' || territory.status === 'capital') {
-                        const loyaltyIcon = document.createElement('div');
-                        loyaltyIcon.className = 'marker-icon';
-                        loyaltyIcon.style.backgroundColor = territory.loyalty > 60 ? 'var(--success-green)' : territory.loyalty > 30 ? 'var(--gold-primary)' : 'var(--error-red)';
-                        marker.appendChild(loyaltyIcon);
-                    }
-                    marker.style.left = `${territory.x}%`; marker.style.top = `${territory.y}%`;
-                    marker.addEventListener('click', () => this.showTerritoryModal(territory));
-                    this.elements.mapContent.appendChild(marker);
-                });
-                gameState.legions.forEach(legion => {
-                    const territory = gameState.world.territories.find(t => t.id === legion.locationId);
-                    const marker = document.createElement('div');
-                    marker.className = 'legion-marker';
-                    marker.innerHTML = 'I';
-                    marker.style.left = `calc(${territory.x}% + 5px)`;
-                    marker.style.top = `calc(${territory.y}% + 5px)`;
-                    marker.addEventListener('click', (e) => { e.stopPropagation(); this.showLegionModal(legion); });
-                    this.elements.mapContent.appendChild(marker);
-                });
-            },
-            renderCommandGrid() {
-                 this.elements.commandGrid.innerHTML = `
-                    <div class="action-tile active" data-action="command"><div class="tile-icon">🏛️</div><div class="tile-title">Commandement</div></div>
-                    <div class="action-tile" data-action="missions"><div class="tile-icon">🎯</div><div class="tile-title">Missions</div></div>
-                    <div class="action-tile" data-action="resources"><div class="tile-icon">💰</div><div class="tile-title">Ressources</div></div>
-                    <div class="action-tile" data-action="end-turn"><div class="tile-icon">✅</div><div class="tile-title">Fin du Tour</div></div>
-                `;
-            },
-            updatePreview(action) {
-                let text = '';
-                document.querySelectorAll('.action-tile').forEach(t => t.classList.remove('active'));
-                document.querySelector(`.action-tile[data-action="${action}"]`).classList.add('active');
-
-                switch(action) {
-                    case 'command': text = 'Gérez les aspects internes et externes de votre empire.'; break;
-                    case 'missions': text = 'Consultez vos objectifs actuels.'; break;
-                    case 'resources': text = 'Affichez le bilan économique de votre empire.'; break;
-                    case 'end-turn': text = 'Passez au tour suivant.'; break;
-                }
-                this.elements.previewText.textContent = text;
-            },
-            showTerritoryModal(territory) {
-                this.elements.modalTitle.innerHTML = `${territory.flag} ${territory.name}`;
-                let body = `<p>Statut : <strong>${statusTexts[territory.status]}</strong></p>`;
-                let buttons = '';
-                if (territory.status === 'capital') {
-                     buttons += `<button class="modal-btn" data-action="recruit_legion" data-id="${territory.id}">Levez une Légion</button>`;
-                }
-                buttons += `<button class="modal-btn cancel">Fermer</button>`;
-                this.elements.modalBody.innerHTML = body; this.elements.modalButtons.innerHTML = buttons;
-                this.elements.modal.style.display = 'flex';
-            },
-            showGovernorsModal() {
-                this.elements.modalTitle.innerHTML = `Nommer un Gouverneur`;
-                let body = '';
-                gameState.governors.forEach(gov => {
-                    body += `<div class="governor-item">
-                        <div><strong>${gov.name}</strong> (${gov.trait.name})</div>
-                        <div>Assigné à: ${gov.assignedTerritory ? gameState.world.territories.find(t=>t.id === gov.assignedTerritory).name : 'Aucun'}</div>
-                        <select data-gov-id="${gov.id}">
-                            <option value="">-- Choisir une province --</option>
-                            ${gameState.world.territories.filter(t => t.status === 'controlled' || t.status === 'capital').map(t => `<option value="${t.id}" ${gov.assignedTerritory === t.id ? 'selected' : ''}>${t.name}</option>`).join('')}
-                        </select>
-                    </div>`;
-                });
-                this.elements.modalBody.innerHTML = body;
-                this.elements.modalButtons.innerHTML = `<button class="modal-btn" data-action="assign_governors">Confirmer</button><button class="modal-btn cancel">Fermer</button>`;
-                this.elements.modal.style.display = 'flex';
-            },
-            showLegionModal(legion) {
-                this.elements.modalTitle.innerHTML = legion.name;
-                let body = `<p>Général: ${legion.general}</p><p>Force: ${legion.strength} hommes</p>`;
-                this.elements.modalBody.innerHTML = body;
-                this.elements.modalButtons.innerHTML = `<button class="modal-btn cancel">Fermer</button>`;
-                this.elements.modal.style.display = 'flex';
-            },
-            hideModal() { this.elements.modal.style.display = 'none'; },
-            showNotification(message, type = 'info') {
-                const notif = document.createElement('div');
-                notif.className = `notification ${type}`; notif.textContent = message;
-                this.elements.notificationsContainer.appendChild(notif);
-                setTimeout(() => notif.remove(), 5000);
-            },
-            updateResource(resource, change, notify = false) {
-                gameState.resources[resource] += change;
-                if (notify) {
-                    this.showNotification(`${change > 0 ? '+' : ''}${change} ${resource}`, change > 0 ? 'success' : 'error');
-                }
-            },
-            setupEventListeners() {
-                this.elements.closeButton.onclick = () => this.hideModal();
-                this.elements.modal.onclick = (e) => { if (e.target === this.elements.modal) this.hideModal(); };
-                this.elements.modalButtons.addEventListener('click', (e) => {
-                    const btn = e.target.closest('button');
-                    if (!btn || btn.classList.contains('cancel')) { this.hideModal(); return; }
-                    const action = btn.dataset.action;
-                    if (action === 'recruit_legion') GameLogic.recruitLegion(btn.dataset.id, 'Decimus');
-                    if (action === 'assign_governors') {
-                        this.elements.modalBody.querySelectorAll('select').forEach(sel => {
-                            if (sel.value) GameLogic.assignGovernor(sel.dataset.govId, sel.value);
-                        });
-                    }
-                    if(!['assign_governors'].includes(action)) this.hideModal();
-                });
-                 this.elements.commandGrid.addEventListener('mouseover', (e) => {
-                    const tile = e.target.closest('.action-tile');
-                    if (tile) this.updatePreview(tile.dataset.action);
-                });
-                this.elements.commandGrid.addEventListener('click', (e) => {
-                    const tile = e.target.closest('.action-tile');
-                    if (!tile) return;
-                    const action = tile.dataset.action;
-                    if (action === 'command') this.showCommandModal();
-                    if (action === 'missions') this.showMissionsModal();
-                    if (action === 'resources') this.showResourcesModal();
-                    if (action === 'end-turn') GameLoop.endTurn();
-                });
-            },
-            showCommandModal() {
-                this.elements.modalTitle.innerHTML = `Commandement de l'Empire`;
-                this.elements.modalBody.innerHTML = `Sélectionnez une action pour gérer votre empire.`;
-                this.elements.modalButtons.innerHTML = `
-                    <button class="modal-btn" data-action="legions">Gérer les Légions</button>
-                    <button class="modal-btn" data-action="governors">Nommer Gouverneur</button>
-                    <button class="modal-btn" data-action="senate">Consulter le Sénat</button>
-                    <button class="modal-btn" data-action="tech">Recherche</button>
-                    <button class="modal-btn cancel">Fermer</button>`;
-                this.elements.modal.style.display = 'flex';
-            },
-            showMissionsModal() {
-                this.elements.modalTitle.innerHTML = `Missions`;
-                let body = '';
-                gameState.missions.forEach(m => {
-                    if (!m.completed) {
-                        body += `<div class="mission"><div class="mission-title">${m.title}</div><div class="mission-progress">${m.description}</div></div>`;
-                    }
-                });
-                if (gameState.missions.every(m => m.completed)) body += `<p>Toutes les missions sont accomplies.</p>`;
-                this.elements.modalBody.innerHTML = body;
-                this.elements.modalButtons.innerHTML = `<button class="modal-btn cancel">Fermer</button>`;
-                this.elements.modal.style.display = 'flex';
-            },
-            showResourcesModal() {
-                this.elements.modalTitle.innerHTML = `Trésorerie de l'Empire (Tour ${gameState.turn})`;
-                let body = `<div class="detail-row"><strong>Ressource</strong><strong>Stock Actuel</strong></div>`;
-                Object.entries(gameState.resources).forEach(([icon, value]) => {
-                    body += `<div class="detail-row"><span>${icon}</span><span>${value.toLocaleString('fr-FR')}</span></div>`;
-                });
-                this.elements.modalBody.innerHTML = body;
-                this.elements.modalButtons.innerHTML = `<button class="modal-btn cancel">Fermer</button>`;
-                this.elements.modal.style.display = 'flex';
-            },
-        };
-
-        const MapManager = {
-            scale: 1,
-            posX: 0,
-            posY: 0,
-            isPanning: false,
-            startX: 0,
-            startY: 0,
-            mapContainer: null,
-            mapContent: null,
-
-            init(container, content) {
-                this.mapContainer = container;
-                this.mapContent = content;
-                this.mapContainer.addEventListener('wheel', this.handleWheel.bind(this));
-                this.mapContainer.addEventListener('mousedown', this.handleMouseDown.bind(this));
-                this.mapContainer.addEventListener('mousemove', this.handleMouseMove.bind(this));
-                this.mapContainer.addEventListener('mouseup', this.handleMouseUp.bind(this));
-                this.mapContainer.addEventListener('mouseleave', this.handleMouseUp.bind(this));
-            },
-
-            updateTransform() {
-                this.mapContent.style.transform = `translate(${this.posX}px, ${this.posY}px) scale(${this.scale})`;
-            },
-
-            handleMouseDown(e) {
-                e.preventDefault();
-                this.isPanning = true;
-                this.startX = e.clientX - this.posX;
-                this.startY = e.clientY - this.posY;
-            },
-
-            handleMouseUp(e) {
-                this.isPanning = false;
-            },
-
-            handleMouseMove(e) {
-                if (!this.isPanning) return;
-                e.preventDefault();
-                this.posX = e.clientX - this.startX;
-                this.posY = e.clientY - this.startY;
-                this.updateTransform();
-            },
-
-            handleWheel(e) {
-                e.preventDefault();
-                const scaleAmount = 0.1;
-                if (e.deltaY < 0) { // Zoom in
-                    this.scale = Math.min(3, this.scale + scaleAmount);
-                } else { // Zoom out
-                    this.scale = Math.max(0.5, this.scale - scaleAmount);
-                }
-                this.updateTransform();
-            }
-        };
-
-        UIManager.init();
-    });
-    </script>
+    <!-- La popup IMPERIUM sera injectée ici par imperium_popup.js -->
 </body>
 </html>
