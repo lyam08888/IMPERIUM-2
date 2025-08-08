@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>IMPERIUM V20 PREMIUM - Nouvelles Fonctionnalités</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .premium-showcase {
+            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--dark-stone) 100%);
+            min-height: 100vh;
+            color: var(--text-light);
+        }
+
+        .premium-header {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--roman-red), var(--roman-purple));
+            margin-bottom: 3rem;
+        }
+
+        .premium-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .premium-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            padding: 0 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, var(--dark-marble), var(--dark-stone));
+            border: 2px solid var(--gold-primary);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gold-primary), var(--gold-secondary));
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(217, 119, 6, 0.3);
+            border-color: var(--gold-light);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .feature-title {
+            color: var(--gold-primary);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .feature-description {
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-highlights {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-highlights li {
+            margin-bottom: 0.8rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .feature-highlights li::before {
+            content: '✨';
+            position: absolute;
+            left: 0;
+        }
+
+        .demo-buttons {
+            text-align: center;
+            margin: 3rem 0;
+        }
+
+        .demo-btn {
+            background: linear-gradient(135deg, var(--gold-secondary), var(--gold-primary));
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin: 0 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(217, 119, 6, 0.4);
+        }
+
+        .changelog {
+            background: var(--dark-stone);
+            padding: 2rem;
+            margin: 0 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-gold);
+        }
+
+        .changelog h3 {
+            color: var(--gold-primary);
+            margin-bottom: 1rem;
+        }
+
+        .changelog-item {
+            margin-bottom: 1rem;
+            padding-left: 1rem;
+            border-left: 3px solid var(--gold-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="premium-showcase">
+        <!-- Header Premium -->
+        <div class="premium-header">
+            <h1 class="premium-title">🏛️ IMPERIUM V20 PREMIUM</h1>
+            <p class="premium-subtitle">Découvrez les Nouvelles Fonctionnalités Premium</p>
+        </div>
+
+        <!-- Grid des fonctionnalités -->
+        <div class="features-grid">
+            <!-- Système de Gestion d'Erreurs -->
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3 class="feature-title">Système de Gestion Avancée</h3>
+                <p class="feature-description">
+                    Un système intelligent de détection et récupération automatique des erreurs pour une expérience de jeu fluide et sans interruption.
+                </p>
+                <ul class="feature-highlights">
+                    <li>Détection automatique des erreurs</li>
+                    <li>Récupération intelligente</li>
+                    <li>Monitoring des performances</li>
+                    <li>Mode performance adaptatif</li>
+                    <li>Sauvegarde d'urgence automatique</li>
+                </ul>
+            </div>
+
+            <!-- Interface Mobile Premium -->
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3 class="feature-title">Interface Mobile Premium</h3>
+                <p class="feature-description">
+                    Une expérience mobile révolutionnaire avec des gestes tactiles avancés et un feedback haptique immersif.
+                </p>
+                <ul class="feature-highlights">
+                    <li>Gestes multi-touch intelligents</li>
+                    <li>Feedback haptique</li>
+                    <li>Zones de touch optimisées</li>
+                    <li>Menus contextuels rapides</li>
+                    <li>Interface adaptative</li>
+                </ul>
+            </div>
+
+            <!-- Système de Quêtes -->
+            <div class="feature-card">
+                <div class="feature-icon">📜</div>
+                <h3 class="feature-title">Système de Quêtes Dynamique</h3>
+                <p class="feature-description">
+                    Des quêtes et événements dynamiques qui s'adaptent à votre style de jeu et créent une expérience unique à chaque partie.
+                </p>
+                <ul class="feature-highlights">
+                    <li>Quêtes principales épiques</li>
+                    <li>Défis quotidiens/hebdomadaires</li>
+                    <li>Événements aléatoires immersifs</li>
+                    <li>Arcs narratifs complexes</li>
+                    <li>Choix avec conséquences</li>
+                </ul>
+            </div>
+
+            <!-- Diplomatie Avancée -->
+            <div class="feature-card">
+                <div class="feature-icon">🤝</div>
+                <h3 class="feature-title">Diplomatie Avancée</h3>
+                <p class="feature-description">
+                    Un système diplomatique complexe avec des nations intelligentes, des traités dynamiques et des conséquences à long terme.
+                </p>
+                <ul class="feature-highlights">
+                    <li>5 nations avec IA unique</li>
+                    <li>Événements diplomatiques complexes</li>
+                    <li>Traités et alliances</li>
+                    <li>Système de réputation global</li>
+                    <li>Conséquences à long terme</li>
+                </ul>
+            </div>
+
+            <!-- Battle Pass Intégré -->
+            <div class="feature-card">
+                <div class="feature-icon">🎖️</div>
+                <h3 class="feature-title">Battle Pass Impérial</h3>
+                <p class="feature-description">
+                    Un système de progression inspiré des jeux modernes avec 100 niveaux de récompenses et des défis saisonniers.
+                </p>
+                <ul class="feature-highlights">
+                    <li>100 niveaux de progression</li>
+                    <li>Récompenses exclusives</li>
+                    <li>Défis saisonniers</li>
+                    <li>Cosmétiques premium</li>
+                    <li>Boost de progression</li>
+                </ul>
+            </div>
+
+            <!-- Événements Dynamiques -->
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3 class="feature-title">Événements Premium</h3>
+                <p class="feature-description">
+                    Des événements aléatoires sophistiqués qui transforment votre empire avec des conséquences durables et des choix moraux.
+                </p>
+                <ul class="feature-highlights">
+                    <li>Événements aléatoires complexes</li>
+                    <li>Choix moraux difficiles</li>
+                    <li>Conséquences permanentes</li>
+                    <li>Événements saisonniers</li>
+                    <li>Système de réputation</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Boutons de démonstration -->
+        <div class="demo-buttons">
+            <a href="imperium-unified.html" class="demo-btn">🌟 Essayer la Version Unifiée</a>
+            <a href="imperium-mobile.html" class="demo-btn">📱 Tester sur Mobile</a>
+            <a href="index.html" class="demo-btn">🏠 Retour à l'Accueil</a>
+        </div>
+
+        <!-- Changelog -->
+        <div class="changelog">
+            <h3>🚀 Changelog V20 Premium</h3>
+            
+            <div class="changelog-item">
+                <strong>🛡️ Stabilité & Performance</strong><br>
+                • Système de gestion d'erreurs avec récupération automatique<br>
+                • Monitoring des performances en temps réel<br>
+                • Mode performance adaptatif pour les appareils lents<br>
+                • Sauvegarde d'urgence automatique
+            </div>
+
+            <div class="changelog-item">
+                <strong>📱 Expérience Mobile</strong><br>
+                • Gestes tactiles avancés (tap, long press, swipe)<br>
+                • Feedback haptique intelligent<br>
+                • Zones de touch optimisées (44px minimum)<br>
+                • Interface adaptive selon la taille d'écran<br>
+                • Notifications mobiles personnalisées
+            </div>
+
+            <div class="changelog-item">
+                <strong>🎮 Gameplay Enrichi</strong><br>
+                • Système de quêtes dynamiques avec arcs narratifs<br>
+                • Diplomatie complexe avec 5 nations uniques<br>
+                • Événements aléatoires avec choix moraux<br>
+                • Battle Pass avec 100 niveaux de progression<br>
+                • Système de réputation global
+            </div>
+
+            <div class="changelog-item">
+                <strong>🎨 Interface Premium</strong><br>
+                • Design cohérent sur toutes les plateformes<br>
+                • Animations fluides et feedback visuel<br>
+                • Thème sombre premium avec accents dorés<br>
+                • Modals et popups redesignées<br>
+                • Système de notifications unifié
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animation d'entrée pour les cartes
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+
+            // Effet de parallax léger
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                const header = document.querySelector('.premium-header');
+                header.style.transform = `translateY(${scrolled * 0.5}px)`;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 // ===============================================================
-// IMPERIUM V19 - GAME.JS
+// IMPERIUM V20 PREMIUM - GAME.JS UNIFIED
 // ===============================================================
 // Ce fichier est le cerveau du jeu. Il contient :
 // 1. Les définitions de toutes les entités du jeu (bâtiments, unités, etc.).

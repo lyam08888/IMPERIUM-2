@@ -44,6 +44,11 @@ class UnifiedGameController {
         } catch (error) {
             console.error('❌ Failed to initialize game controller:', error);
             this.showErrorMessage('Erreur d\'initialisation du jeu');
+            // Tentative de récupération automatique
+            setTimeout(() => {
+                console.log('🔄 Attempting automatic recovery...');
+                this.initialize();
+            }, 2000);
         }
     }
 

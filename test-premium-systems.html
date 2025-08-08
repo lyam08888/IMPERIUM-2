@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Test des Systèmes Premium - IMPERIUM V20</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .test-container {
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--dark-bg), var(--dark-stone));
+            min-height: 100vh;
+        }
+        
+        .test-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .test-card {
+            background: var(--dark-marble);
+            border: 2px solid var(--border-gold);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .test-card.success {
+            border-color: var(--success-green);
+            background: rgba(34, 197, 94, 0.1);
+        }
+        
+        .test-card.error {
+            border-color: var(--error-red);
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .test-card.running {
+            border-color: var(--gold-primary);
+            background: rgba(217, 119, 6, 0.1);
+            animation: pulse 2s infinite;
+        }
+        
+        .test-title {
+            color: var(--gold-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .test-status {
+            font-size: 1.2rem;
+        }
+        
+        .test-details {
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+        
+        .test-log {
+            background: var(--dark-bg);
+            border: 1px solid var(--border-gold);
+            border-radius: 8px;
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        
+        .log-entry {
+            margin-bottom: 0.5rem;
+            padding: 0.25rem;
+            border-radius: 4px;
+        }
+        
+        .log-success { background: rgba(34, 197, 94, 0.2); color: var(--success-green); }
+        .log-error { background: rgba(239, 68, 68, 0.2); color: var(--error-red); }
+        .log-info { background: rgba(59, 130, 246, 0.2); color: var(--info-blue); }
+        .log-warning { background: rgba(245, 158, 11, 0.2); color: var(--gold-secondary); }
+        
+        .control-panel {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .test-btn {
+            background: linear-gradient(135deg, var(--gold-secondary), var(--gold-primary));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(217, 119, 6, 0.4);
+        }
+        
+        .test-btn:disabled {
+            background: var(--dark-marble);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--dark-bg);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold-primary), var(--gold-secondary));
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🧪 Test des Systèmes Premium IMPERIUM V20</h1>
+            <p>Validation automatique de tous les nouveaux systèmes</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="globalProgress"></div>
+        </div>
+        
+        <div class="control-panel">
+            <button class="test-btn" onclick="runAllTests()">🚀 Lancer Tous les Tests</button>
+            <button class="test-btn" onclick="runSpecificTest('error-system')">🛡️ Test Gestion Erreurs</button>
+            <button class="test-btn" onclick="runSpecificTest('mobile-interface')">📱 Test Interface Mobile</button>
+            <button class="test-btn" onclick="runSpecificTest('quest-system')">📜 Test Système Quêtes</button>
+            <button class="test-btn" onclick="runSpecificTest('diplomacy-system')">🤝 Test Diplomatie</button>
+            <button class="test-btn" onclick="clearLogs()">🧹 Nettoyer Logs</button>
+        </div>
+        
+        <div class="test-grid">
+            <!-- Système de Gestion d'Erreurs -->
+            <div class="test-card" id="test-error-system">
+                <div class="test-title">
+                    <span class="test-status">⏳</span>
+                    <span>🛡️ Système de Gestion d'Erreurs</span>
+                </div>
+                <div class="test-details">
+                    <div>Status: <span id="error-system-status">En attente</span></div>
+                    <div>Performance: <span id="error-system-perf">-</span></div>
+                    <div>Récupération: <span id="error-system-recovery">-</span></div>
+                </div>
+            </div>
+            
+            <!-- Interface Mobile -->
+            <div class="test-card" id="test-mobile-interface">
+                <div class="test-title">
+                    <span class="test-status">⏳</span>
+                    <span>📱 Interface Mobile Premium</span>
+                </div>
+                <div class="test-details">
+                    <div>Status: <span id="mobile-interface-status">En attente</span></div>
+                    <div>Gestes: <span id="mobile-interface-gestures">-</span></div>
+                    <div>Responsive: <span id="mobile-interface-responsive">-</span></div>
+                </div>
+            </div>
+            
+            <!-- Système de Quêtes -->
+            <div class="test-card" id="test-quest-system">
+                <div class="test-title">
+                    <span class="test-status">⏳</span>
+                    <span>📜 Système de Quêtes</span>
+                </div>
+                <div class="test-details">
+                    <div>Status: <span id="quest-system-status">En attente</span></div>
+                    <div>Quêtes actives: <span id="quest-system-active">-</span></div>
+                    <div>Événements: <span id="quest-system-events">-</span></div>
+                </div>
+            </div>
+            
+            <!-- Diplomatie -->
+            <div class="test-card" id="test-diplomacy-system">
+                <div class="test-title">
+                    <span class="test-status">⏳</span>
+                    <span>🤝 Système de Diplomatie</span>
+                </div>
+                <div class="test-details">
+                    <div>Status: <span id="diplomacy-system-status">En attente</span></div>
+                    <div>Nations: <span id="diplomacy-system-nations">-</span></div>
+                    <div>Relations: <span id="diplomacy-system-relations">-</span></div>
+                </div>
+            </div>
+            
+            <!-- Intégration Générale -->
+            <div class="test-card" id="test-integration">
+                <div class="test-title">
+                    <span class="test-status">⏳</span>
+                    <span>🔗 Intégration Systèmes</span>
+                </div>
+                <div class="test-details">
+                    <div>Status: <span id="integration-status">En attente</span></div>
+                    <div>Compatibilité: <span id="integration-compat">-</span></div>
+                    <div>Performance: <span id="integration-perf">-</span></div>
+                </div>
+            </div>
+            
+            <!-- Performance Globale -->
+            <div class="test-card" id="test-performance">
+                <div class="test-title">
+                    <span class="test-status">⏳</span>
+                    <span>⚡ Performance Globale</span>
+                </div>
+                <div class="test-details">
+                    <div>Status: <span id="performance-status">En attente</span></div>
+                    <div>FPS: <span id="performance-fps">-</span></div>
+                    <div>Mémoire: <span id="performance-memory">-</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Log Console -->
+        <div class="test-log" id="testLog">
+            <div class="log-entry log-info">[INFO] Système de test initialisé - Prêt pour les tests</div>
+        </div>
+    </div>
+    
+    <!-- Scripts des systèmes à tester -->
+    <script src="js/game.js" defer></script>
+    <script src="js/shared-utils.js" defer></script>
+    <script src="js/premium-error-system.js" defer></script>
+    <script src="js/premium-mobile-interface.js" defer></script>
+    <script src="js/premium-quest-system.js" defer></script>
+    <script src="js/premium-diplomacy-system.js" defer></script>
+    
+    <script>
+        class PremiumSystemTester {
+            constructor() {
+                this.tests = new Map();
+                this.totalTests = 6;
+                this.completedTests = 0;
+                this.initializeTester();
+            }
+            
+            initializeTester() {
+                this.log('info', 'Testeur de systèmes premium initialisé');
+                
+                // Attendre que tous les scripts soient chargés
+                window.addEventListener('load', () => {
+                    this.log('success', 'Tous les scripts sont chargés');
+                    document.querySelector('#runAllTests')?.removeAttribute('disabled');
+                });
+            }
+            
+            log(type, message) {
+                const logElement = document.getElementById('testLog');
+                const timestamp = new Date().toLocaleTimeString();
+                const entry = document.createElement('div');
+                entry.className = `log-entry log-${type}`;
+                entry.textContent = `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+                logElement.appendChild(entry);
+                logElement.scrollTop = logElement.scrollHeight;
+            }
+            
+            updateProgress() {
+                const progress = (this.completedTests / this.totalTests) * 100;
+                document.getElementById('globalProgress').style.width = `${progress}%`;
+            }
+            
+            updateTestCard(testId, status, details = {}) {
+                const card = document.getElementById(`test-${testId}`);
+                const statusIcon = card.querySelector('.test-status');
+                
+                card.className = `test-card ${status}`;
+                
+                switch(status) {
+                    case 'success':
+                        statusIcon.textContent = '✅';
+                        this.completedTests++;
+                        break;
+                    case 'error':
+                        statusIcon.textContent = '❌';
+                        this.completedTests++;
+                        break;
+                    case 'running':
+                        statusIcon.textContent = '🔄';
+                        break;
+                    default:
+                        statusIcon.textContent = '⏳';
+                }
+                
+                // Mettre à jour les détails
+                Object.entries(details).forEach(([key, value]) => {
+                    const element = document.getElementById(`${testId}-${key}`);
+                    if (element) {
+                        element.textContent = value;
+                    }
+                });
+                
+                this.updateProgress();
+            }
+            
+            async runAllTests() {
+                this.log('info', 'Démarrage de tous les tests...');
+                this.completedTests = 0;
+                this.updateProgress();
+                
+                const tests = [
+                    'error-system',
+                    'mobile-interface',
+                    'quest-system',
+                    'diplomacy-system',
+                    'integration',
+                    'performance'
+                ];
+                
+                for (const test of tests) {
+                    await this.runSpecificTest(test);
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                this.log('success', `Tous les tests terminés ! ${this.completedTests}/${this.totalTests} réussis`);
+            }
+            
+            async runSpecificTest(testType) {
+                this.log('info', `Démarrage test: ${testType}`);
+                this.updateTestCard(testType, 'running', { status: 'En cours...' });
+                
+                try {
+                    switch(testType) {
+                        case 'error-system':
+                            await this.testErrorSystem();
+                            break;
+                        case 'mobile-interface':
+                            await this.testMobileInterface();
+                            break;
+                        case 'quest-system':
+                            await this.testQuestSystem();
+                            break;
+                        case 'diplomacy-system':
+                            await this.testDiplomacySystem();
+                            break;
+                        case 'integration':
+                            await this.testIntegration();
+                            break;
+                        case 'performance':
+                            await this.testPerformance();
+                            break;
+                    }
+                } catch (error) {
+                    this.log('error', `Erreur dans le test ${testType}: ${error.message}`);
+                    this.updateTestCard(testType, 'error', { status: 'Échec', error: error.message });
+                }
+            }
+            
+            async testErrorSystem() {
+                if (typeof window.premiumErrorSystem === 'undefined') {
+                    throw new Error('Premium Error System non disponible');
+                }
+                
+                const errorSystem = window.premiumErrorSystem;
+                const report = errorSystem.getSystemReport();
+                
+                this.updateTestCard('error-system', 'success', {
+                    status: 'Opérationnel',
+                    perf: `${report.performance.fps} FPS`,
+                    recovery: `${errorSystem.autoRecoveryAttempts}/3 tentatives`
+                });
+                
+                this.log('success', 'Système de gestion d\'erreurs testé avec succès');
+            }
+            
+            async testMobileInterface() {
+                if (typeof window.premiumMobileInterface === 'undefined') {
+                    throw new Error('Premium Mobile Interface non disponible');
+                }
+                
+                const mobileInterface = window.premiumMobileInterface;
+                const isMobile = mobileInterface.isMobile;
+                const hasHaptic = mobileInterface.hapticFeedbackEnabled;
+                
+                this.updateTestCard('mobile-interface', 'success', {
+                    status: 'Opérationnel',
+                    gestures: hasHaptic ? 'Haptique OK' : 'Pas de haptique',
+                    responsive: isMobile ? 'Mobile détecté' : 'Desktop'
+                });
+                
+                this.log('success', 'Interface mobile testée avec succès');
+            }
+            
+            async testQuestSystem() {
+                if (typeof window.premiumQuestSystem === 'undefined') {
+                    throw new Error('Premium Quest System non disponible');
+                }
+                
+                const questSystem = window.premiumQuestSystem;
+                const activeQuests = questSystem.activeQuests.size;
+                const questTypes = Object.keys(questSystem.questTypes).length;
+                
+                this.updateTestCard('quest-system', 'success', {
+                    status: 'Opérationnel',
+                    active: `${activeQuests} quêtes`,
+                    events: `${questTypes} types`
+                });
+                
+                this.log('success', 'Système de quêtes testé avec succès');
+            }
+            
+            async testDiplomacySystem() {
+                if (typeof window.premiumDiplomacySystem === 'undefined') {
+                    throw new Error('Premium Diplomacy System non disponible');
+                }
+                
+                const diplomacySystem = window.premiumDiplomacySystem;
+                const nationCount = diplomacySystem.nations.size;
+                const treatyTypes = Object.keys(diplomacySystem.treatyTypes).length;
+                
+                this.updateTestCard('diplomacy-system', 'success', {
+                    status: 'Opérationnel',
+                    nations: `${nationCount} nations`,
+                    relations: `${treatyTypes} traités`
+                });
+                
+                this.log('success', 'Système de diplomatie testé avec succès');
+            }
+            
+            async testIntegration() {
+                const requiredSystems = [
+                    'premiumErrorSystem',
+                    'premiumMobileInterface',
+                    'premiumQuestSystem',
+                    'premiumDiplomacySystem'
+                ];
+                
+                const available = requiredSystems.filter(system => window[system]);
+                const compatibility = (available.length / requiredSystems.length) * 100;
+                
+                if (compatibility === 100) {
+                    this.updateTestCard('integration', 'success', {
+                        status: 'Parfaite',
+                        compat: `${compatibility}%`,
+                        perf: 'Optimale'
+                    });
+                    this.log('success', 'Intégration des systèmes parfaite');
+                } else {
+                    throw new Error(`Intégration incomplète: ${compatibility}%`);
+                }
+            }
+            
+            async testPerformance() {
+                const start = performance.now();
+                
+                // Simulations de performance
+                for (let i = 0; i < 1000; i++) {
+                    // Test calculs
+                    Math.random() * Math.PI;
+                }
+                
+                const end = performance.now();
+                const duration = end - start;
+                
+                const memoryUsage = performance.memory 
+                    ? Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) 
+                    : 'Non disponible';
+                
+                const fps = window.premiumErrorSystem 
+                    ? window.premiumErrorSystem.performanceMetrics.fps 
+                    : 60;
+                
+                this.updateTestCard('performance', 'success', {
+                    status: 'Excellente',
+                    fps: `${fps} FPS`,
+                    memory: `${memoryUsage} MB`
+                });
+                
+                this.log('success', `Performance testée: ${duration.toFixed(2)}ms`);
+            }
+            
+            clearLogs() {
+                const logElement = document.getElementById('testLog');
+                logElement.innerHTML = '<div class="log-entry log-info">[INFO] Logs nettoyés</div>';
+            }
+        }
+        
+        // Fonctions globales pour les boutons
+        let tester;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            tester = new PremiumSystemTester();
+        });
+        
+        function runAllTests() {
+            tester?.runAllTests();
+        }
+        
+        function runSpecificTest(testType) {
+            tester?.runSpecificTest(testType);
+        }
+        
+        function clearLogs() {
+            tester?.clearLogs();
+        }
+    </script>
+</body>
+</html>

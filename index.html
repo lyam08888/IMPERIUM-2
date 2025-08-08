@@ -13,7 +13,7 @@
             <h1 class="game-title">IMPERIUM</h1>
             <p class="subtitle">Roma Aeterna</p>
             <div style="margin: 15px 0; color: #d4651f; font-size: 0.9em; opacity: 0.8;">
-                ✨ Tous les boutons fonctionnent maintenant ! Choisissez votre mode de jeu ✨
+                🚀 <strong>NOUVEAU:</strong> Version 20 Premium avec systèmes avancés !
                 <br><span style="font-size: 0.8em;">💡 Raccourcis: Entrée, Espace ou touches 1-4</span>
             </div>
             <div id="intro-buttons">
@@ -181,6 +181,13 @@
                     urls: ['START-UNIFIED.html'],
                     hoverColor: 'rgba(245, 158, 11, 0.6)',
                     defaultColor: 'rgba(245, 158, 11, 0.4)'
+                },
+                {
+                    id: 'premium-features-btn',
+                    name: 'Nouveautés V20',
+                    urls: ['premium-features.html'],
+                    hoverColor: 'rgba(124, 58, 237, 0.6)',
+                    defaultColor: 'rgba(124, 58, 237, 0.4)'
                 }
             ];
             
@@ -253,6 +260,9 @@
                         break;
                     case '4':
                         document.getElementById('launcher-btn')?.click();
+                        break;
+                    case '5':
+                        document.getElementById('premium-features-btn')?.click();
                         break;
                 }
             });
