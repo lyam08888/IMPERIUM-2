@@ -7,7 +7,7 @@ function debugLog(message, data = null) {
 }
 
 // Fonction de sécurité pour redirection
-function safeRedirect(url, fallbackUrl = 'game.html') {
+function safeRedirect(url, fallbackUrl = 'imperium-mobile-clean.html') {
     try {
         debugLog(`Tentative de redirection vers: ${url}`);
         window.location.href = url;
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // Redirection de sécurité vers le jeu principal
-        setTimeout(() => safeRedirect('game.html'), 2000);
+        setTimeout(() => safeRedirect('imperium-mobile-clean.html'), 2000);
         return;
     }
     
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Fallback - rediriger vers le jeu principal
                 if (text.includes('Jouer') || text.includes('Direct')) {
-                    safeRedirect('game.html');
+                    safeRedirect('imperium-mobile-clean.html');
                 }
             }
         });
