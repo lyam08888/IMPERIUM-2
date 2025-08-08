@@ -259,39 +259,10 @@
         forced_conscription: { name: "Conscription Forcée", effect: { type: 'add_units', unit: 'legionnaire', count: 100 } }
     };
 
-    let playerState = {};
+    // No longer using a separate playerState for the maritime simulator.
+    // It will now use the global `gameState` from game.js
     let battleState = {};
     let isSkipped = false;
-    let combatHistory = [];
-    let currentOpponent = null;
-
-    function initializePlayerState() {
-        const savedState = localStorage.getItem('imperiumPlayerStateV18_naval');
-        if (savedState) {
-            playerState = JSON.parse(savedState);
-        } else {
-            playerState = {
-                resources: { gold: 20000, wood: 10000 },
-                units: {
-                    trireme: { count: 20, xp: 0 },
-                    quinquereme: { count: 5, xp: 0 },
-                    liburnian: { count: 10, xp: 0 },
-                    corvus_ship: { count: 5, xp: 0 },
-                    ballista_ship: { count: 8, xp: 0 },
-                    fire_ship: { count: 3, xp: 0 }
-                },
-                generals: { // Amiraux
-                    agrippa: { loyalty: 90, xp: 0, level: 1 },
-                    sextus: { loyalty: 75, xp: 0, level: 1 },
-                    drusus: { loyalty: 80, xp: 0, level: 1 }
-                }
-            };
-        }
-    }
-
-    function savePlayerState() {
-        localStorage.setItem('imperiumPlayerStateV18', JSON.stringify(playerState));
-    }
 
     function updateStatBar(id, value, max) {
         const bar = document.getElementById(id);
@@ -306,8 +277,8 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        initializePlayerState();
+    function initializeMaritimeSimulator() {
+        // gameState is already loaded by game.js
         populateSelects();
         generateUnitSelectors();
 
@@ -335,7 +306,10 @@
         });
 
         resetSimulator();
-    });
+    }
+
+    // Call the initializer now that the script is running
+    initializeMaritimeSimulator();
 
     function setupHeroAbilityButton() {
         const heroKey = document.getElementById('attacker-hero').value;
@@ -395,8 +369,10 @@
 
     function createUnitSelector(unitType, side) {
         const config = UNITS_CONFIG[unitType];
-        const available = side === 'attacker' ? (playerState.units[unitType]?.count || 0) : 0;
-        const xp = side === 'attacker' ? (playerState.units[unitType]?.xp || 0) : 0;
+        // Use the global gameState
+        const available = side === 'attacker' ? (gameState.navalUnitPool[unitType] || 0) : 0;
+        // XP for naval units is not tracked yet in the main gameState, so we'll default to 0
+        const xp = 0;
         const rank = getRank(xp);
         const selector = document.createElement('div');
         selector.className = 'unit-selector';
@@ -469,9 +445,10 @@
         Object.keys(UNITS_CONFIG).forEach(unitKey => {
             const attackerCount = parseInt(document.querySelector(`[data-side="attacker"][data-unit="${unitKey}"]`).value) || 0;
             if (attackerCount > 0) {
-                const rank = getRank(playerState.units[unitKey].xp);
+                // Not tracking XP for naval units yet
+                const rank = getRank(0);
                 const veteranBonus = 1 + rank.bonus;
-                attacker.army[unitKey] = { ...JSON.parse(JSON.stringify(UNITS_CONFIG[unitKey])), count: attackerCount, hasRammed: false, xp: playerState.units[unitKey].xp };
+                attacker.army[unitKey] = { ...JSON.parse(JSON.stringify(UNITS_CONFIG[unitKey])), count: attackerCount, hasRammed: false, xp: 0 };
                 attacker.army[unitKey].attack = Math.round(attacker.army[unitKey].attack * veteranBonus);
                 attacker.army[unitKey].defense = Math.round(attacker.army[unitKey].defense * veteranBonus);
             }
@@ -603,26 +580,25 @@
         document.getElementById('attacker-losses').innerHTML = formatLosses(attackerLosses);
         document.getElementById('defender-losses').innerHTML = formatLosses(defenderLosses);
 
-        Object.keys(finalAttacker).forEach(unitKey => {
-            const survived = finalAttacker[unitKey].count;
-            if (survived > 0) {
-                playerState.units[unitKey].xp += Math.round(Object.keys(defenderLosses).length * 10 / survived);
-            }
-        });
-
+        // Update the global gameState
         Object.keys(attackerLosses).forEach(unitKey => {
-            playerState.units[unitKey].count = Math.max(0, (playerState.units[unitKey].count || 0) - attackerLosses[unitKey]);
+            if (gameState.navalUnitPool[unitKey] !== undefined) {
+                gameState.navalUnitPool[unitKey] = Math.max(0, gameState.navalUnitPool[unitKey] - attackerLosses[unitKey]);
+            }
         });
 
         if (victory) {
             const goldLoot = Math.floor(Math.random() * 5000) + 1000;
+            gameState.resources.gold += goldLoot;
+            addXp(150); // Use global addXp function
             document.getElementById('loot-section').style.display = 'block';
             document.getElementById('battle-loot').innerHTML = `<div class="loot-item"><span>💰 Or</span><span class="loot-amount">+${goldLoot.toLocaleString()}</span></div>`;
         } else {
+             addXp(40);
             document.getElementById('loot-section').style.display = 'none';
         }
 
-        savePlayerState();
+        saveGameState(); // Use the global save function
         generateUnitSelectors();
     }
 
