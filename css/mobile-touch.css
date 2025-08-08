@@ -1,0 +1,451 @@
+/* 
+ * IMPERIUM Mobile - Optimisations tactiles avancées
+ * Fichier CSS dédié aux interactions tactiles et performances mobile
+ */
+
+/* === OPTIMISATIONS PERFORMANCES === */
+
+/* Optimisation de la composition pour GPU */
+.mobile-building-slot,
+.mobile-action-btn,
+.context-menu-option,
+.side-menu-item {
+    will-change: transform, opacity;
+    transform: translateZ(0); /* Force GPU layer */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* Optimisation du scrolling */
+.mobile-buildings-grid,
+.mobile-context-menu,
+.side-menu {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
+}
+
+/* === INTERACTIONS TACTILES AMÉLIORÉES === */
+
+/* États tactiles pour tous les éléments interactifs */
+.touchable {
+    position: relative;
+    overflow: hidden;
+}
+
+.touchable::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+.touchable:active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Effet ripple tactile */
+.ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease;
+}
+
+.ripple:active::after {
+    width: 200px;
+    height: 200px;
+}
+
+/* === ZONES DE TOUCH OPTIMISÉES === */
+
+/* Agrandissement des zones tactiles */
+.touch-target {
+    position: relative;
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.touch-target::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    z-index: -1;
+}
+
+/* === FEEDBACK VISUEL AMÉLIORÉ === */
+
+/* Animation de pression */
+@keyframes pressDown {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.95);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.press-animation:active {
+    animation: pressDown 0.1s ease;
+}
+
+/* Animation de succès */
+@keyframes successPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(34, 197, 94, 0.3);
+        transform: scale(1.05);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+        transform: scale(1);
+    }
+}
+
+.success-feedback {
+    animation: successPulse 0.5s ease;
+}
+
+/* Animation d'erreur */
+@keyframes errorShake {
+    0%, 20%, 40%, 60%, 80%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+    }
+}
+
+.error-feedback {
+    animation: errorShake 0.5s ease;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+/* === GESTES AVANCÉS === */
+
+/* Support pour les gestes de balayage */
+.swipe-container {
+    touch-action: pan-x pan-y;
+    user-select: none;
+}
+
+.swipe-left {
+    transform: translateX(-20px);
+    opacity: 0.8;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.swipe-right {
+    transform: translateX(20px);
+    opacity: 0.8;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Support pour le pinch-to-zoom */
+.zoomable {
+    touch-action: pinch-zoom;
+}
+
+/* === OPTIMISATIONS POUR DIFFÉRENTS TYPES D'ÉCRANS === */
+
+/* Écrans haute densité */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .mobile-building-slot {
+        border-width: 0.5px;
+    }
+    
+    .building-level-mobile {
+        border-width: 1px;
+    }
+}
+
+/* Écrans avec encoche (notch) */
+@supports (padding: max(0px)) {
+    .mobile-header {
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+    }
+    
+    .mobile-action-bar {
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+    }
+    
+    .side-menu {
+        padding-left: max(0px, env(safe-area-inset-left));
+    }
+}
+
+/* === TRANSITIONS FLUIDES === */
+
+/* Transition universelle pour tous les éléments interactifs */
+.smooth-transition {
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Transitions spécialisées */
+.scale-transition {
+    transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.opacity-transition {
+    transition: opacity 0.2s ease-in-out;
+}
+
+.color-transition {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* === ÉTATS DE FOCUS POUR ACCESSIBILITÉ === */
+
+/* Focus visible pour navigation au clavier sur mobile */
+.mobile-action-btn:focus-visible,
+.context-menu-option:focus-visible,
+.side-menu-item:focus-visible {
+    outline: 2px solid var(--gold-primary);
+    outline-offset: 2px;
+}
+
+/* === OPTIMISATIONS POUR FAIBLE LUMINOSITÉ === */
+
+@media (prefers-contrast: high) {
+    .mobile-building-slot {
+        border-width: 3px;
+    }
+    
+    .mobile-action-btn {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+}
+
+/* === RÉDUCTION DE MOUVEMENT POUR ACCESSIBILITÉ === */
+
+@media (prefers-reduced-motion: reduce) {
+    .mobile-building-slot,
+    .mobile-action-btn,
+    .context-menu-option,
+    .side-menu-item {
+        transition: none;
+    }
+    
+    .ripple::after {
+        display: none;
+    }
+    
+    @keyframes none {
+        /* Désactive toutes les animations */
+    }
+}
+
+/* === DARK MODE AMÉLIORÉ === */
+
+@media (prefers-color-scheme: dark) {
+    .touchable::before {
+        background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .ripple::after {
+        background: rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* === OPTIMISATIONS POUR ÉCONOMIE D'ÉNERGIE === */
+
+@media (prefers-reduced-data: reduce) {
+    /* Désactiver les animations coûteuses */
+    .mobile-building-slot::before,
+    .mobile-action-btn::before {
+        display: none;
+    }
+}
+
+/* === INDICATEURS DE PERFORMANCE === */
+
+/* Indicateur de lag/performance dégradée */
+.performance-warning {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.performance-warning.show {
+    opacity: 1;
+}
+
+/* === OPTIMISATIONS SPÉCIFIQUES AUX APPAREILS === */
+
+/* iPhone avec Dynamic Island */
+@media screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) {
+    .mobile-header {
+        padding-top: max(44px, env(safe-area-inset-top));
+    }
+}
+
+/* Pliables en mode déplié */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+    .mobile-buildings-grid {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 16px;
+    }
+    
+    .mobile-action-bar {
+        justify-content: center;
+        gap: 24px;
+    }
+    
+    .mobile-action-btn {
+        max-width: 120px;
+        padding: 12px 8px;
+    }
+}
+
+/* === UTILITAIRES POUR GESTES === */
+
+/* Classes utilitaires pour les interactions gestuelles */
+.prevent-scroll {
+    touch-action: none;
+    overflow: hidden;
+}
+
+.allow-pan-x {
+    touch-action: pan-x;
+}
+
+.allow-pan-y {
+    touch-action: pan-y;
+}
+
+.allow-pinch {
+    touch-action: pinch-zoom;
+}
+
+/* === ANIMATIONS OPTIMISÉES GPU === */
+
+@keyframes slideInUp {
+    from {
+        transform: translate3d(0, 100%, 0);
+        opacity: 0;
+    }
+    to {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutDown {
+    from {
+        transform: translate3d(0, 0, 0);
+        opacity: 1;
+    }
+    to {
+        transform: translate3d(0, 100%, 0);
+        opacity: 0;
+    }
+}
+
+@keyframes fadeInScale {
+    from {
+        transform: scale3d(0.8, 0.8, 1);
+        opacity: 0;
+    }
+    to {
+        transform: scale3d(1, 1, 1);
+        opacity: 1;
+    }
+}
+
+/* === CLASSES D'ANIMATION === */
+
+.animate-slide-in-up {
+    animation: slideInUp 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.animate-slide-out-down {
+    animation: slideOutDown 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.animate-fade-in-scale {
+    animation: fadeInScale 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* === INDICATEURS D'ÉTAT === */
+
+.loading-state {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.loading-state::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid var(--gold-primary);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.disabled-state {
+    pointer-events: none;
+    opacity: 0.5;
+    filter: grayscale(0.5);
+}
+
+.success-state {
+    background-color: rgba(34, 197, 94, 0.1) !important;
+    border-color: var(--success-green) !important;
+}
+
+.error-state {
+    background-color: rgba(239, 68, 68, 0.1) !important;
+    border-color: var(--error-red) !important;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

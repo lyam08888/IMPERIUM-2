@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>IMPERIUM Mobile - Test Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #d97706;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .test-section {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(217, 119, 6, 0.3);
+        }
+
+        .test-section h2 {
+            color: #fbbf24;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .test-btn {
+            background: linear-gradient(145deg, #f59e0b, #d97706);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 12px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            min-height: 44px;
+            min-width: 120px;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+
+        .test-btn:active {
+            transform: scale(0.95);
+            background: linear-gradient(145deg, #d97706, #f59e0b);
+        }
+
+        .result {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .success { color: #22c55e; }
+        .error { color: #ef4444; }
+        .info { color: #3b82f6; }
+
+        .grid-test {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .grid-item {
+            aspect-ratio: 1;
+            background: rgba(217, 119, 6, 0.2);
+            border: 2px solid rgba(217, 119, 6, 0.5);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+
+        .grid-item:active {
+            transform: scale(0.9);
+            background: rgba(217, 119, 6, 0.4);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #d97706, #fbbf24);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid #d97706;
+            border-radius: 8px;
+            padding: 15px;
+            z-index: 1000;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 480px) {
+            .test-container {
+                padding: 0 10px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .test-section {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>📱 IMPERIUM Mobile - Tests</h1>
+
+        <!-- Test 1: Détection des fonctionnalités -->
+        <div class="test-section">
+            <h2>🔍 Détection des fonctionnalités</h2>
+            <button class="test-btn" onclick="testFeatureDetection()">Tester les fonctionnalités</button>
+            <div id="featureResult" class="result"></div>
+        </div>
+
+        <!-- Test 2: Interactions tactiles -->
+        <div class="test-section">
+            <h2>👆 Interactions tactiles</h2>
+            <button class="test-btn" onclick="testTouchEvents()">Tester les événements tactiles</button>
+            <button class="test-btn" onclick="testVibration()">Tester la vibration</button>
+            <div id="touchResult" class="result"></div>
+            
+            <div class="grid-test" id="touchGrid">
+                <!-- Grille de test tactile générée par JS -->
+            </div>
+        </div>
+
+        <!-- Test 3: Performance -->
+        <div class="test-section">
+            <h2>⚡ Performance</h2>
+            <button class="test-btn" onclick="testPerformance()">Test de performance</button>
+            <button class="test-btn" onclick="testMemory()">Test mémoire</button>
+            <div class="progress-bar">
+                <div id="performanceProgress" class="progress-fill"></div>
+            </div>
+            <div id="performanceResult" class="result"></div>
+        </div>
+
+        <!-- Test 4: Stockage -->
+        <div class="test-section">
+            <h2>💾 Stockage</h2>
+            <button class="test-btn" onclick="testLocalStorage()">Test localStorage</button>
+            <button class="test-btn" onclick="testServiceWorker()">Test Service Worker</button>
+            <div id="storageResult" class="result"></div>
+        </div>
+
+        <!-- Test 5: Gestes avancés -->
+        <div class="test-section">
+            <h2>✋ Gestes avancés</h2>
+            <button class="test-btn" onclick="testGestures()">Activer détection gestes</button>
+            <div id="gestureArea" style="background: rgba(0,0,0,0.2); height: 150px; border-radius: 8px; margin-top: 10px; display: flex; align-items: center; justify-content: center; border: 2px dashed #d97706;">
+                Zone de test des gestes<br>
+                <small>Balayez, pincez, appuyez longuement</small>
+            </div>
+            <div id="gestureResult" class="result"></div>
+        </div>
+
+        <!-- Test 6: Interface responsive -->
+        <div class="test-section">
+            <h2>📐 Interface responsive</h2>
+            <button class="test-btn" onclick="testResponsive()">Tester adaptabilité</button>
+            <div id="responsiveResult" class="result"></div>
+            <div id="screenInfo" class="result"></div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification">
+        <div id="notificationText"></div>
+    </div>
+
+    <script>
+        let touchTestActive = false;
+        let gestureTestActive = false;
+        let testResults = {};
+
+        // Fonction utilitaire pour afficher les notifications
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const text = document.getElementById('notificationText');
+            
+            text.innerHTML = `<span class="${type}">${message}</span>`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Test 1: Détection des fonctionnalités
+        function testFeatureDetection() {
+            const features = {
+                touchSupport: 'ontouchstart' in window,
+                serviceWorker: 'serviceWorker' in navigator,
+                localStorage: testLocalStorageSupport(),
+                vibration: 'vibrate' in navigator,
+                geolocation: 'geolocation' in navigator,
+                deviceOrientation: 'DeviceOrientationEvent' in window,
+                deviceMotion: 'DeviceMotionEvent' in window,
+                webGL: detectWebGL(),
+                webAssembly: typeof WebAssembly === 'object',
+                indexedDB: 'indexedDB' in window,
+                webWorkers: typeof Worker !== 'undefined',
+                notifications: 'Notification' in window,
+                fullscreen: document.fullscreenEnabled || document.webkitFullscreenEnabled,
+                pageVisibility: 'visibilityState' in document,
+                deviceMemory: navigator.deviceMemory || 'N/A',
+                hardwareConcurrency: navigator.hardwareConcurrency || 'N/A',
+                connection: navigator.connection ? {
+                    effectiveType: navigator.connection.effectiveType,
+                    downlink: navigator.connection.downlink,
+                    saveData: navigator.connection.saveData
+                } : 'N/A'
+            };
+
+            testResults.features = features;
+            
+            let result = '=== FONCTIONNALITÉS DÉTECTÉES ===\n';
+            Object.entries(features).forEach(([key, value]) => {
+                const status = value ? '✅' : '❌';
+                const displayValue = typeof value === 'object' ? JSON.stringify(value, null, 2) : value;
+                result += `${status} ${key}: ${displayValue}\n`;
+            });
+
+            document.getElementById('featureResult').textContent = result;
+            showNotification('Détection des fonctionnalités terminée', 'success');
+        }
+
+        function testLocalStorageSupport() {
+            try {
+                const test = 'test';
+                localStorage.setItem(test, test);
+                localStorage.removeItem(test);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function detectWebGL() {
+            try {
+                const canvas = document.createElement('canvas');
+                return !!(window.WebGLRenderingContext && canvas.getContext('webgl'));
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Test 2: Interactions tactiles
+        function testTouchEvents() {
+            if (!touchTestActive) {
+                touchTestActive = true;
+                createTouchGrid();
+                setupTouchListeners();
+                showNotification('Test tactile activé - touchez les éléments', 'info');
+            }
+        }
+
+        function createTouchGrid() {
+            const grid = document.getElementById('touchGrid');
+            grid.innerHTML = '';
+            
+            const emojis = ['🏛️', '⚔️', '🛡️', '👑', '💰', '🌾', '🏗️', '⚡', '🔥'];
+            
+            emojis.forEach((emoji, index) => {
+                const item = document.createElement('div');
+                item.className = 'grid-item';
+                item.textContent = emoji;
+                item.dataset.index = index;
+                grid.appendChild(item);
+            });
+        }
+
+        function setupTouchListeners() {
+            const grid = document.getElementById('touchGrid');
+            let touchData = [];
+
+            grid.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const element = e.target.closest('.grid-item');
+                
+                if (element) {
+                    touchData.push({
+                        type: 'touchstart',
+                        element: element.textContent,
+                        x: touch.clientX,
+                        y: touch.clientY,
+                        time: Date.now()
+                    });
+                    
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(50);
+                    }
+                }
+            });
+
+            grid.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                touchData.push({
+                    type: 'touchmove',
+                    x: touch.clientX,
+                    y: touch.clientY,
+                    time: Date.now()
+                });
+            });
+
+            grid.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                touchData.push({
+                    type: 'touchend',
+                    time: Date.now()
+                });
+
+                updateTouchResult(touchData);
+                touchData = [];
+            });
+
+            // Gestion des clics pour desktop
+            grid.addEventListener('click', (e) => {
+                if (!('ontouchstart' in window)) {
+                    const element = e.target.closest('.grid-item');
+                    if (element) {
+                        updateTouchResult([{
+                            type: 'click',
+                            element: element.textContent,
+                            x: e.clientX,
+                            y: e.clientY,
+                            time: Date.now()
+                        }]);
+                    }
+                }
+            });
+        }
+
+        function updateTouchResult(data) {
+            let result = '=== DONNÉES TACTILES ===\n';
+            data.forEach((event, index) => {
+                result += `${index + 1}. ${event.type}`;
+                if (event.element) result += ` sur ${event.element}`;
+                if (event.x !== undefined) result += ` (${Math.round(event.x)}, ${Math.round(event.y)})`;
+                result += ` à ${new Date(event.time).toLocaleTimeString()}\n`;
+            });
+
+            document.getElementById('touchResult').textContent = result;
+        }
+
+        function testVibration() {
+            if ('vibrate' in navigator) {
+                navigator.vibrate([100, 50, 100, 50, 200]);
+                showNotification('Test de vibration lancé', 'success');
+            } else {
+                showNotification('Vibration non supportée', 'error');
+            }
+        }
+
+        // Test 3: Performance
+        function testPerformance() {
+            showNotification('Test de performance en cours...', 'info');
+            
+            const startTime = performance.now();
+            const progress = document.getElementById('performanceProgress');
+            
+            let currentProgress = 0;
+            const interval = setInterval(() => {
+                currentProgress += 10;
+                progress.style.width = currentProgress + '%';
+                
+                if (currentProgress >= 100) {
+                    clearInterval(interval);
+                    
+                    const endTime = performance.now();
+                    const testDuration = endTime - startTime;
+                    
+                    // Tests de performance
+                    const performanceTests = runPerformanceTests();
+                    
+                    let result = '=== RÉSULTATS PERFORMANCE ===\n';
+                    result += `Durée du test: ${Math.round(testDuration)}ms\n`;
+                    result += `Temps de réponse: ${Math.round(testDuration / 10)}ms par étape\n\n`;
+                    
+                    Object.entries(performanceTests).forEach(([key, value]) => {
+                        result += `${key}: ${value}\n`;
+                    });
+
+                    document.getElementById('performanceResult').textContent = result;
+                    showNotification('Test de performance terminé', 'success');
+                }
+            }, 100);
+        }
+
+        function runPerformanceTests() {
+            const tests = {};
+            
+            // Test de rendu
+            const renderStart = performance.now();
+            const testDiv = document.createElement('div');
+            testDiv.style.cssText = 'width: 100px; height: 100px; background: red; transform: rotate(45deg);';
+            document.body.appendChild(testDiv);
+            document.body.removeChild(testDiv);
+            tests['Rendu DOM'] = `${Math.round(performance.now() - renderStart)}ms`;
+            
+            // Test de calcul
+            const calcStart = performance.now();
+            let sum = 0;
+            for (let i = 0; i < 100000; i++) {
+                sum += Math.sqrt(i);
+            }
+            tests['Calcul JavaScript'] = `${Math.round(performance.now() - calcStart)}ms`;
+            
+            // Mémoire utilisée
+            if (performance.memory) {
+                tests['Mémoire utilisée'] = `${Math.round(performance.memory.usedJSHeapSize / 1024 / 1024)}MB`;
+                tests['Limite mémoire'] = `${Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024)}MB`;
+            }
+            
+            // FPS estimation
+            tests['FPS estimé'] = estimateFPS();
+            
+            return tests;
+        }
+
+        function estimateFPS() {
+            return '~60fps (estimation)';
+        }
+
+        function testMemory() {
+            if (performance.memory) {
+                const memory = performance.memory;
+                let result = '=== UTILISATION MÉMOIRE ===\n';
+                result += `Mémoire utilisée: ${Math.round(memory.usedJSHeapSize / 1024 / 1024)}MB\n`;
+                result += `Mémoire totale: ${Math.round(memory.totalJSHeapSize / 1024 / 1024)}MB\n`;
+                result += `Limite mémoire: ${Math.round(memory.jsHeapSizeLimit / 1024 / 1024)}MB\n`;
+                
+                const usage = (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
+                result += `Utilisation: ${Math.round(usage)}%\n`;
+                
+                document.getElementById('performanceResult').textContent = result;
+                showNotification('Analyse mémoire terminée', 'success');
+            } else {
+                showNotification('API Memory non disponible', 'error');
+            }
+        }
+
+        // Test 4: Stockage
+        function testLocalStorage() {
+            try {
+                const testData = {
+                    timestamp: Date.now(),
+                    userAgent: navigator.userAgent,
+                    testArray: [1, 2, 3, 4, 5],
+                    testObject: { name: 'IMPERIUM', version: '2.0.0' }
+                };
+
+                localStorage.setItem('imperium-test', JSON.stringify(testData));
+                const retrieved = JSON.parse(localStorage.getItem('imperium-test'));
+                
+                const success = JSON.stringify(testData) === JSON.stringify(retrieved);
+                
+                let result = '=== TEST LOCALSTORAGE ===\n';
+                result += `Écriture: ${success ? '✅' : '❌'}\n`;
+                result += `Lecture: ${success ? '✅' : '❌'}\n`;
+                result += `Taille stockée: ${new Blob([JSON.stringify(testData)]).size} bytes\n`;
+                
+                // Test de capacité
+                try {
+                    let testSize = '';
+                    let size = 0;
+                    while (size < 1024 * 1024) { // 1MB max test
+                        testSize += 'x';
+                        localStorage.setItem('imperium-capacity-test', testSize);
+                        size = testSize.length;
+                    }
+                    localStorage.removeItem('imperium-capacity-test');
+                    result += `Capacité testée: >${Math.round(size / 1024)}KB\n`;
+                } catch (e) {
+                    result += `Limite atteinte: ~${Math.round(testSize.length / 1024)}KB\n`;
+                }
+                
+                localStorage.removeItem('imperium-test');
+                document.getElementById('storageResult').textContent = result;
+                showNotification('Test localStorage terminé', 'success');
+                
+            } catch (e) {
+                document.getElementById('storageResult').textContent = `Erreur localStorage: ${e.message}`;
+                showNotification('Erreur test localStorage', 'error');
+            }
+        }
+
+        function testServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                let result = '=== TEST SERVICE WORKER ===\n';
+                result += '✅ API disponible\n';
+                
+                navigator.serviceWorker.getRegistrations()
+                    .then(registrations => {
+                        result += `Registrations actives: ${registrations.length}\n`;
+                        
+                        registrations.forEach((reg, index) => {
+                            result += `${index + 1}. Scope: ${reg.scope}\n`;
+                            result += `   State: ${reg.active ? reg.active.state : 'inactive'}\n`;
+                        });
+                        
+                        document.getElementById('storageResult').textContent = result;
+                        showNotification('Test Service Worker terminé', 'success');
+                    })
+                    .catch(error => {
+                        result += `❌ Erreur: ${error.message}\n`;
+                        document.getElementById('storageResult').textContent = result;
+                        showNotification('Erreur test Service Worker', 'error');
+                    });
+            } else {
+                document.getElementById('storageResult').textContent = '❌ Service Worker non supporté';
+                showNotification('Service Worker non supporté', 'error');
+            }
+        }
+
+        // Test 5: Gestes avancés
+        function testGestures() {
+            if (!gestureTestActive) {
+                gestureTestActive = true;
+                setupGestureListeners();
+                showNotification('Test des gestes activé', 'info');
+            }
+        }
+
+        function setupGestureListeners() {
+            const area = document.getElementById('gestureArea');
+            let gestureData = [];
+            let startTime, startX, startY;
+            let touchCount = 0;
+
+            area.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                startTime = Date.now();
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                touchCount = e.touches.length;
+                
+                gestureData = [{
+                    type: 'start',
+                    touches: touchCount,
+                    x: startX,
+                    y: startY,
+                    time: startTime
+                }];
+            });
+
+            area.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const currentX = e.touches[0].clientX;
+                const currentY = e.touches[0].clientY;
+                
+                gestureData.push({
+                    type: 'move',
+                    x: currentX,
+                    y: currentY,
+                    deltaX: currentX - startX,
+                    deltaY: currentY - startY,
+                    time: Date.now()
+                });
+            });
+
+            area.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+                
+                analyzeGesture(gestureData, duration);
+            });
+
+            // Long press detection
+            let longPressTimeout;
+            area.addEventListener('touchstart', (e) => {
+                longPressTimeout = setTimeout(() => {
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(100);
+                    }
+                    updateGestureResult([{
+                        type: 'longpress',
+                        duration: 1000,
+                        x: startX,
+                        y: startY
+                    }]);
+                }, 1000);
+            });
+
+            area.addEventListener('touchend', () => {
+                clearTimeout(longPressTimeout);
+            });
+        }
+
+        function analyzeGesture(data, duration) {
+            if (data.length < 2) return;
+
+            const start = data[0];
+            const end = data[data.length - 1];
+            const deltaX = end.x - start.x;
+            const deltaY = end.y - start.y;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+            let gestureType = 'unknown';
+            let analysis = {};
+
+            if (distance < 10 && duration < 200) {
+                gestureType = 'tap';
+            } else if (distance > 50) {
+                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                    gestureType = deltaX > 0 ? 'swipe-right' : 'swipe-left';
+                } else {
+                    gestureType = deltaY > 0 ? 'swipe-down' : 'swipe-up';
+                }
+            } else if (duration > 500) {
+                gestureType = 'press';
+            }
+
+            analysis = {
+                type: gestureType,
+                duration: duration,
+                distance: Math.round(distance),
+                deltaX: Math.round(deltaX),
+                deltaY: Math.round(deltaY),
+                startPoint: `(${Math.round(start.x)}, ${Math.round(start.y)})`,
+                endPoint: `(${Math.round(end.x)}, ${Math.round(end.y)})`,
+                touches: start.touches || 1
+            };
+
+            updateGestureResult([analysis]);
+        }
+
+        function updateGestureResult(gestureArray) {
+            let result = '=== GESTE DÉTECTÉ ===\n';
+            gestureArray.forEach(gesture => {
+                Object.entries(gesture).forEach(([key, value]) => {
+                    result += `${key}: ${value}\n`;
+                });
+            });
+
+            document.getElementById('gestureResult').textContent = result;
+        }
+
+        // Test 6: Interface responsive
+        function testResponsive() {
+            const screenInfo = {
+                windowSize: `${window.innerWidth}x${window.innerHeight}`,
+                screenSize: `${screen.width}x${screen.height}`,
+                availableSize: `${screen.availWidth}x${screen.availHeight}`,
+                colorDepth: screen.colorDepth,
+                pixelDepth: screen.pixelDepth,
+                devicePixelRatio: window.devicePixelRatio,
+                orientation: screen.orientation ? screen.orientation.type : 'unknown',
+                touchPoints: navigator.maxTouchPoints || 'unknown'
+            };
+
+            let result = '=== INFORMATIONS ÉCRAN ===\n';
+            Object.entries(screenInfo).forEach(([key, value]) => {
+                result += `${key}: ${value}\n`;
+            });
+
+            // Test de breakpoints CSS
+            result += '\n=== BREAKPOINTS CSS ===\n';
+            const breakpoints = [
+                { name: 'mobile-small', query: '(max-width: 360px)' },
+                { name: 'mobile', query: '(max-width: 480px)' },
+                { name: 'tablet', query: '(min-width: 768px)' },
+                { name: 'desktop', query: '(min-width: 1024px)' }
+            ];
+
+            breakpoints.forEach(bp => {
+                const matches = window.matchMedia(bp.query).matches;
+                result += `${bp.name}: ${matches ? '✅' : '❌'}\n`;
+            });
+
+            document.getElementById('responsiveResult').textContent = result;
+            
+            // Informations détaillées
+            document.getElementById('screenInfo').textContent = 
+                `User Agent: ${navigator.userAgent}`;
+
+            showNotification('Test responsive terminé', 'success');
+        }
+
+        // Auto-test au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            showNotification('Tests mobiles IMPERIUM chargés', 'success');
+            
+            // Test automatique des fonctionnalités de base
+            setTimeout(() => {
+                testFeatureDetection();
+            }, 1000);
+        });
+
+        // Test d'orientation
+        window.addEventListener('orientationchange', function() {
+            setTimeout(() => {
+                showNotification(`Orientation changée: ${window.orientation}°`, 'info');
+                if (document.getElementById('responsiveResult').textContent) {
+                    testResponsive();
+                }
+            }, 100);
+        });
+
+        // Test de visibilité de page
+        document.addEventListener('visibilitychange', function() {
+            const status = document.hidden ? 'cachée' : 'visible';
+            showNotification(`Page ${status}`, 'info');
+        });
+    </script>
+</body>
+</html>

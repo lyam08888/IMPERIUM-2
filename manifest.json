@@ -1,0 +1,112 @@
+{
+  "name": "IMPERIUM - Roma Aeterna",
+  "short_name": "IMPERIUM",
+  "description": "Construisez votre empire romain et conquérez le monde antique",
+  "version": "2.0.0",
+  "start_url": "./imperium-mobile.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#d97706",
+  "background_color": "#0f172a",
+  "categories": ["games", "strategy"],
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA3MiA3Mic+PHJlY3Qgd2lkdGg9JzcyJyBoZWlnaHQ9JzcyJyBmaWxsPScjZDk3NzA2Jy8+PHRleHQgeD0nMzYnIHk9JzQ1JyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmaWxsPSd3aGl0ZScgZm9udC1mYW1pbHk9J3NlcmlmJyBmb250LXNpemU9JzM2JyBmb250LXdlaWdodD0nYm9sZCc+STwvdGV4dD48L3N2Zz4=",
+      "sizes": "72x72",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA5NiA5Nic+PHJlY3Qgd2lkdGg9Jzk2JyBoZWlnaHQ9Jzk2JyBmaWxsPScjZDk3NzA2Jy8+PHRleHQgeD0nNDgnIHk9JzYwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmaWxsPSd3aGl0ZScgZm9udC1mYW1pbHk9J3NlcmlmJyBmb250LXNpemU9JzQ4JyBmb250LXdlaWdodD0nYm9sZCc+STwvdGV4dD48L3N2Zz4=",
+      "sizes": "96x96",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMjggMTI4Jz48cmVjdCB3aWR0aD0nMTI4JyBoZWlnaHQ9JzEyOCcgZmlsbD0nI2Q5NzcwNicvPjx0ZXh0IHg9JzY0JyB5PSc4MCcgdGV4dC1hbmNob3I9J21pZGRsZScgZmlsbD0nd2hpdGUnIGZvbnQtZmFtaWx5PSdzZXJpZicgZm9udC1zaXplPSc2NCcgZm9udC13ZWlnaHQ9J2JvbGQnPkk8L3RleHQ+PC9zdmc+",
+      "sizes": "128x128",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxNDQgMTQ0Jz48cmVjdCB3aWR0aD0nMTQ0JyBoZWlnaHQ9JzE0NCcgZmlsbD0nI2Q5NzcwNicvPjx0ZXh0IHg9JzcyJyB5PSc5MCcgdGV4dC1hbmNob3I9J21pZGRsZScgZmlsbD0nd2hpdGUnIGZvbnQtZmFtaWx5PSdzZXJpZicgZm9udC1zaXplPSc3MicgZm9udC13ZWlnaHQ9J2JvbGQnPkk8L3RleHQ+PC9zdmc+",
+      "sizes": "144x144",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxNTIgMTUyJz48cmVjdCB3aWR0aD0nMTUyJyBoZWlnaHQ9JzE1MicgZmlsbD0nI2Q5NzcwNicvPjx0ZXh0IHg9Jzc2JyB5PSc5NScgdGV4dC1hbmNob3I9J21pZGRsZScgZmlsbD0nd2hpdGUnIGZvbnQtZmFtaWx5PSdzZXJpZicgZm9udC1zaXplPSc3NicgZm9udC13ZWlnaHQ9J2JvbGQnPkk8L3RleHQ+PC9zdmc+",
+      "sizes": "152x152",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxOTIgMTkyJz48cmVjdCB3aWR0aD0nMTkyJyBoZWlnaHQ9JzE5MicgZmlsbD0nI2Q5NzcwNicvPjx0ZXh0IHg9Jzk2JyB5PScxMjAnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZpbGw9J3doaXRlJyBmb250LWZhbWlseT0nc2VyaWYnIGZvbnQtc2l6ZT0nOTYnIGZvbnQtd2VpZ2h0PSdib2xkJz5JPC90ZXh0Pjwvc3ZnPg==",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA1MTIgNTEyJz48cmVjdCB3aWR0aD0nNTEyJyBoZWlnaHQ9JzUxMicgZmlsbD0nI2Q5NzcwNicvPjx0ZXh0IHg9JzI1NicgeT0nMzIwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmaWxsPSd3aGl0ZScgZm9udC1mYW1pbHk9J3NlcmlmJyBmb250LXNpemU9JzI1NicgZm9udC13ZWlnaHQ9J2JvbGQnPkk8L3RleHQ+PC9zdmc+",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAzOTAgODQ0Jz48cmVjdCB3aWR0aD0nMzkwJyBoZWlnaHQ9Jzg0NCcgZmlsbD0nIzBmMTcyYScvPjx0ZXh0IHg9JzE5NScgeT0nNDIyJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmaWxsPScjZDk3NzA2JyBmb250LWZhbWlseT0nc2VyaWYnIGZvbnQtc2l6ZT0nNDgnIGZvbnQtd2VpZ2h0PSdib2xkJz5JTVBFU0lVTTwvdGV4dD48dGV4dCB4PScxOTUnIHk9JzQ4MCcgdGV4dC1hbmNob3I9J21pZGRsZScgZmlsbD0nI2U5ZGNjNicgZm9udC1mYW1pbHk9J3NlcmlmJyBmb250LXNpemU9JzI0Jz5Sb21hIEFldGVybmE8L3RleHQ+PC9zdmc+",
+      "sizes": "390x844",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Construire",
+      "short_name": "Build",
+      "description": "Accès rapide au menu de construction",
+      "url": "./imperium-mobile.html?action=build",
+      "icons": [
+        {
+          "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA5NiA5Nic+PHJlY3Qgd2lkdGg9Jzk2JyBoZWlnaHQ9Jzk2JyBmaWxsPScjZDk3NzA2Jy8+PHRleHQgeD0nNDgnIHk9JzYwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmaWxsPSd3aGl0ZScgZm9udC1mYW1pbHk9J3NlcmlmJyBmb250LXNpemU9JzQ4Jz7wn5SoPC90ZXh0Pjwvc3ZnPg==",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Monde",
+      "short_name": "World",
+      "description": "Explorer la carte du monde",
+      "url": "./imperium-mobile.html?action=world",
+      "icons": [
+        {
+          "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCA5NiA5Nic+PHJlY3Qgd2lkdGg9Jzk2JyBoZWlnaHQ9Jzk2JyBmaWxsPScjZDk3NzA2Jy8+PHRleHQgeD0nNDgnIHk9JzYwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmaWxsPSd3aGl0ZScgZm9udC1mYW1pbHk9J3NlcmlmJyBmb250LXNpemU9JzQ4Jz7wn5e677iPPC90ZXh0Pjwvc3ZnPg==",
+          "sizes": "96x96",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "id": "imperium-roma-aeterna",
+  "scope": "./",
+  "launch_handler": {
+    "client_mode": "navigate-new"
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "handle_links": "preferred",
+  "file_handlers": [
+    {
+      "action": "./imperium-mobile.html",
+      "accept": {
+        "application/json": [".json"]
+      }
+    }
+  ]
+}
