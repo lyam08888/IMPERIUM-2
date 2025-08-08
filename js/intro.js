@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const introButtonsContainer = document.getElementById('intro-buttons');
     const loadingBar = document.getElementById('loading-bar');
     const cinematicText = document.getElementById('cinematic-text');
+    const tutorialNextBtn = document.getElementById('tutorial-next-btn');
 
     // --- Check for Saved Game ---
     function initializeIntro() {
@@ -18,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
         introButtonsContainer.innerHTML = ''; // Clear any existing buttons
 
         if (savedGame) {
-            // Player has a saved game
             const continueBtn = document.createElement('button');
             continueBtn.textContent = 'Continuer la partie';
             continueBtn.className = 'imperium-btn';
@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
             introButtonsContainer.appendChild(newGameBtn);
 
         } else {
-            // New player
             const startGameBtn = document.createElement('button');
             startGameBtn.textContent = 'Commencez à Jouer';
             startGameBtn.className = 'imperium-btn';
@@ -57,19 +56,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function runCinematic() {
-        // Animate loading bar
         setTimeout(() => {
             loadingBar.style.width = '100%';
             cinematicText.textContent = 'La fondation de Rome...';
-        }, 100); // Small delay to ensure transition works
+        }, 100);
 
-        // After cinematic, start tutorial
         setTimeout(() => {
             cinematicScreen.classList.add('hidden');
             tutorialScreen.classList.remove('hidden');
-            // This function will be expanded in the next plan step
             startTutorial();
-        }, 2500); // 2s for bar animation + 0.5s buffer
+        }, 2500);
     }
 
     // --- Tutorial Logic ---
@@ -79,23 +75,40 @@ document.addEventListener('DOMContentLoaded', () => {
         targetSlotId: -1,
     };
 
-    const tutorialNextBtn = document.getElementById('tutorial-next-btn');
-
     const tutorialSteps = [
         {
             message: "Bienvenue, Consul ! Pour commencer, nous devons nourrir notre peuple. Construisons une ferme. <br><br>Veuillez cliquer sur un terrain vide pour commencer.",
             action: 'clickEmptyPlot',
+            highlight: '#tutorialBuildingsGrid .building-slot:not(.occupied)',
             showButton: false,
         },
         {
             message: "Parfait. Voici les bâtiments que vous pouvez construire. Sélectionnez la <strong>Ferme</strong>.",
             action: 'selectBuilding',
+            highlight: '.build-item[data-building-type="farm"]',
             showButton: false,
         },
         {
-            message: "Excellent choix ! La construction de votre première ferme a commencé. Cela prendra un peu de temps.",
+            message: "Excellent choix ! La construction de votre première ferme a commencé. Pendant ce temps, parlons des ressources.",
             action: 'wait',
-            showButton: false,
+            showButton: true,
+        },
+        {
+            message: "Voici vos ressources principales : l'Or, la Nourriture et le Marbre. La ferme que vous construisez produira de la nourriture.",
+            action: 'highlightElement',
+            highlight: '#tutorial-resources',
+            showButton: true,
+        },
+        {
+            message: "La construction est terminée ! Votre ferme produit maintenant de la nourriture pour votre peuple.",
+            action: 'wait',
+            showButton: false, // Will auto-advance
+        },
+        {
+            message: "Félicitations ! Vous avez terminé votre premier objectif. Les objectifs vous guideront et vous offriront des récompenses.",
+            action: 'highlightElement',
+            highlight: '#tutorial-objectives-tile',
+            showButton: true,
         },
         {
             message: "Votre cité est sur la bonne voie. Vous êtes maintenant prêt à la diriger seul. Bonne chance, Consul !",
@@ -105,13 +118,9 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     function startTutorial() {
-        // 1. Initialize a fresh gameState for the tutorial
         tutorialState.gameState = getDefaultGameState();
-
-        // 2. Render the initial (empty) city grid for the tutorial
         renderTutorialGrid();
-
-        // 3. Start the first step
+        renderTutorialResources();
         runTutorialStep(0);
     }
 
@@ -120,53 +129,53 @@ document.addEventListener('DOMContentLoaded', () => {
         const step = tutorialSteps[stepIndex];
         if (!step) return;
 
-        // Update modal message and button visibility
+        // Update modal and button
         const tutorialMessage = document.getElementById('tutorial-message');
         tutorialMessage.innerHTML = step.message;
         tutorialNextBtn.style.display = step.showButton ? 'inline-block' : 'none';
+        tutorialNextBtn.textContent = "Suivant"; // Reset button text
 
-        // Setup UI and listeners for the step
+        // Handle highlighting
+        clearHighlights();
+        if (step.highlight) {
+            document.querySelectorAll(step.highlight).forEach(el => el.classList.add('tutorial-highlight'));
+        }
+
         setupStepAction(step.action);
     }
 
     function setupStepAction(action) {
-        // Remove previous highlights and listeners to avoid conflicts
-        clearHighlights();
         clearSlotListeners();
 
-        const grid = document.getElementById('tutorialBuildingsGrid');
         if (action === 'clickEmptyPlot') {
-            const slots = grid.querySelectorAll('.building-slot:not(.occupied)');
+            const slots = document.querySelectorAll('#tutorialBuildingsGrid .building-slot:not(.occupied)');
             slots.forEach(slot => {
-                slot.classList.add('tutorial-highlight');
                 slot.addEventListener('click', handlePlotClick);
             });
-        } else if (action === 'selectBuilding') {
-            // This assumes the modal is open. The highlight logic is in handlePlotClick
+        } else if (action === 'highlightElement' || action === 'wait') {
+            tutorialNextBtn.onclick = () => runTutorialStep(tutorialState.currentStep + 1);
         } else if (action === 'finish') {
             tutorialNextBtn.textContent = "Aller à ma Cité";
             tutorialNextBtn.onclick = () => {
-                // Overwrite global state, save it, and redirect
-                gameState = tutorialState.gameState;
-                saveGameState();
+                // We save the tutorial state which includes the newly built farm
+                // The main game will load this state.
+                saveTutorialStateAsMain();
                 window.location.href = 'game.html';
             };
         }
     }
 
     function handlePlotClick(event) {
-        // The user clicked on an empty plot, as instructed.
-        clearSlotListeners();
         clearHighlights();
+        clearSlotListeners();
 
         const slotId = parseInt(event.currentTarget.dataset.slotId);
         tutorialState.targetSlotId = slotId;
 
-        // Reuse the logic from city-view to show the build modal, but simplified for the tutorial
+        // Simplified build modal from city-view.js
         const buildOptions = Object.entries(BUILDING_DEFINITIONS).map(([type, def]) => {
             const costs = getCost(def.baseCost, def.upgradeCostMultiplier, 0);
             const costsHtml = costs.map(c => `<span>${c.amount.toLocaleString()} ${c.res}</span>`).join(', ');
-
             return `<div class="build-item" data-building-type="${type}" style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-gold); border-radius: 0.75rem; padding: 0.75rem; text-align: center; cursor: pointer;">
                         <div style="font-size: 1.8rem;">${def.icon}</div>
                         <div style="font-weight: bold; color: var(--gold-light); font-size: 0.9rem;">${def.name}</div>
@@ -176,50 +185,57 @@ document.addEventListener('DOMContentLoaded', () => {
         const body = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem;">${buildOptions}</div>`;
         showModal('Construire un bâtiment', body, '');
 
-        // Now that the modal is open, proceed to the next tutorial step
-        runTutorialStep(1);
+        runTutorialStep(1); // Advance to "select farm" step
 
-        // Highlight the farm and add a listener
-        setTimeout(() => { // Timeout to ensure modal is rendered
+        setTimeout(() => {
             const farmButton = document.querySelector('.build-item[data-building-type="farm"]');
             if (farmButton) {
-                farmButton.classList.add('tutorial-highlight');
                 farmButton.addEventListener('click', handleFarmSelect);
             }
         }, 100);
     }
 
     function handleFarmSelect() {
-        // User selected the farm.
         closeModal();
 
-        // Use the game's logic to start building
         const type = 'farm';
         const slotId = tutorialState.targetSlotId;
         const def = BUILDING_DEFINITIONS[type];
         const costs = getCost(def.baseCost, def.upgradeCostMultiplier, 0);
         costs.forEach(c => tutorialState.gameState.resources[c.res] -= c.amount);
-        const buildTime = 100; // Use a short time for the tutorial
+
+        renderTutorialResources(); // Update resource display
+
+        const buildTime = 100; // Short time for tutorial
         tutorialState.gameState.city.constructionQueue.push({ slotId, type, level: 1, endTime: Date.now() + buildTime, xpGain: def.xpGain });
 
-        // Update the grid to show construction
         renderTutorialGrid();
+        runTutorialStep(2); // Advance to "construction started" step
 
-        // Proceed to the next step
-        runTutorialStep(2);
-
-        // Automatically proceed to the final step after a delay
         setTimeout(() => {
-            // "Complete" the construction for the user
             const item = tutorialState.gameState.city.constructionQueue.shift();
             const building = tutorialState.gameState.city.buildings.find(b => b.slotId === item.slotId);
             if (building) {
                 building.type = item.type;
                 building.level = item.level;
             }
+            // Simulate resource production from the new farm
+            tutorialState.gameState.resources.food += 50;
+
+            // Complete the first quest
+            tutorialState.gameState.city.activeQuestId = 1;
+
             renderTutorialGrid();
-            runTutorialStep(3);
-        }, 1500);
+            renderTutorialResources();
+
+            const questPreview = document.getElementById('tutorial-quest-preview');
+            if(questPreview) {
+                questPreview.innerHTML = `✅ Construire une Ferme`;
+                questPreview.parentElement.classList.add('completed');
+            }
+
+            runTutorialStep(4); // Advance to "construction finished" step
+        }, 2000); // Wait for "construction"
     }
 
     function renderTutorialGrid() {
@@ -230,21 +246,45 @@ document.addEventListener('DOMContentLoaded', () => {
             const slot = document.createElement('div');
             slot.className = 'building-slot';
             slot.dataset.slotId = building.slotId;
-
             const isConstructing = tutorialState.gameState.city.constructionQueue.some(item => item.slotId === building.slotId);
 
-            if (building.type) {
+            if (isConstructing) {
+                slot.classList.add('constructing');
+                slot.innerHTML = `<div class="building-icon">🔨</div><div class="building-name">Construction...</div>`;
+            } else if (building.type) {
                 const def = BUILDING_DEFINITIONS[building.type];
                 slot.classList.add('occupied');
                 slot.innerHTML = `<div class="building-icon">${def.icon}</div><div class="building-name">${def.name}</div><div class="building-level">Niv. ${building.level}</div>`;
-            } else if (isConstructing) {
-                slot.classList.add('constructing');
-                slot.innerHTML = `<div class="building-icon">🔨</div><div class="building-name">Construction...</div>`;
             } else {
                 slot.innerHTML = `<div class="building-icon" style="font-size: 2.5rem; color: var(--gold-light);">+</div>`;
             }
             grid.appendChild(slot);
         });
+    }
+
+    function renderTutorialResources() {
+        const container = document.getElementById('tutorial-resources');
+        if (!container) return;
+        const resources = tutorialState.gameState.resources;
+        container.innerHTML = `
+            <span>💰 Or: ${Math.floor(resources.gold)}</span>
+            <span>🌾 Nourriture: ${Math.floor(resources.food)}</span>
+            <span>🏛️ Marbre: ${Math.floor(resources.marble)}</span>
+        `;
+    }
+
+    function saveTutorialStateAsMain() {
+        // This function overwrites the main game save with the tutorial's result
+        try {
+            const stateToSave = tutorialState.gameState;
+            stateToSave.lastUpdate = Date.now();
+            // Ensure tutorial-specific flags are not saved
+            // (There are none currently, but good practice)
+            localStorage.setItem(SAVE_KEY, JSON.stringify(stateToSave));
+            console.log("Tutorial state saved as main game state.");
+        } catch (error) {
+            console.error("Error saving tutorial state:", error);
+        }
     }
 
     function clearHighlights() {
