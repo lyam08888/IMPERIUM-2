@@ -18,11 +18,12 @@
 }
 
 .game-title {
-    font-size: 6rem;
+    font-size: clamp(3rem, 15vw, 8rem);
     font-weight: bold;
     color: var(--gold-primary);
     text-shadow: 4px 4px 8px rgba(0,0,0,0.7);
     animation: slideInFromTop 1s ease-out;
+    word-break: break-word;
 }
 
 .subtitle {
@@ -134,7 +135,7 @@
 }
 
 @keyframes slideInFromTop {
-    from { transform: translateY(-50px); opacity: 0; }
+    from { transform: translateY(-30px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
 
