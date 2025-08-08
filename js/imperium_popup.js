@@ -38,6 +38,8 @@ function initializePopup() {
         return;
     }
 
+    moveDashboardTiles();
+
     // 3. Gérer l'ouverture et la fermeture
     openBtn.addEventListener('click', () => {
         const isActive = popup.classList.toggle('active');
@@ -98,5 +100,22 @@ function updateImperiumPopup() {
             item.innerHTML = `<span class="popup-resource-icon">${resourceIcons[res]}</span> <span>${value.toLocaleString()}</span>`;
             resourcesList.appendChild(item);
         }
+    }
+}
+
+function moveDashboardTiles() {
+    const dashboardGrid = document.querySelector('.dashboard-grid');
+    const actionsGrid = document.getElementById('imperium-actions-grid');
+
+    if (dashboardGrid && actionsGrid) {
+        // Move all tiles from the dashboard to the popup
+        while (dashboardGrid.firstChild) {
+            actionsGrid.appendChild(dashboardGrid.firstChild);
+        }
+        // Remove the now-empty dashboard grid
+        dashboardGrid.remove();
+
+        // Add a class to the popup actions grid for styling
+        actionsGrid.classList.add('dashboard-grid-popup');
     }
 }
