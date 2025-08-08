@@ -75,6 +75,7 @@
     width: 100%;
     height: 100%;
     z-index: 2000;
+    pointer-events: none; /* Allow clicks to pass through the entire tutorial container */
 }
 
 #tutorial-overlay {
@@ -128,6 +129,75 @@
     box-shadow: 0 0 0 4px var(--gold-light), 0 0 20px 10px var(--shadow-gold);
     border-radius: 1rem; /* Match building slot radius */
     transition: box-shadow 0.3s ease;
+    pointer-events: auto; /* Ensure highlighted elements are clickable */
+}
+
+/* Tutorial building slots styling and functionality */
+#tutorialBuildingsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+}
+
+#tutorialBuildingsGrid .building-slot {
+    pointer-events: auto;
+    aspect-ratio: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--gold-primary, #d4651f);
+    border-radius: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    color: var(--text-light, #e8dcc6);
+}
+
+#tutorialBuildingsGrid .building-slot:hover {
+    transform: scale(1.05);
+    border-color: var(--gold-light, #f59e0b);
+    box-shadow: 0 0 20px rgba(180, 83, 9, 0.4);
+}
+
+#tutorialBuildingsGrid .building-slot.occupied {
+    background: linear-gradient(135deg, rgba(180, 83, 9, 0.2), rgba(212, 101, 31, 0.2));
+}
+
+#tutorialBuildingsGrid .building-slot .building-icon {
+    font-size: 2.5em;
+    margin-bottom: 8px;
+}
+
+#tutorialBuildingsGrid .building-slot .building-name {
+    font-size: 0.8em;
+    text-align: center;
+    font-weight: bold;
+}
+
+#tutorialBuildingsGrid .building-slot .building-level {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: var(--gold-primary, #d4651f);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7em;
+    font-weight: bold;
+}
+
+/* Ensure the modal container can still function during tutorial */
+.modal-container {
+    z-index: 2005 !important; /* Above tutorial elements */
+    pointer-events: all !important;
 }
 
 

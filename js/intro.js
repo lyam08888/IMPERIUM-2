@@ -134,6 +134,24 @@ document.addEventListener('DOMContentLoaded', () => {
         tutorialMessage.innerHTML = step.message;
         tutorialNextBtn.style.display = step.showButton ? 'inline-block' : 'none';
         tutorialNextBtn.textContent = "Suivant"; // Reset button text
+        
+        // Add skip tutorial button if not already present
+        if (!document.getElementById('skip-tutorial-btn')) {
+            const skipBtn = document.createElement('button');
+            skipBtn.id = 'skip-tutorial-btn';
+            skipBtn.textContent = 'Passer le tutoriel';
+            skipBtn.className = 'imperium-btn danger';
+            skipBtn.style.marginLeft = '10px';
+            skipBtn.onclick = () => {
+                if (confirm('Voulez-vous vraiment passer le tutoriel ? Vous irez directement au jeu.')) {
+                    // Save a basic game state without tutorial progress
+                    tutorialState.gameState = getDefaultGameState();
+                    saveTutorialStateAsMain();
+                    window.location.href = 'game.html';
+                }
+            };
+            tutorialNextBtn.parentNode.appendChild(skipBtn);
+        }
 
         // Handle highlighting
         clearHighlights();
@@ -251,6 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const slot = document.createElement('div');
             slot.className = 'building-slot';
             slot.dataset.slotId = building.slotId;
+            slot.style.pointerEvents = 'auto'; // Ensure slots are always clickable
             const isConstructing = tutorialState.gameState.city.constructionQueue.some(item => item.slotId === building.slotId);
 
             if (isConstructing) {
@@ -299,8 +318,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearSlotListeners() {
         const slots = document.querySelectorAll('#tutorialBuildingsGrid .building-slot');
         slots.forEach(slot => {
-            const newSlot = slot.cloneNode(true);
-            slot.parentNode.replaceChild(newSlot, slot);
+            // Remove only click listeners by removing the function reference
+            slot.removeEventListener('click', handlePlotClick);
+            // Ensure pointer-events are still active for CSS
+            slot.style.pointerEvents = 'auto';
         });
     }
 
