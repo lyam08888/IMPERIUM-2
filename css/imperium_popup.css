@@ -2,8 +2,8 @@
 
 #imperium-popup-button {
     position: fixed;
-    top: 20px;
-    left: 20px;
+    bottom: 20px;
+    right: 20px;
     z-index: 1050;
     background: linear-gradient(145deg, var(--gold-secondary), var(--gold-primary));
     color: white;
@@ -27,8 +27,8 @@
 
 .imperium-popup-container {
     position: fixed;
-    top: 80px;
-    left: 20px;
+    bottom: 80px;
+    right: 20px;
     width: 300px;
     z-index: 1040;
     background: linear-gradient(135deg, var(--dark-bg), var(--dark-stone));
@@ -109,10 +109,62 @@
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Styling for the moved dashboard grid */
+#imperium-actions-grid.dashboard-grid-popup {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    padding-top: 0.5rem;
+}
+
+#imperium-actions-grid.dashboard-grid-popup .dashboard-tile {
+    /* Reuse some styling from the original dashboard-tile */
+    background: var(--dark-marble);
+    border: 1px solid var(--border-gold);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+#imperium-actions-grid.dashboard-grid-popup .dashboard-tile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px var(--shadow-gold);
+    border-color: var(--gold-light);
+}
+
+#imperium-actions-grid.dashboard-grid-popup .tile-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+#imperium-actions-grid.dashboard-grid-popup .tile-icon {
+    font-size: 1.2rem;
+}
+
+#imperim-actions-grid.dashboard-grid-popup .tile-title {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--gold-light);
+    margin: 0;
+}
+
+#imperium-actions-grid.dashboard-grid-popup .tile-preview {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

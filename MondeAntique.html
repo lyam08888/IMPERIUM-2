@@ -11,6 +11,7 @@
 
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/imperium_popup.css">
+    <link rel="stylesheet" href="css/loader.css">
 
 
     <script src="js/game.js" defer></script>
@@ -19,6 +20,10 @@
 
 </head>
 <body>
+    <div id="loader">
+        <div class="loader-spinner"></div>
+    </div>
+
     <div id="notifications-container"></div>
 
 
@@ -60,5 +65,11 @@
     </div>
 
     <!-- La popup IMPERIUM sera injectée ici par imperium_popup.js -->
+    <script>
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+            document.querySelector('.imperium-ui').classList.add('content-fade-in');
+        });
+    </script>
 </body>
 </html>
