@@ -149,8 +149,9 @@ function updateDashboardPreviews() {
     document.getElementById('resources-tile-preview').textContent = `Or : ${Math.floor(gameState.resources.gold).toLocaleString()}`;
     document.getElementById('stats-tile-preview').textContent = `Population : ${Math.floor(gameState.city.stats.population).toLocaleString()}`;
     document.getElementById('production-tile-preview').textContent = `Or/h : ${Math.round(gameState.city.production.gold * gameState.city.stats.happinessModifier).toLocaleString()}`;
-    const quest = QUESTS[gameState.city.activeQuestId];
-    document.getElementById('quest-tile-preview').textContent = quest ? quest.description : "Terminé";
+
+    const quest = getCurrentQuest();
+    document.getElementById('quest-tile-preview').textContent = quest ? quest.description : "Scénario terminé !";
 
     // Update Research Tile Preview
     const researchPreview = document.getElementById('research-tile-preview');
@@ -301,19 +302,7 @@ function completeConstruction(item) {
         building.level = item.level;
         showToast(`${BUILDING_DEFINITIONS[item.type].name} (Niv. ${item.level}) terminé !`, "success");
         addXp(item.xpGain);
-        checkQuestCompletion();
-    }
-}
-
-function checkQuestCompletion() {
-    const quest = QUESTS[gameState.city.activeQuestId];
-    if (quest && quest.isComplete(gameState)) {
-        showToast(`Objectif atteint : ${quest.description}`, "success");
-        gameState.city.activeQuestId++;
-        addXp(quest.reward.xp);
-        quest.reward.resources.forEach(r => {
-            gameState.resources[r.res] = Math.min(gameState.resources[r.res] + r.amount, gameState.storage[r.res] || Infinity);
-        });
+        // checkQuestCompletion is now called in the master tick
     }
 }
 
@@ -423,46 +412,27 @@ function showProductionModal() {
 }
 
 function showQuestModal() {
-    let body = '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
 
-    if (QUESTS && QUESTS.length > 0) {
-        QUESTS.forEach(quest => {
-            let statusIcon = '';
-            let statusClass = '';
+    const chapter = SCENARIO.chapters[gameState.scenario.currentChapterIndex];
+    const quest = getCurrentQuest();
 
-            // The quest is complete if its ID is less than the active one.
-            if (quest.id < gameState.city.activeQuestId) {
-                statusIcon = '✅';
-                statusClass = 'completed';
-            // The quest is the current one.
-            } else if (quest.id === gameState.city.activeQuestId) {
-                statusIcon = '▶️';
-                statusClass = 'inprogress';
-            // The quest is not yet available.
-            } else {
-                statusIcon = '🔒';
-                statusClass = 'locked';
-            }
-
-            const rewardText = (quest.reward.resources || []).map(r => `${r.amount.toLocaleString()} ${r.res}`).join(', ') + (quest.reward.xp > 0 ? ` & ${quest.reward.xp} XP` : '');
-
-            body += `
-                <div class="quest-item ${statusClass}" style="border: 1px solid var(--border-gold); padding: 1rem; border-radius: 0.5rem; display: flex; align-items: center; gap: 1rem; opacity: ${statusClass === 'locked' ? 0.6 : 1}; background: ${statusClass === 'completed' ? 'rgba(44, 160, 44, 0.1)' : 'transparent'};">
-                    <div style="font-size: 1.5rem;">${statusIcon}</div>
-                    <div>
-                        <div style="font-weight: bold; color: var(--text-light);">${quest.description}</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Récompense : ${rewardText}</div>
-                    </div>
+    let body = '';
+    if (chapter && quest) {
+        const rewardText = (quest.reward.resources || []).map(r => `${r.amount.toLocaleString()} ${r.res}`).join(', ') + (quest.reward.xp > 0 ? ` & ${quest.reward.xp} XP` : '');
+        body = `
+            <div style="text-align: center;">
+                <h4 style="color: var(--gold-light); margin-bottom: 0.5rem;">${chapter.title}</h4>
+                <p style="margin-bottom: 1rem;">${chapter.description}</p>
+                <div style="border-top: 1px solid var(--border-gold); padding-top: 1rem;">
+                    <strong>Objectif : ${quest.description}</strong>
+                    <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">Récompense : ${rewardText}</div>
                 </div>
-            `;
-        });
+            </div>`;
     } else {
-        body += '<p>Aucun objectif défini pour le moment.</p>';
+        body = `<div style="text-align: center;"><strong>Vous avez terminé le scénario principal !</strong><p>Continuez à développer votre cité.</p></div>`;
     }
 
-    body += '</div>';
-
-    showModal("Objectifs", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    showModal("Scénario Principal", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
 }
 
 function showBarracksModal(building) {
