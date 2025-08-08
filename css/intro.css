@@ -74,20 +74,14 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 2000;
+    z-index: 10;
     pointer-events: none; /* Allow clicks to pass through the entire tutorial container */
+    background: rgba(15, 23, 42, 0.3); /* Légère teinte de fond */
 }
 
 #tutorial-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(5px);
-    z-index: 1; /* Lower than everything else */
-    pointer-events: none; /* Allow clicks to pass through the overlay */
+    /* COMPLÈTEMENT DÉSACTIVÉ POUR ÉVITER LES CONFLITS */
+    display: none !important;
 }
 
 #tutorial-modal {
@@ -233,6 +227,24 @@
 #tutorialBuildingsGrid .building-slot {
     z-index: 50 !important;
     position: relative !important;
+}
+
+/* Solution de secours - rendre TOUT cliquable dans le tutoriel */
+#tutorial-screen * {
+    pointer-events: auto !important;
+}
+
+/* Mais le conteneur principal reste transparent */
+#tutorial-screen {
+    pointer-events: none !important;
+}
+
+/* Assurer que les slots ont un background visible */
+#tutorialBuildingsGrid .building-slot {
+    background: rgba(212, 101, 31, 0.4) !important;
+    border: 3px solid #f59e0b !important;
+    min-height: 120px !important;
+    min-width: 120px !important;
 }
 
 

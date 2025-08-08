@@ -45,6 +45,19 @@ document.addEventListener('DOMContentLoaded', () => {
             startGameBtn.className = 'imperium-btn';
             startGameBtn.onclick = startIntroSequence;
             introButtonsContainer.appendChild(startGameBtn);
+            
+            // Bouton pour aller directement au jeu
+            const directBtn = document.createElement('button');
+            directBtn.textContent = 'Jeu Direct (Sans Tutoriel)';
+            directBtn.className = 'imperium-btn';
+            directBtn.style.marginTop = '10px';
+            directBtn.style.background = '#16a34a';
+            directBtn.onclick = () => {
+                if (confirm('Voulez-vous aller directement au jeu principal ?\n\nVous commencerez avec :\n• Une ferme déjà construite\n• Des ressources de base\n• Aucun tutoriel')) {
+                    skipTutorialCompletely();
+                }
+            };
+            introButtonsContainer.appendChild(directBtn);
         }
     }
 
@@ -121,10 +134,14 @@ document.addEventListener('DOMContentLoaded', () => {
         tutorialState.gameState = getDefaultGameState();
         renderTutorialGrid();
         renderTutorialResources();
+        
+        // Créer le bouton "passer le tutoriel" immédiatement
+        createSkipTutorialButton();
+        
         runTutorialStep(0);
         
         // Debug - Log tutorial startup
-        console.log('Tutorial started');
+        console.log('Tutorial started - Bouton passer le tutoriel créé');
         setTimeout(() => {
             console.log('Tutorial slots after render:', document.querySelectorAll('#tutorialBuildingsGrid .building-slot').length);
             document.querySelectorAll('#tutorialBuildingsGrid .building-slot').forEach((slot, i) => {
@@ -137,6 +154,62 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }, 100);
     }
+    
+    function createSkipTutorialButton() {
+        // Créer un bouton fixe en haut à droite
+        if (!document.getElementById('fixed-skip-tutorial-btn')) {
+            const skipBtn = document.createElement('button');
+            skipBtn.id = 'fixed-skip-tutorial-btn';
+            skipBtn.textContent = '❌ PASSER LE TUTORIEL';
+            skipBtn.className = 'imperium-btn danger';
+            skipBtn.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                font-size: 1.2em;
+                font-weight: bold;
+                padding: 12px 20px;
+                background: #dc2626;
+                border: 2px solid #fbbf24;
+                color: white;
+                border-radius: 8px;
+                cursor: pointer;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            `;
+            skipBtn.onclick = () => {
+                if (confirm('Voulez-vous vraiment passer le tutoriel ?\n\nVous irez directement au jeu principal avec :\n• Une ferme déjà construite\n• Des ressources de base\n• Le premier objectif complété')) {
+                    skipTutorialCompletely();
+                }
+            };
+            document.body.appendChild(skipBtn);
+        }
+    }
+    
+    function skipTutorialCompletely() {
+        // Create completed tutorial state
+        const completedState = getDefaultGameState();
+        
+        // Add a farm to the first slot
+        completedState.city.buildings[0].type = 'farm';
+        completedState.city.buildings[0].level = 1;
+        
+        // Give resources as if the farm has been producing
+        completedState.resources.food = 150;
+        completedState.resources.gold = 120;
+        completedState.resources.marble = 80;
+        
+        // Mark first quest as completed
+        completedState.city.activeQuestId = 1;
+        
+        // Add some progress
+        completedState.player.xp = 25;
+        
+        // Save and redirect
+        localStorage.setItem(SAVE_KEY, JSON.stringify(completedState));
+        console.log("Tutoriel complètement passé - redirection vers le jeu");
+        window.location.href = 'game.html';
+    }
 
     function runTutorialStep(stepIndex) {
         tutorialState.currentStep = stepIndex;
@@ -145,7 +218,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update modal and button
         const tutorialMessage = document.getElementById('tutorial-message');
-        tutorialMessage.innerHTML = step.message;
+        let messageContent = step.message;
+        
+        // Add help message for problematic steps
+        if (step.action === 'clickEmptyPlot') {
+            messageContent += `<br><br><div style="color: #f59e0b; font-size: 0.9em; font-style: italic; margin-top: 10px;">
+                ⚠️ Problème de clic ? Utilisez le bouton "PASSER LE TUTORIEL" ci-dessous pour aller directement au jeu !
+            </div>`;
+        }
+        
+        tutorialMessage.innerHTML = messageContent;
         tutorialNextBtn.style.display = step.showButton ? 'inline-block' : 'none';
         tutorialNextBtn.textContent = "Suivant"; // Reset button text
         
@@ -153,14 +235,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!document.getElementById('skip-tutorial-btn')) {
             const skipBtn = document.createElement('button');
             skipBtn.id = 'skip-tutorial-btn';
-            skipBtn.textContent = 'Passer le tutoriel';
+            skipBtn.textContent = 'PASSER LE TUTORIEL';
             skipBtn.className = 'imperium-btn danger';
             skipBtn.style.marginLeft = '10px';
+            skipBtn.style.fontSize = '1.1em';
+            skipBtn.style.fontWeight = 'bold';
             skipBtn.onclick = () => {
-                if (confirm('Voulez-vous vraiment passer le tutoriel ? Vous irez directement au jeu.')) {
-                    // Save a basic game state without tutorial progress
-                    tutorialState.gameState = getDefaultGameState();
-                    saveTutorialStateAsMain();
+                if (confirm('Voulez-vous vraiment passer le tutoriel ? Vous irez directement au jeu avec une ferme déjà construite.')) {
+                    // Create completed tutorial state
+                    const completedState = getDefaultGameState();
+                    
+                    // Add a farm to the first slot
+                    completedState.city.buildings[0].type = 'farm';
+                    completedState.city.buildings[0].level = 1;
+                    
+                    // Give some resources as if the farm has been producing
+                    completedState.resources.food += 100;
+                    completedState.resources.gold += 50;
+                    
+                    // Mark first quest as completed
+                    completedState.city.activeQuestId = 1;
+                    
+                    // Save and redirect
+                    localStorage.setItem(SAVE_KEY, JSON.stringify(completedState));
+                    console.log("Tutoriel passé - état de base sauvegardé");
                     window.location.href = 'game.html';
                 }
             };
@@ -184,6 +282,22 @@ document.addEventListener('DOMContentLoaded', () => {
             slots.forEach(slot => {
                 slot.addEventListener('click', handlePlotClick);
             });
+            
+            // SOLUTION DE SECOURS : Si aucun clic après 10 secondes, déclencher automatiquement
+            setTimeout(() => {
+                if (tutorialState.currentStep === 0) { // Si on est toujours sur la première étape
+                    console.log("Déclenchement automatique du clic - problème détecté");
+                    const firstEmptySlot = document.querySelector('#tutorialBuildingsGrid .building-slot:not(.occupied)');
+                    if (firstEmptySlot) {
+                        // Simuler le clic
+                        const mockEvent = {
+                            currentTarget: firstEmptySlot,
+                            stopPropagation: () => {}
+                        };
+                        handlePlotClick(mockEvent);
+                    }
+                }
+            }, 10000);
         } else if (action === 'highlightElement' || action === 'wait') {
             tutorialNextBtn.onclick = () => runTutorialStep(tutorialState.currentStep + 1);
         } else if (action === 'autoAdvance') {
