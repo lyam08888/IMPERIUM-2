@@ -21,14 +21,21 @@ function initializeCityUI() {
 }
 
 function cityGameTick() {
-    const now = Date.now();
-    if (gameState.city.constructionQueue.length > 0 && now >= gameState.city.constructionQueue[0].endTime) {
-        completeConstruction(gameState.city.constructionQueue[0]);
-        gameState.city.constructionQueue.shift();
-        recalculateCityStats();
+    const researchInProgress = gameState.city.researchQueue.length > 0 ? gameState.city.researchQueue[0] : null;
+    const trainingInProgress = gameState.city.trainingQueue.length > 0 ? gameState.city.trainingQueue[0] : null;
+
+    if (masterGameTick()) {
+        if (researchInProgress && gameState.city.researchQueue.length === 0) {
+            const tech = findTechnology(researchInProgress.techId);
+            if(tech) showToast(`Recherche terminée : ${tech.name}!`, "success");
+        }
+        if (trainingInProgress && gameState.city.trainingQueue.length === 0) {
+            const unitDef = UNITS_CONFIG[trainingInProgress.unitId];
+            if(unitDef) showToast(`${trainingInProgress.amount} ${unitDef.name}(s) ont terminé leur formation !`, "success");
+        }
         updateAllCityUI();
-        saveGameState();
     }
+
     for (const res in gameState.city.production) {
         if (gameState.resources[res] !== undefined) {
             const gainPerSecond = (gameState.city.production[res] * gameState.city.stats.happinessModifier) / 3600;
@@ -84,12 +91,29 @@ function renderTimers() {
         const build = gameState.city.constructionQueue.find(item => item.slotId === slotId);
         if (build) {
             const remaining = Math.max(0, build.endTime - now);
-            const seconds = Math.floor((remaining / 1000) % 60);
-            const minutes = Math.floor((remaining / (1000 * 60)) % 60);
-            const hours = Math.floor((remaining / (1000 * 60 * 60)) % 24);
-            timerEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            timerEl.textContent = formatTime(remaining);
         }
     });
+
+    // Add research timer update
+    const researchTimerEl = document.querySelector('#research-tile-preview .timer, .tech-node.in-progress .research-timer');
+    if (researchTimerEl) {
+        const research = gameState.city.researchQueue[0];
+        if (research) {
+            const remaining = Math.max(0, research.endTime - now);
+            researchTimerEl.textContent = formatTime(remaining);
+        } else {
+             researchTimerEl.textContent = '';
+        }
+    }
+}
+
+function formatTime(ms) {
+    if (ms <= 0) return "00:00:00";
+    const seconds = Math.floor((ms / 1000) % 60);
+    const minutes = Math.floor((ms / (1000 * 60)) % 60);
+    const hours = Math.floor((ms / (1000 * 60 * 60)) % 24);
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
 function updateDashboardPreviews() {
@@ -99,6 +123,18 @@ function updateDashboardPreviews() {
     document.getElementById('production-tile-preview').textContent = `Or/h : ${Math.round(gameState.city.production.gold * gameState.city.stats.happinessModifier).toLocaleString()}`;
     const quest = QUESTS[gameState.city.activeQuestId];
     document.getElementById('quest-tile-preview').textContent = quest ? quest.description : "Terminé";
+
+    // Update Research Tile Preview
+    const researchPreview = document.getElementById('research-tile-preview');
+    if (researchPreview) {
+        const currentResearch = gameState.city.researchQueue[0];
+        if (currentResearch) {
+            const tech = findTechnology(currentResearch.techId);
+            researchPreview.innerHTML = `<div>${tech.name}</div><div class="timer"></div>`;
+        } else {
+            researchPreview.textContent = "Aucune recherche en cours.";
+        }
+    }
 }
 
 function updateAllCityUI() {
@@ -119,6 +155,12 @@ function handleBuildingClick(building) {
         showToast("Ce bâtiment est en cours de construction.", "error");
         return;
     }
+
+    if (building.type === 'barracks') {
+        showBarracksModal(building);
+        return;
+    }
+
     if (building.type) {
         const def = BUILDING_DEFINITIONS[building.type];
         const upgradeCosts = getCost(def.baseCost, def.upgradeCostMultiplier, building.level);
@@ -364,4 +406,151 @@ function showQuestModal() {
     }
 
     showModal("Objectif Actuel", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+}
+
+function showBarracksModal(building) {
+    let body = '<div>';
+
+    // Section 1: Unit Pool
+    body += '<h4>Unités en réserve</h4><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.5rem; margin-bottom: 1.5rem; text-align: center;">';
+    for(const unitId in gameState.unitPool) {
+        body += `<div style="background: rgba(15, 23, 42, 0.7); padding: 0.5rem; border-radius: 0.5rem;">
+            <div>${UNITS_CONFIG[unitId].icon} ${UNITS_CONFIG[unitId].name}</div>
+            <div style="font-size: 1.2rem; font-weight: bold;">${gameState.unitPool[unitId].toLocaleString()}</div>
+        </div>`;
+    }
+    body += '</div>';
+
+    // Section 2: Training Queue
+    body += '<h4>File d\'entraînement</h4>';
+    if (gameState.city.trainingQueue.length > 0) {
+        const item = gameState.city.trainingQueue[0];
+        const unitDef = UNITS_CONFIG[item.unitId];
+        const remaining = Math.max(0, item.endTime - Date.now());
+        body += `<div style="border: 1px solid var(--border-gold); padding: 1rem; border-radius: 0.5rem;">
+            Entraînement de ${item.amount} ${unitDef.name}(s)... <span class="timer">${formatTime(remaining)}</span>
+        </div>`;
+    } else {
+        body += '<p>Aucune unité en entraînement.</p>';
+    }
+
+    // Section 3: Train New Units
+    body += '<h4 style="margin-top: 1.5rem;">Entraîner de nouvelles unités</h4><div style="display: flex; flex-direction: column; gap: 0.5rem;">';
+    Object.entries(UNITS_CONFIG).forEach(([unitId, unitDef]) => {
+        let canTrain = true;
+        let requirementText = '';
+        if (unitDef.requires) {
+            const reqBuilding = gameState.city.buildings.find(b => b.type === unitDef.requires.building);
+            if (!reqBuilding || reqBuilding.level < unitDef.requires.level) {
+                canTrain = false;
+                requirementText = `<div style="font-size: 0.8em; color: var(--error-red);">Requiert Caserne Niv. ${unitDef.requires.level}</div>`;
+            }
+        }
+
+        const costsHtml = unitDef.cost.map(c => `${c.amount} ${c.res}`).join(', ');
+
+        body += `<div style="border: 1px solid var(--border-gold); padding: 1rem; border-radius: 0.5rem; display: flex; justify-content: space-between; align-items: center; opacity: ${!canTrain ? 0.5 : 1};">
+            <div>
+                <div style="font-weight: bold; color: var(--gold-light);">${unitDef.icon} ${unitDef.name}</div>
+                <div style="font-size: 0.8em; color: var(--text-muted);">${costsHtml} | ${unitDef.trainTime}s par unité</div>
+                ${requirementText}
+            </div>
+            <div style="display: flex; align-items:center; gap: 0.5rem;">
+                <input type="number" id="train-amount-${unitId}" value="1" min="1" max="100" style="width: 60px; padding: 0.5rem; background: var(--dark-bg); border: 1px solid var(--border-gold); color: var(--text-light); border-radius: 0.25rem;">
+                <button class="imperium-btn" onclick="handleTrainClick('${unitId}')" ${!canTrain || gameState.city.trainingQueue.length > 0 ? 'disabled' : ''}>Entraîner</button>
+            </div>
+        </div>`;
+    });
+    body += '</div>';
+
+    body += '</div>';
+    showModal(`Caserne (Niveau ${building.level})`, body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+}
+
+function handleTrainClick(unitId) {
+    const amount = parseInt(document.getElementById(`train-amount-${unitId}`).value);
+    if (!amount || amount <= 0) {
+        showToast("Quantité invalide.", "error");
+        return;
+    }
+    const result = startTraining(unitId, amount);
+    if (result.success) {
+        showToast("L'entraînement a commencé !", "success");
+        const building = gameState.city.buildings.find(b => b.type === 'barracks');
+        showBarracksModal(building); // Refresh modal
+    } else {
+        showToast(result.message, "error");
+    }
+}
+
+function showTechModal() {
+    let body = '<div class="tech-tree-container">';
+
+    // Tabs for categories
+    body += '<div class="tech-tabs" style="display: flex; gap: 0.5rem; border-bottom: 1px solid var(--border-gold); margin-bottom: 1rem;">';
+    Object.keys(TECHNOLOGY_DEFINITIONS).forEach((catId, index) => {
+        body += `<button class="imperium-btn" style="background: transparent; border: none; border-bottom: 2px solid transparent;" data-tab-btn="${catId}" onclick="switchTechTab(this, '${catId}')">${TECHNOLOGY_DEFINITIONS[catId].name}</button>`;
+    });
+    body += '</div>';
+
+    // Content for each category
+    Object.entries(TECHNOLOGY_DEFINITIONS).forEach(([catId, category]) => {
+        body += `<div id="tech-tab-${catId}" class="tech-tab-content" style="display: none; flex-direction: column; gap: 0.5rem;">`;
+        Object.entries(category.technologies).forEach(([techId, tech]) => {
+            const isResearched = gameState.researchedTechs.includes(techId);
+            const isBeingResearched = gameState.city.researchQueue.some(item => item.techId === techId);
+            const canAfford = tech.cost.every(c => gameState.resources[c.res] >= c.amount);
+            const reqsMet = tech.requirements.every(req => gameState.researchedTechs.includes(req));
+
+            let statusClass = '';
+            let statusText = '';
+            if (isResearched) { statusClass = 'researched'; statusText = 'Terminé'; }
+            else if (isBeingResearched) { statusClass = 'in-progress'; statusText = 'En cours'; }
+            else if (!reqsMet) { statusClass = 'locked'; statusText = 'Verrouillé'; }
+            else if (!canAfford) { statusClass = 'locked'; statusText = 'Fonds insuffisants'; }
+
+            const costsHtml = tech.cost.map(c => `<span style="color: ${gameState.resources[c.res] < c.amount ? 'var(--error-red)' : 'var(--text-light)'}">${c.amount.toLocaleString()} ${c.res}</span>`).join(', ');
+
+            body += `<div class="tech-node ${statusClass}" style="border: 1px solid var(--border-gold); padding: 1rem; border-radius: 0.5rem; display: flex; justify-content: space-between; align-items: center; opacity: ${statusClass === 'locked' || statusClass === 'researched' ? 0.6 : 1};">
+                <div>
+                    <div class="tech-name" style="font-weight: bold; color: var(--gold-light);">${tech.name}</div>
+                    <div class="tech-desc" style="font-size: 0.9em;">${tech.description}</div>
+                    <div class="tech-cost" style="font-size: 0.8em; color: var(--text-muted);">${costsHtml} | ${formatTime(tech.researchTime * 1000)}</div>
+                </div>
+                <button class="imperium-btn" onclick="handleTechClick('${techId}')" ${statusClass !== '' || gameState.city.researchQueue.length > 0 ? 'disabled' : ''}>
+                    ${statusText || 'Rechercher'}
+                </button>
+            </div>`;
+        });
+        body += `</div>`;
+    });
+
+    body += '</div>';
+
+    showModal("Arbre Technologique", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+
+    // Activate the first tab
+    switchTechTab(document.querySelector('.tech-tabs button'), Object.keys(TECHNOLOGY_DEFINITIONS)[0]);
+}
+
+function switchTechTab(btn, catId) {
+    document.querySelectorAll('[data-tab-btn]').forEach(b => b.style.borderBottomColor = 'transparent');
+    btn.style.borderBottomColor = 'var(--gold-primary)';
+    document.querySelectorAll('.tech-tab-content').forEach(c => c.style.display = 'none');
+    document.getElementById(`tech-tab-${catId}`).style.display = 'flex';
+}
+
+function handleTechClick(techId) {
+    const isResearched = gameState.researchedTechs.includes(techId);
+    const isBeingResearched = gameState.city.researchQueue.some(item => item.techId === techId);
+    if (isResearched || isBeingResearched) return;
+
+    const result = startResearch(techId);
+    if (result.success) {
+        showToast("La recherche a commencé !", "success");
+        updateAllCityUI();
+        showTechModal(); // Re-render modal
+    } else {
+        showToast(result.message, "error");
+    }
 }
