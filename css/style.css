@@ -172,3 +172,160 @@ body {
     text-align: center;
 }
 
+/* Player Profile Modal */
+.profile-main-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+.profile-avatar {
+    font-size: 3rem;
+    width: 90px;
+    height: 90px;
+    background: var(--dark-marble);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--gold-primary);
+}
+.profile-details {
+    flex-grow: 1;
+}
+.profile-name {
+    margin: 0;
+    font-size: 1.6rem;
+    color: var(--gold-light);
+}
+.profile-title {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+.profile-level {
+    margin: 0.25rem 0 0;
+    font-size: 1rem;
+}
+.xp-bar-container {
+    width: 100%;
+    height: 10px;
+    background-color: var(--dark-bg);
+    border-radius: 5px;
+    margin-top: 1rem;
+    overflow: hidden;
+    border: 1px solid var(--border-gold);
+}
+.xp-bar {
+    height: 100%;
+    background-color: var(--xp-bar);
+    transition: width 0.5s ease-in-out;
+}
+.xp-text {
+    text-align: center;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+}
+.player-profile-edit .form-group {
+    margin-bottom: 1rem;
+}
+.player-profile-edit .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+}
+.imperium-input {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--dark-bg);
+    border: 1px solid var(--border-gold);
+    color: var(--text-light);
+    border-radius: 0.25rem;
+}
+.avatar-selection {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+.avatar-option {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    border-radius: 50%;
+    background: var(--dark-marble);
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+.avatar-option:hover {
+    border-color: var(--gold-light);
+}
+.avatar-option.selected {
+    border-color: var(--gold-primary);
+    box-shadow: 0 0 10px var(--gold-primary);
+}
+
+/* Quest Log Modal */
+.quest-log .quest-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-gold);
+    margin-bottom: 1rem;
+}
+.quest-tab-btn {
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1rem;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+.quest-tab-btn.active {
+    color: var(--gold-light);
+    border-bottom-color: var(--gold-primary);
+}
+.quest-tab-content {
+    display: none;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.quest-tab-content.active {
+    display: flex;
+}
+.quest-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(15, 23, 42, 0.7);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border-left: 4px solid var(--info-blue);
+}
+.quest-item.completed {
+    border-left-color: var(--success-green);
+    opacity: 0.7;
+}
+.quest-status-icon {
+    font-size: 1.5rem;
+}
+.quest-description {
+    margin: 0;
+    font-weight: bold;
+}
+.quest-reward {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+.no-quests {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 2rem;
+}
