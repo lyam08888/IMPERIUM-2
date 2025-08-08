@@ -27,6 +27,7 @@
         color: var(--text-light);
         min-height: 100vh;
         padding: 1rem;
+        overflow-x: hidden;
     }
     .imperium-body { flex-grow: 1; max-width: 1600px; margin: 0 auto; width: 100%; }
     .main-content { position: relative; }
@@ -44,7 +45,7 @@
     .army-setup.attacker { border-color: var(--roman-red); }
     .army-setup.defender { border-color: var(--success-green); }
     .army-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; text-align: center; }
-    .unit-selection { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+    .unit-selection { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
     .unit-selector { background: rgba(30, 41, 59, 0.6); border-radius: 0.8rem; border: 1px solid var(--border-gold); padding: 0.75rem; text-align: center; position: relative; transition: all 0.2s ease-in-out; }
     .unit-selector:hover { transform: translateY(-3px); box-shadow: 0 4px 10px var(--shadow-gold); }
     .unit-icon { font-size: 2rem; margin-bottom: 0.25rem; }
