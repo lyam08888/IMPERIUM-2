@@ -307,9 +307,10 @@ function completeConstruction(item) {
     }
 }
 
-function showModal(title, body, footer) {
+function showModal(title, body, footer, customClass = '') {
     const container = document.getElementById('modal-container');
-    container.innerHTML = `<div class="modal-backdrop" onclick="closeModal()"></div><div class="modal-content"><div class="modal-header"><h3 class="modal-title">${title}</h3><button class="modal-close-btn" onclick="closeModal()">&times;</button></div><div class="modal-body">${body}</div><div class="modal-footer">${footer}</div></div>`;
+    const customClassStr = customClass ? ` ${customClass}` : '';
+    container.innerHTML = `<div class="modal-backdrop" onclick="closeModal()"></div><div class="modal-content${customClassStr}"><div class="modal-header"><h3 class="modal-title">${title}</h3><button class="modal-close-btn" onclick="closeModal()">&times;</button></div><div class="modal-body">${body}</div><div class="modal-footer">${footer}</div></div>`;
     setTimeout(() => container.classList.add('active'), 10);
 }
 
@@ -589,6 +590,7 @@ function handleTrainClick(unitId) {
     }
 }
 
+
 function setupEventListeners() {
     setupDashboardToggle();
 }
@@ -619,6 +621,7 @@ function setupDashboardToggle() {
     });
 
     applyState(); // Apply initial state on load
+
 }
 
 function showTechModal() {
