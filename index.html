@@ -1,956 +1,700 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="default">
+<html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>IMPERIUM — Mobile v3 (Single File)</title>
-<meta name="theme-color" content="#0b0f1a">
-<style>
-/* ============ THEMES ============ */
-:root{
-  --bg:#0b0f1a; --panel:#0f1426; --panel-2:#0a1020;
-  --accent:#d2b35b; --accent-2:#8c6e2a;
-  --text:#f2efe6; --muted:#aab0bd; --line:#273251;
-  --ok:#77d39c; --warn:#ffb454; --bad:#ff7b7b;
-  --touch:56px; --radius:14px; --shadow:0 12px 32px rgba(0,0,0,.35);
-  --safe-b: env(safe-area-inset-bottom, 0px);
-  --safe-t: env(safe-area-inset-top, 0px);
-}
-html[data-theme="sepia"]{
-  --bg:#1a150f; --panel:#221a12; --panel-2:#1a130e;
-  --accent:#d1a562; --accent-2:#8a6a2b; --text:#f1e6cf; --muted:#b8a98f; --line:#3a2c1b;
-}
-html[data-theme="ivory"]{
-  --bg:#0f1115; --panel:#141820; --panel-2:#0f141c;
-  --accent:#cfd8dc; --accent-2:#90a4ae; --text:#f5f7fa; --muted:#c3c8cf; --line:#2a3446;
-}
-html[data-theme="contrast"]{
-  --bg:#000; --panel:#0a0a0a; --panel-2:#000; --accent:#ffd95a; --accent-2:#e6b800;
-  --text:#fff; --muted:#bbb; --line:#222;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>IMPERIUM - Ma Cité : Roma Aeterna V18</title>
+    <meta name="description" content="Gérez votre cité romaine dans IMPERIUM - Construisez, développez, prospérez.">
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23b45309'/><text x='16' y='20' text-anchor='middle' fill='white' font-family='serif' font-size='20' font-weight='bold'>I</text></svg>" type="image/svg+xml">
 
-/* ============ RESET & BASE ============ */
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif;}
-@media (prefers-reduced-motion:no-preference){ .t {transition: all .25s ease;} }
-.hidden{display:none!important}
-
-/* ============ LAYOUT ============ */
-#app{display:flex;flex-direction:column;height:100%;}
-header{
-  position:sticky;top:0;padding:10px 16px calc(8px + var(--safe-t));
-  background:linear-gradient(180deg,#121a31 0%,#0b1022 100%);
-  display:flex;align-items:center;gap:12px;z-index:4;border-bottom:1px solid var(--line);
-}
-h1{font-size:18px;margin:0;letter-spacing:.3px;color:var(--accent);}
-.header-actions{margin-left:auto;display:flex;gap:8px;}
-.btn{
-  background:#141c34;border:1px solid var(--line);color:var(--text);
-  border-radius:12px;min-height:40px;padding:8px 12px;font-size:14px;
-}
-.btn:active{transform:scale(.98)}
-.res-wrap{display:flex;gap:8px;overflow:auto;padding:6px 12px;scroll-snap-type:x mandatory;border-bottom:1px solid var(--line)}
-.res-chip{flex:0 0 auto;display:flex;align-items:center;gap:6px;background:rgba(20,28,52,.85);border:1px solid var(--line);border-radius:999px;padding:8px 10px;font-size:13px;scroll-snap-align:center;}
-
-#game-wrap{position:relative;flex:1;overflow:hidden;}
-canvas{width:100%;height:100%;display:block;touch-action:none;}
-
-/* FAB */
-.fab{position:absolute;right:16px;bottom:calc(88px + var(--safe-b));width:64px;height:64px;border-radius:999px;border:1px solid var(--line);
-  background:radial-gradient(circle at 30% 30%, #2a3558, #11182e);color:var(--text);font-size:28px;display:grid;place-items:center;box-shadow:var(--shadow);z-index:3;}
-.fab:active{transform:scale(.97)}
-
-/* Dock */
-#dock{position:sticky;bottom:0;z-index:5;padding:8px 10px calc(8px + var(--safe-b));
-  background:linear-gradient(0deg,rgba(11,16,34,1) 0%, rgba(11,16,34,.9) 60%, rgba(11,16,34,0) 100%);}
-.dock{display:flex;gap:6px;background:rgba(20,28,52,.92);border:1px solid var(--line);border-radius:16px;padding:6px;justify-content:space-between;align-items:center;}
-.dock .i{flex:1 1 0;min-width:56px;min-height:var(--touch);display:flex;gap:6px;flex-direction:column;align-items:center;justify-content:center;color:#d7dbe6;border-radius:12px;}
-.dock .i.active{background:#141c34;box-shadow:inset 0 0 0 1px var(--line);color:var(--accent);}
-.dock .i .ico{font-size:20px;}
-
-/* Bottom Sheet */
-.sheet{position:absolute;left:0;right:0;bottom:0;transform:translateY(105%);background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);
-  border-top-left-radius:20px;border-top-right-radius:20px;border:1px solid var(--line);border-bottom:none;box-shadow:var(--shadow);z-index:6;max-height:75%;
-  display:flex;flex-direction:column;}
-.sheet.show{transform:translateY(0%);}
-.sheet header{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;}
-.sheet h2{margin:0;font-size:16px;color:var(--accent);}
-.sheet .grab{width:42px;height:5px;border-radius:999px;background:#2a3558;margin:6px auto;}
-.sheet .body{padding:12px 16px;overflow:auto;display:grid;gap:10px;}
-.row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.tag{border:1px solid var(--line);border-radius:10px;padding:2px 8px;font-size:12px;color:#d7dbe6;}
-.small{font-size:12px;color:var(--muted);}
-.card{border:1px solid var(--line);border-radius:12px;padding:10px;background:#141c34;display:grid;gap:8px;}
-
-/* Builder Ghost */
-.ghost-tip{position:absolute;pointer-events:none;padding:6px 8px;border-radius:8px;background:rgba(20,28,52,.9);border:1px solid var(--line);font-size:12px;color:var(--text);z-index:7;transform:translate(-50%,-140%);}
-
-/* Toast */
-.toast{position:absolute;left:50%;bottom:calc(120px + var(--safe-b));transform:translateX(-50%);
-  background:rgba(20,28,52,.96);border:1px solid var(--line);padding:10px 12px;border-radius:12px;font-size:13px;z-index:8;box-shadow:var(--shadow);}
-
-/* Onboarding */
-#ob{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:9;}
-#ob.show{display:flex;}
-.ob-sheet{width:100%;max-width:640px;background:linear-gradient(180deg,var(--panel) 0%, var(--panel-2) 100%);border-top-left-radius:16px;border-top-right-radius:16px;
-  border:1px solid var(--line);box-shadow:var(--shadow);padding:14px;display:grid;gap:10px;}
-.ob-title{font-size:16px;color:var(--accent);margin:0;}
-.ob-actions{display:flex;gap:8px;justify-content:flex-end;}
-.kbd{padding:2px 6px;border-radius:4px;border:1px solid var(--line);background:#1a2238;font-size:12px}
-
-/* Anim helpers */
-@keyframes pop { 0%{transform:scale(.6);opacity:.0} 70%{transform:scale(1.05);opacity:1} 100%{transform:scale(1);} }
-.pop{animation:pop .25s ease-out;}
-</style>
+    <style>
+        :root {
+            --gold-primary: #d97706; --gold-secondary: #f59e0b; --gold-light: #fbbf24;
+            --marble-white: #f8fafc; --roman-red: #dc2626; --roman-purple: #7c3aed;
+            --dark-stone: #1e293b; --dark-marble: #334155; --dark-bg: #0f172a;
+            --text-light: #e2e8f0; --text-muted: #94a3b8;
+            --border-gold: rgba(217, 119, 6, 0.3); --shadow-gold: rgba(217, 119, 6, 0.4);
+            --success-green: #22c55e; --error-red: #ef4444;
+            --xp-color: #7c3aed;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Times New Roman', serif;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(217, 119, 6, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(124, 58, 237, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, var(--dark-bg) 0%, var(--dark-stone) 100%);
+            color: var(--text-light);
+            overflow-y: auto;
+        }
+        .imperium-ui { display: flex; flex-direction: column; min-height: 100vh; position: relative; z-index: 10; padding-bottom: 80px; /* Space for footer */ }
+        .imperium-body { max-width: 1200px; margin: 0 auto; width: 100%; padding: 1.5rem 2rem; }
+        .view-title { font-size: 2.2rem; font-weight: bold; color: var(--gold-primary); margin-bottom: 2rem; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .city-map-section { background: rgba(15, 23, 42, 0.8); border-radius: 1rem; border: 1px solid var(--border-gold); padding: 1.5rem; margin-bottom: 2rem; }
+        .map-header { margin-bottom: 2rem; } /* Espace ajouté ici */
+        .buildings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; min-height: 400px; }
+        @media (min-width: 768px) { .buildings-grid { grid-template-columns: repeat(5, 1fr); } }
+        .building-slot { background: rgba(30, 41, 59, 0.6); border: 2px dashed var(--text-muted); border-radius: 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; min-height: 120px; padding: 0.5rem; position: relative; }
+        .building-slot:hover:not(.constructing) { border-color: var(--gold-light); background: rgba(217, 119, 6, 0.15); transform: translateY(-5px); }
+        .building-slot.occupied { border-style: solid; border-color: var(--border-gold); }
+        .building-slot.constructing { cursor: not-allowed; background: rgba(124, 58, 237, 0.2); border-color: var(--xp-color); border-style: solid;}
+        .building-icon { font-size: 2.5rem; margin-bottom: 0.5rem; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5)); }
+        .building-name { color: var(--text-light); font-weight: bold; font-size: 0.9rem; text-align: center; }
+        .building-level { color: var(--gold-light); font-size: 0.8rem; font-weight: bold; margin-top: 0.3rem; padding: 0.2rem 0.5rem; background: rgba(217, 119, 6, 0.2); border-radius: 1rem; }
+        .construction-timer { position: absolute; bottom: 5px; left: 0; right: 0; text-align: center; font-size: 0.9rem; font-weight: bold; color: var(--gold-light); background: rgba(0,0,0,0.5); padding: 2px 0; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .dashboard-tile { background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-gold); border-radius: 1rem; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease; }
+        .dashboard-tile:hover { transform: translateY(-5px); box-shadow: 0 5px 20px var(--shadow-gold); border-color: var(--gold-primary); }
+        .tile-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .tile-icon { font-size: 2rem; }
+        .tile-title { font-size: 1.3rem; font-weight: bold; color: var(--gold-light); }
+        .tile-preview { font-size: 0.9rem; color: var(--text-muted); }
+        .imperium-btn { background: linear-gradient(145deg, var(--gold-secondary), var(--gold-primary)); color: white; border: none; border-radius: 0.5rem; padding: 0.8rem 1.2rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; font-family: 'Times New Roman', serif; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); box-shadow: 0 2px 5px rgba(0,0,0,0.2), inset 0 -2px 2px rgba(0,0,0,0.2); }
+        .imperium-btn.danger { background: linear-gradient(145deg, var(--roman-red), #991b1b); }
+        .imperium-btn:hover { filter: brightness(1.1); box-shadow: 0 4px 10px var(--shadow-gold), inset 0 -2px 2px rgba(0,0,0,0.2); }
+        .imperium-btn:active { transform: translateY(1px); box-shadow: 0 1px 3px rgba(0,0,0,0.3), inset 0 0 2px rgba(0,0,0,0.3); filter: brightness(1); }
+        .imperium-btn:disabled { background: var(--dark-marble); cursor: not-allowed; color: var(--text-muted); transform: none; box-shadow: none; filter: none; }
+        .modal-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; display: flex; justify-content: center; align-items: center; pointer-events: none; }
+        .modal-container.active { pointer-events: all; }
+        .modal-backdrop { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease; }
+        .modal-container.active .modal-backdrop { opacity: 1; }
+        .modal-content { background: linear-gradient(135deg, var(--dark-stone), var(--dark-bg)); border: 2px solid var(--gold-primary); border-radius: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 90%; max-width: 600px; z-index: 1001; transform: scale(0.9) translateY(20px); opacity: 0; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); display: flex; flex-direction: column; max-height: 90vh; }
+        .modal-container.active .modal-content { transform: scale(1) translateY(0); opacity: 1; }
+        .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-gold); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); }
+        .modal-title { font-size: 1.8rem; color: var(--gold-light); text-shadow: 1px 1px 3px var(--shadow-gold); }
+        .modal-close-btn { background: none; border: none; color: var(--text-muted); font-size: 2rem; cursor: pointer; transition: color 0.3s; }
+        .modal-body { padding: 1rem; overflow-y: auto; }
+        .modal-footer { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-top: 1px solid var(--border-gold); gap: 1rem; background: rgba(0,0,0,0.2); }
+        .upgrade-info { background: rgba(15, 23, 42, 0.7); border-radius: 0.5rem; padding: 1rem; margin-top: 1rem; border: 1px solid var(--border-gold); }
+        .build-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; }
+        .build-item { background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-gold); border-radius: 0.75rem; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .build-item:not(.disabled):hover { background: rgba(217, 119, 6, 0.15); transform: translateY(-5px); box-shadow: 0 5px 15px var(--shadow-gold); }
+        .build-item.disabled { opacity: 0.6; cursor: not-allowed; background: rgba(30, 41, 59, 0.4); }
+        .build-item-icon { font-size: 1.8rem; }
+        .build-item-name { font-weight: bold; margin: 0.25rem 0; color: var(--gold-light); font-size: 0.9rem; }
+        .build-item-costs { font-size: 0.75rem; color: var(--text-muted); }
+        .build-item-prereq { color: var(--error-red); font-size: 0.7rem; font-style: italic; margin-top: 0.25rem; }
+        .quest-panel { text-align: center; }
+        .quest-title { font-weight: bold; color: var(--gold-light); }
+        .quest-reward { font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem; }
+        .construction-footer { position: fixed; bottom: 0; left: 0; right: 0; background: linear-gradient(135deg, var(--dark-marble) 0%, var(--dark-stone) 100%); border-top: 2px solid var(--border-gold); padding: 0.5rem 1rem; z-index: 100; display: none; align-items: center; gap: 1rem; }
+        .construction-footer.active { display: flex; }
+        .footer-item { display: flex; align-items: center; gap: 1rem; }
+        .footer-icon { font-size: 2rem; }
+        .footer-details { flex-grow: 1; }
+        .footer-progress-bar { width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden; }
+        .footer-progress-fill { height: 100%; background: var(--xp-color); width: 0%; transition: width 0.5s linear; }
+        #toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+        .toast { padding: 0.8rem 1.5rem; border-radius: 2rem; color: white; font-weight: bold; background: linear-gradient(135deg, var(--dark-marble), var(--dark-stone)); border: 1px solid var(--gold-primary); box-shadow: 0 4px 15px rgba(0,0,0,0.3); animation: toast-in 0.5s ease, toast-out 0.5s ease 3.5s; opacity: 0; }
+        .toast.success { background: linear-gradient(135deg, #16a34a, #15803d); border-color: #4ade80; }
+        .toast.error { background: linear-gradient(135deg, #dc2626, #b91c1c); border-color: #f87171; }
+        .toast.levelup { background: linear-gradient(135deg, var(--xp-color), #a855f7); border-color: var(--gold-light); font-size: 1.2rem; padding: 1rem 2rem; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
 </head>
 <body>
-<div id="app">
-  <header>
-    <h1>IMPERIUM</h1>
-    <div class="header-actions">
-      <button id="btn-save" class="btn" title="Sauvegarder">💾</button>
-      <button id="btn-load" class="btn" title="Charger">📂</button>
-      <button id="btn-reset" class="btn" title="Réinit">♻️</button>
-      <button id="btn-settings" class="btn" title="Réglages">⚙️</button>
-    </div>
-  </header>
-
-  <div class="res-wrap" id="resbar"></div>
-
-  <div id="game-wrap">
-    <canvas id="game" width="720" height="1280"></canvas>
-    <button class="fab t" id="fab">🏗️</button>
-
-    <!-- Ghost tooltip -->
-    <div id="ghost-tip" class="ghost-tip hidden">Tap pour confirmer</div>
-
-    <!-- Bottom Sheet -->
-    <section id="sheet" class="sheet t" aria-hidden="true">
-      <div class="grab"></div>
-      <header><h2 id="sheet-title">Panneau</h2></header>
-      <div id="sheet-body" class="body"></div>
-    </section>
-
-    <!-- Onboarding -->
-    <section id="ob">
-      <div class="ob-sheet">
-        <h3 class="ob-title" id="ob-title">Bienvenue dans Imperium</h3>
-        <div id="ob-body" class="small"></div>
-        <div class="ob-actions">
-          <button class="btn" id="ob-skip">Passer</button>
-          <button class="btn" id="ob-next">Suivant</button>
+    <div class="imperium-ui">
+        <div class="imperium-body">
+            <main class="main-content">
+                <div id="city-view" class="view-container active">
+                    <div class="city-map-section">
+                        <div class="map-header">
+                            <h2 class="map-title">Plan de la Cité</h2>
+                        </div>
+                        <div class="buildings-grid" id="buildingsGrid"></div>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="dashboard-tile" onclick="showPlayerModal()">
+                            <div class="tile-header">
+                                <span class="tile-icon">👤</span>
+                                <h3 class="tile-title">Profil du Consul</h3>
+                            </div>
+                            <div class="tile-preview" id="player-tile-preview"></div>
+                        </div>
+                        <div class="dashboard-tile" onclick="showResourcesModal()">
+                             <div class="tile-header">
+                                <span class="tile-icon">💰</span>
+                                <h3 class="tile-title">Ressources</h3>
+                            </div>
+                            <div class="tile-preview" id="resources-tile-preview"></div>
+                        </div>
+                        <div class="dashboard-tile" onclick="showStatsModal()">
+                             <div class="tile-header">
+                                <span class="tile-icon">📊</span>
+                                <h3 class="tile-title">Statistiques</h3>
+                            </div>
+                            <div class="tile-preview" id="stats-tile-preview"></div>
+                        </div>
+                        <div class="dashboard-tile" onclick="showProductionModal()">
+                             <div class="tile-header">
+                                <span class="tile-icon">📈</span>
+                                <h3 class="tile-title">Production</h3>
+                            </div>
+                            <div class="tile-preview" id="production-tile-preview"></div>
+                        </div>
+                        <div class="dashboard-tile" onclick="showQuestModal()">
+                             <div class="tile-header">
+                                <span class="tile-icon">🎯</span>
+                                <h3 class="tile-title">Objectif Actuel</h3>
+                            </div>
+                            <div class="tile-preview" id="quest-tile-preview"></div>
+                        </div>
+                        <div class="dashboard-tile" onclick="showActionsModal()">
+                             <div class="tile-header">
+                                <span class="tile-icon">⚡</span>
+                                <h3 class="tile-title">Actions Rapides</h3>
+                            </div>
+                            <div class="tile-preview">Collecter les impôts, organiser des jeux...</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
-      </div>
-    </section>
-  </div>
-
-  <div id="dock">
-    <nav class="dock">
-      <button class="i active" data-tab="city"><span class="ico">🏛️</span><span class="small">Ville</span></button>
-      <button class="i" data-tab="build"><span class="ico">🧱</span><span class="small">Construire</span></button>
-      <button class="i" data-tab="research"><span class="ico">🧪</span><span class="small">Recherches</span></button>
-      <button class="i" data-tab="army"><span class="ico">🛡️</span><span class="small">Armée</span></button>
-      <button class="i" data-tab="world"><span class="ico">🗺️</span><span class="small">Monde</span></button>
-      <button class="i" data-tab="diplo"><span class="ico">🤝</span><span class="small">Diplomatie</span></button>
-      <button class="i" data-tab="menu"><span class="ico">☰</span><span class="small">Menu</span></button>
-    </nav>
-  </div>
-</div>
-
-<script>
-(() => {
-/* ================= CORE STATE ================= */
-const S = {
-  time:{dt:0,last:performance.now(),speed:1},
-  cam:{x:0,y:0,zoom:2},
-  input:{touches:new Map(),pinch:0,mode:'select',longPress:null},
-  grid:{w:60,h:60,ts:32},
-  city:{buildings:[], queue:null, research:{}, army:{legion:0}},
-  res:{
-    bois:150,pierre:120,argile:120,fer:50,or:30,vin:10,science:0,
-    pop:8, logements:20, bonheur:100,
-    storage: { bois:500, pierre:500, argile:500, fer:300, or:300, vin:300 }
-  },
-  rates:{bois:1.0,pierre:0.8,argile:0.8,fer:0.2,or:0.1,vin:0,science:0.2,pop:0},
-  ui:{tab:'city', oneHand:'right', theme:(localStorage.getItem('imperium-theme')||'default'), sound:true},
-  fx:[] // animations [{x,y,t,kind}]
-};
-document.documentElement.setAttribute('data-theme', S.ui.theme);
-
-/* ================= AUDIO (WebAudio tiny beeps) ================= */
-let AC=null;
-function audioCtx(){ if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)(); return AC;}
-function beep(freq=440, dur=0.06, type='sine', vol=0.05){
-  if(!S.ui.sound) return;
-  const ctx=audioCtx();
-  const o=ctx.createOscillator(); const g=ctx.createGain();
-  o.type=type; o.frequency.value=freq; g.gain.value=vol;
-  o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime+dur);
-}
-const haptics=(ms=10)=>{ if(navigator.vibrate) navigator.vibrate(ms); };
-
-/* ================= CANVAS ================= */
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-const resbar = document.getElementById('resbar');
-const sheet = document.getElementById('sheet'), sheetBody=document.getElementById('sheet-body'), sheetTitle=document.getElementById('sheet-title');
-const ghostTip=document.getElementById('ghost-tip');
-
-/* ================= UTILS ================= */
-const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
-const fmt=(n)=>Math.floor(n).toLocaleString('fr-FR');
-function rnd(a,b){ return Math.random()*(b-a)+a; }
-
-/* ================= DEFINITIONS ================= */
-const BDEF = {
-  'Scierie': {cat:'prod', baseCost:{bois:40,pierre:10}, baseTime:5, rate:{bois:0.8}},
-  'Carrière': {cat:'prod', baseCost:{bois:10,pierre:40}, baseTime:5, rate:{pierre:0.6}},
-  'Briqueterie': {cat:'prod', baseCost:{bois:25,argile:35}, baseTime:6, rate:{argile:0.6}},
-  'Mine de fer': {cat:'prod', baseCost:{bois:30,pierre:25,fer:10}, baseTime:8, rate:{fer:0.4}},
-  'Entrepôt': {cat:'util', baseCost:{bois:60,pierre:40}, baseTime:6, storage:{bois:400,pierre:400,argile:400,fer:200,or:200,vin:200}},
-  'Maison': {cat:'util', baseCost:{bois:35,argile:20}, baseTime:4, pop:{logements:6}},
-  'Taverne': {cat:'bonheur', baseCost:{bois:50,vin:20}, baseTime:7, happy:8},
-  'Thermes': {cat:'bonheur', baseCost:{pierre:80,fer:20}, baseTime:12, happy:15, needsResearch:'Hydraulique'},
-  'Forum': {cat:'centre', baseCost:{bois:70,pierre:70,argile:70}, baseTime:10, rate:{or:0.1}},
-  'Marché': {cat:'eco', baseCost:{bois:80,pierre:40,or:30}, baseTime:9, rate:{or:0.2}},
-  'Académie': {cat:'science', baseCost:{bois:80,pierre:80}, baseTime:9, rate:{science:0.3}},
-  'Temple': {cat:'culture', baseCost:{pierre:120,or:40}, baseTime:12, happy:6},
-  'Caserne': {cat:'mil', baseCost:{bois:90,pierre:60,fer:40}, baseTime:10, needsResearch:'Tactiques'},
-  'Port': {cat:'mil', baseCost:{bois:120,pierre:100,fer:60}, baseTime:14, needsResearch:'Navigation'},
-  'Sénat': {cat:'centre', baseCost:{pierre:150,or:60}, baseTime:15}
-};
-const RESEARCH = {
-  'Hydraulique': { cost:{science:60}, unlocks:['Thermes'] },
-  'Tactiques': { cost:{science:80}, unlocks:['Caserne'] },
-  'Navigation': { cost:{science:100}, unlocks:['Port'] }
-};
-
-// World/Diplomacy bootstrap
-function initWorld(){
-  if(S.world) return; // already in save
-  const playerFaction = 'Imperium';
-  const factions = ['Gaules','Carthage','Grecques'];
-  const provinces = [
-    { id:'latium', name:'Latium', owner:playerFaction, yields:{or:0.1, bois:0.2}, garrison:{legion:2}, power:4 },
-    { id:'etrurie', name:'Étrurie', owner:'Gaules', yields:{pierre:0.2, or:0.08}, garrison:{legion:5}, power:7 },
-    { id:'sardaigne', name:'Sardaigne', owner:'Carthage', yields:{vin:0.12, or:0.06}, garrison:{legion:6}, power:8 },
-    { id:'sicile', name:'Sicile', owner:'Carthage', yields:{bois:0.15, argile:0.15}, garrison:{legion:7}, power:9 },
-    { id:'macedoine', name:'Macédoine', owner:'Grecques', yields:{fer:0.12, or:0.09}, garrison:{legion:8}, power:10 },
-    { id:'iberia', name:'Ibérie', owner:'Gaules', yields:{bois:0.2, argile:0.2}, garrison:{legion:6}, power:8 }
-  ];
-  const diplo = {};
-  for(const f of factions){ diplo[f] = { relation: 20, war:false, trade:false }; }
-  S.world = { playerFaction, factions, provinces, diplo };
-}
-
-// Rates composition
-function getWorldRates(){
-  if(!S.world) return {};
-  const acc={};
-  for(const p of S.world.provinces){ if(p.owner===S.world.playerFaction){ for(const [k,v] of Object.entries(p.yields)) acc[k]=(acc[k]||0)+v; } }
-  return acc;
-}
-function getTradeRates(){
-  if(!S.world) return {};
-  const acc={};
-  for(const [name,st] of Object.entries(S.world.diplo||{})){
-    if(st.trade){ acc.or=(acc.or||0)+0.06; acc.vin=(acc.vin||0)+0.03; }
-  }
-  return acc;
-}
-function getUpkeepRates(){
-  const acc={};
-  const l=S.city?.army?.legion||0;
-  if(l>0){ acc.or = (acc.or||0) - 0.02*l; acc.vin = (acc.vin||0) - 0.005*l; }
-  return acc;
-}
-function mergeRates(){
-  const out={};
-  const parts=[S.rates||{}, getWorldRates(), getTradeRates(), getUpkeepRates()];
-  for(const src of parts){ for(const [k,v] of Object.entries(src)) out[k]=(out[k]||0)+v; }
-  return out;
-}
-function getEffectiveRates(){ return mergeRates(); }
-
-// Combat system
-function computePower(units){ return (units.legion||0) * 1.0; }
-function resolveBattle(sendLegions, provinceId){
-  const p=S.world.provinces.find(x=>x.id===provinceId); if(!p) return {ok:false,msg:'Province inconnue'};
-  const defenderFaction=p.owner;
-  if(defenderFaction!==S.world.playerFaction){
-    const st=S.world.diplo[defenderFaction];
-    if(st && !st.war) return {ok:false,msg:'Vous devez déclarer la guerre à '+defenderFaction};
-  }
-  sendLegions = Math.max(0, Math.min(sendLegions, S.city.army.legion));
-  if(sendLegions<=0) return {ok:false,msg:'Aucune troupe à envoyer'};
-  const atkPow = computePower({legion:sendLegions}) * (0.9 + rnd(0,0.2));
-  const defPow = computePower(p.garrison) * (0.9 + rnd(0,0.2));
-  if(atkPow>=defPow){
-    // Victory: casualties proportional
-    const lossRatio = defPow / Math.max(1, atkPow);
-    const lost = Math.max(0, Math.floor(sendLegions * lossRatio * rnd(0.6,0.9)));
-    S.city.army.legion -= Math.min(S.city.army.legion, lost);
-    p.garrison.legion = 0;
-    const prevOwner=p.owner; p.owner=S.world.playerFaction;
-    // Loot: 300s worth of province yields + base gold
-    let lootOr = 5;
-    for(const [k,v] of Object.entries(p.yields)){
-      const cap=S.res.storage[k]??Infinity;
-      const add=v*300; S.res[k]=clamp((S.res[k]||0)+add,0,cap);
-      if(k==='or') lootOr+=add;
-    }
-    S.res.or = clamp((S.res.or||0)+lootOr, 0, S.res.storage.or||Infinity);
-    return {ok:true,msg:`Victoire à ${p.name} ! Butin: 🪙 ${Math.floor(lootOr)}`};
-  } else {
-    // Defeat: casualties still occur
-    const lost = Math.max(1, Math.floor(sendLegions * rnd(0.4,0.8)));
-    S.city.army.legion -= Math.min(S.city.army.legion, lost);
-    const defLoss = Math.max(0, Math.floor((p.garrison.legion||0) * rnd(0.1,0.3)));
-    p.garrison.legion = Math.max(0, (p.garrison.legion||0) - defLoss);
-    return {ok:false,msg:`Défaite à ${p.name}… Pertes: ${lost}`};
-  }
-}
-
-/* ================= SAVE / LOAD ================= */
-const KEY='imperium-v3-single';
-function save(){
-  const data = JSON.stringify(S,(k,v)=>k==='touches'?undefined:v);
-  localStorage.setItem(KEY,data); toast('Sauvegardé'); haptics(8); beep(660,0.05,'square',0.04);
-}
-function load(){
-  const d=localStorage.getItem(KEY);
-  if(!d){ toast('Aucune sauvegarde'); beep(160,0.05,'sawtooth',0.05); return; }
-  Object.assign(S, JSON.parse(d));
-  toast('Chargé'); haptics(8); beep(520,0.05,'triangle',0.04);
-  rebuildResbar();
-}
-function reset(){ localStorage.removeItem(KEY); location.reload(); }
-document.getElementById('btn-save').onclick=save;
-document.getElementById('btn-load').onclick=load;
-document.getElementById('btn-reset').onclick=reset;
-
-/* ================= RENDERING ================= */
-function clear(){
-  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#0b0f1a';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-}
-function colorFor(type){
-  return ({
-    'Scierie':'#c48a3a','Carrière':'#9aa3b2','Briqueterie':'#a6543a','Mine de fer':'#7d8aa6',
-    'Entrepôt':'#3b4a75','Maison':'#d3b58f','Taverne':'#6e3b3b','Thermes':'#5d7f9a',
-    'Forum':'#d2b35b','Marché':'#6a935f','Académie':'#5a6aa0','Temple':'#8a6ea0',
-    'Caserne':'#6e705d','Port':'#4b6a7a','Sénat':'#a09b6a'
-  })[type]||'#888';
-}
-function drawGrid(){
-  const size=S.grid.ts*S.cam.zoom;
-  ctx.save();
-  ctx.translate(canvas.width/2, canvas.height/2);
-  ctx.translate(-S.cam.x*S.cam.zoom, -S.cam.y*S.cam.zoom);
-
-  // ground
-  ctx.fillStyle = '#111831';
-  ctx.fillRect(-5000,-5000,10000,10000);
-
-  // faint grid
-  ctx.strokeStyle='rgba(255,255,255,.05)';
-  ctx.lineWidth=1;
-  ctx.beginPath();
-  for(let x=0;x<=S.grid.w;x++){
-    const xx=(x*S.grid.ts - S.grid.w*S.grid.ts/2)*S.cam.zoom;
-    ctx.moveTo(xx,-S.grid.h*S.grid.ts/2*S.cam.zoom);
-    ctx.lineTo(xx, S.grid.h*S.grid.ts/2*S.cam.zoom);
-  }
-  for(let y=0;y<=S.grid.h;y++){
-    const yy=(y*S.grid.ts - S.grid.h*S.grid.ts/2)*S.cam.zoom;
-    ctx.moveTo(-S.grid.w*S.grid.ts/2*S.cam.zoom, yy);
-    ctx.lineTo(S.grid.w*S.grid.ts/2*S.cam.zoom, yy);
-  }
-  ctx.stroke();
-
-  // buildings
-  for(const b of S.city.buildings){
-    drawBuilding(b);
-  }
-
-  // ghost preview
-  if(S.input.mode==='build' && S.selectedToBuild && S.ghost){
-    const {gx,gy,px,py}=S.ghost;
-    ctx.save(); ctx.translate(px,py);
-    const sz=S.grid.ts*S.cam.zoom-2;
-    ctx.globalAlpha = 0.5;
-    ctx.fillStyle=colorFor(S.selectedToBuild);
-    roundRect(ctx,-sz/2,-sz/2,sz,sz,6*S.cam.zoom); ctx.fill();
-    ctx.globalAlpha = 1.0;
-    ctx.restore();
-  }
-
-  // FX
-  for(const fx of S.fx){
-    if(fx.kind==='pop'){
-      const t=fx.t; const k=t/0.35;
-      const s=1 + 0.2*Math.sin(k*Math.PI);
-      ctx.save();
-      ctx.translate(fx.px, fx.py);
-      ctx.scale(s,s);
-      ctx.fillStyle='rgba(255,255,255,.12)';
-      ctx.beginPath(); ctx.arc(0,0, 18*S.cam.zoom, 0, Math.PI*2); ctx.fill();
-      ctx.restore();
-    }
-  }
-
-  ctx.restore();
-}
-function drawBuilding(b){
-  const px=(b.x*S.grid.ts - S.grid.w*S.grid.ts/2 + S.grid.ts/2)*S.cam.zoom;
-  const py=(b.y*S.grid.ts - S.grid.h*S.grid.ts/2 + S.grid.ts/2)*S.cam.zoom;
-  const sz=S.grid.ts*S.cam.zoom-2;
-  ctx.save(); ctx.translate(px,py);
-  ctx.fillStyle=colorFor(b.type);
-  ctx.beginPath(); roundRect(ctx,-sz/2,-sz/2,sz,sz,6*S.cam.zoom); ctx.fill();
-
-  // name bar
-  ctx.fillStyle='#00000088'; ctx.fillRect(-sz/2,-sz/2,sz,18);
-  ctx.fillStyle='#fff'; ctx.font=`${Math.max(10, 12*S.cam.zoom)}px system-ui`;
-  ctx.fillText(`${b.type} Lv${b.lvl}`, -sz/2+4, -sz/2+13);
-
-  // queue bar if any
-  if(S.city.queue && S.city.queue.id===b.id){
-    const q=S.city.queue; const p=clamp(q.progress/q.time,0,1);
-    ctx.fillStyle='rgba(0,0,0,.35)';
-    ctx.fillRect(-sz/2,sz/2-7,sz,6);
-    ctx.fillStyle='#77d39c';
-    ctx.fillRect(-sz/2,sz/2-7,sz*p,6);
-  }
-  ctx.restore();
-}
-function roundRect(ctx,x,y,w,h,r){
-  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r);
-  ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r);
-}
-
-/* ================= INPUT with GHOST ================= */
-let lastTap=0;
-function screenToWorld(px,py){
-  const wx=(px - canvas.width/2)/S.cam.zoom + S.cam.x;
-  const wy=(py - canvas.height/2)/S.cam.zoom + S.cam.y;
-  const gx=Math.round((wx + S.grid.w*S.grid.ts/2 - S.grid.ts/2)/S.grid.ts);
-  const gy=Math.round((wy + S.grid.h*S.grid.ts/2 - S.grid.ts/2)/S.grid.ts);
-  const worldX = (gx*S.grid.ts - S.grid.w*S.grid.ts/2 + S.grid.ts/2)*S.cam.zoom;
-  const worldY = (gy*S.grid.ts - S.grid.h*S.grid.ts/2 + S.grid.ts/2)*S.cam.zoom;
-  return {gx,gy, px:worldX, py:worldY};
-}
-
-// Unified pointer handlers for touch and mouse
-function pointerStart(touches){
-  touches.forEach(t=>S.input.touches.set(t.id,t));
-  if(touches.length===1){
-    S.input.longPress=setTimeout(()=>{
-      const ww=screenToWorld(touches[0].x,touches[0].y);
-      const b=findBuilding(ww.gx,ww.gy); if(b){ openSheet('Détails', sheetBuilding(b)); bindSheetBuilding(b); }
-    },550);
-  } else if(touches.length===2){
-    const dx=touches[0].x - touches[1].x, dy=touches[0].y - touches[1].y;
-    S.input.pinch=Math.hypot(dx,dy);
-  }
-}
-
-function pointerMove(touches,rect){
-  if(touches.length===1 && S.input.touches.size===1){
-    const prev=[...S.input.touches.values()][0], curr=touches[0];
-    if(S.input.mode==='build' && S.selectedToBuild){
-      S.ghost = screenToWorld(curr.x,curr.y);
-      showGhostTip(curr.x+rect.left, curr.y+rect.top);
-    } else {
-      S.cam.x -= (curr.x - prev.x)/S.cam.zoom;
-      S.cam.y -= (curr.y - prev.y)/S.cam.zoom;
-      hideGhostTip();
-    }
-    S.input.touches.set(curr.id,curr);
-  } else if(touches.length===2){
-    const dx=touches[0].x - touches[1].x, dy=touches[0].y - touches[1].y;
-    const dist=Math.hypot(dx,dy);
-    S.cam.zoom=clamp(S.cam.zoom + (dist - S.input.pinch)*0.004, 0.85, 6);
-    S.input.pinch=dist;
-    touches.forEach(t=>S.input.touches.set(t.id,t));
-    hideGhostTip();
-  }
-}
-
-function pointerEnd(changed){
-  if(S.input.longPress){ clearTimeout(S.input.longPress); S.input.longPress=null; }
-  changed.forEach(t=>S.input.touches.delete(t.id));
-  if(changed.length===1 && changed[0].x!==undefined){
-    const px=changed[0].x, py=changed[0].y;
-    const nowT=Date.now();
-    if(nowT-lastTap<250){ S.cam.x=0;S.cam.y=0; haptics(6); beep(520,0.05); hideGhostTip(); }
-    else onTap(px,py);
-    lastTap=nowT;
-  }
-}
-
-// Touch events
-canvas.addEventListener('touchstart',(ev)=>{
-  ev.preventDefault();
-  const rect=canvas.getBoundingClientRect();
-  const touches=[...ev.touches].map(t=>({id:t.identifier,x:t.clientX-rect.left,y:t.clientY-rect.top}));
-  pointerStart(touches);
-},{passive:false});
-
-canvas.addEventListener('touchmove',(ev)=>{
-  ev.preventDefault();
-  const rect=canvas.getBoundingClientRect();
-  const touches=[...ev.touches].map(t=>({id:t.identifier,x:t.clientX-rect.left,y:t.clientY-rect.top}));
-  pointerMove(touches,rect);
-},{passive:false});
-
-canvas.addEventListener('touchend',(ev)=>{
-  ev.preventDefault();
-  const rect=canvas.getBoundingClientRect();
-  const changed=[...ev.changedTouches].map(t=>({id:t.identifier,x:t.clientX-rect.left,y:t.clientY-rect.top}));
-  pointerEnd(changed);
-},{passive:false});
-
-// Mouse events
-canvas.addEventListener('mousedown',(ev)=>{
-  if(ev.button!==0) return;
-  const rect=canvas.getBoundingClientRect();
-  pointerStart([{id:'mouse',x:ev.clientX-rect.left,y:ev.clientY-rect.top}]);
-});
-
-canvas.addEventListener('mousemove',(ev)=>{
-  if(!S.input.touches.has('mouse')) return;
-  const rect=canvas.getBoundingClientRect();
-  pointerMove([{id:'mouse',x:ev.clientX-rect.left,y:ev.clientY-rect.top}],rect);
-});
-
-canvas.addEventListener('mouseup',(ev)=>{
-  if(ev.button!==0) return;
-  const rect=canvas.getBoundingClientRect();
-  pointerEnd([{id:'mouse',x:ev.clientX-rect.left,y:ev.clientY-rect.top}]);
-});
-
-canvas.addEventListener('mouseleave',()=>{
-  if(S.input.touches.has('mouse')) pointerEnd([{id:'mouse'}]);
-});
-
-canvas.addEventListener('wheel',(ev)=>{
-  ev.preventDefault();
-  const rect=canvas.getBoundingClientRect();
-  const x=ev.clientX-rect.left, y=ev.clientY-rect.top;
-  const wx=(x - canvas.width/2)/S.cam.zoom + S.cam.x;
-  const wy=(y - canvas.height/2)/S.cam.zoom + S.cam.y;
-  S.cam.zoom=clamp(S.cam.zoom * (ev.deltaY>0?0.9:1.1), 0.85, 6);
-  S.cam.x = wx - (x - canvas.width/2)/S.cam.zoom;
-  S.cam.y = wy - (y - canvas.height/2)/S.cam.zoom;
-},{passive:false});
-
-canvas.addEventListener('contextmenu',ev=>ev.preventDefault());
-
-function onTap(px,py){
-  if(S.input.mode==='build' && S.selectedToBuild){
-    // Confirm placement at ghost position
-    const ww = S.ghost || screenToWorld(px,py);
-    placeBuilding(S.selectedToBuild, ww.gx, ww.gy);
-    hideGhostTip();
-    return;
-  }
-  const ww=screenToWorld(px,py);
-  const b=findBuilding(ww.gx,ww.gy);
-  if(b){ openSheet('Détails', sheetBuilding(b)); bindSheetBuilding(b); }
-}
-
-/* Ghost tip helpers */
-function showGhostTip(absX,absY){
-  ghostTip.classList.remove('hidden');
-  ghostTip.style.left = absX+'px';
-  ghostTip.style.top = absY+'px';
-}
-function hideGhostTip(){ ghostTip.classList.add('hidden'); }
-
-/* ================= GAME LOGIC ================= */
-function findBuilding(x,y){ return S.city.buildings.find(b=>b.x===x && b.y===y); }
-function canPlaceAt(x,y){ return !(x<0||y<0||x>=S.grid.w||y>=S.grid.h) && !findBuilding(x,y); }
-function costFor(type,lvl){ const base=BDEF[type].baseCost||{}; const mult=1+(lvl-1)*0.35; const c={}; for(const k in base)c[k]=Math.floor(base[k]*mult); return c; }
-function timeFor(type,lvl){ const base=BDEF[type].baseTime||5; return Math.floor(base*(1+(lvl-1)*0.25)); }
-function canAfford(cost){ return Object.entries(cost).every(([k,v])=>(S.res[k]||0)>=v); }
-function pay(cost){ for(const [k,v] of Object.entries(cost)) S.res[k]-=v; }
-function refundHalf(cost){ for(const [k,v] of Object.entries(cost)) S.res[k]+=Math.floor(v*0.5); }
-
-function placeBuilding(type,x,y){
-  if(!canPlaceAt(x,y)){ toast('Emplacement indisponible'); beep(180,0.05,'sawtooth'); return; }
-  if(BDEF[type].needsResearch && !S.city.research[BDEF[type].needsResearch]){ toast('Recherche requise: '+BDEF[type].needsResearch); beep(200,0.06,'sawtooth'); return; }
-  const c=costFor(type,1);
-  if(!canAfford(c)){ toast('Ressources insuffisantes'); beep(200,0.06,'sawtooth'); return; }
-  if(S.city.queue){ toast('File occupée'); beep(200,0.06,'sawtooth'); return; }
-  pay(c);
-  const b={id:crypto.randomUUID(),type,x,y,lvl:0};
-  const t=timeFor(type,1);
-  S.city.queue={id:b.id,action:'build',type,level:1,time:t,progress:0,payload:b};
-  toast(`Construction: ${type} (${t}s)`);
-  haptics(10); beep(600,0.05,'square',0.04);
-}
-
-function tryUpgrade(b){
-  const next=b.lvl+1, c=costFor(b.type,next);
-  if(!canAfford(c)) return toast('Ressources insuffisantes'), beep(200,0.06,'sawtooth');
-  if(S.city.queue) return toast('File occupée'), beep(200,0.06,'sawtooth');
-  pay(c);
-  const t=timeFor(b.type,next);
-  S.city.queue={id:b.id,action:'upgrade',type:b.type,level:next,time:t,progress:0};
-  toast(`Amélioration: ${b.type} Lv${next} (${t}s)`);
-  haptics(10); beep(650,0.05,'square',0.04);
-}
-
-function cancelQueue(){
-  if(!S.city.queue) return;
-  const q=S.city.queue;
-  if(q.action==='build') refundHalf(costFor(q.type,1));
-  else refundHalf(costFor(q.type,q.level));
-  S.city.queue=null; toast('File annulée (+50%)'); haptics(6); beep(300,0.05,'triangle',0.04);
-}
-
-function applyBuildingEffects(b,sign){
-  const d=BDEF[b.type];
-  if(d.rate){ for(const [k,v] of Object.entries(d.rate)) S.rates[k]=(S.rates[k]||0)+v*sign; }
-  if(d.storage){ for(const [k,v] of Object.entries(d.storage)) S.res.storage[k]=(S.res.storage[k]||0)+v*sign; }
-  if(d.pop){ for(const [k,v] of Object.entries(d.pop)) S.res[k]=(S.res[k]||0)+v*sign; }
-  if(d.happy){ S.res.bonheur=clamp(S.res.bonheur+d.happy*sign,0,200); }
-}
-
-function onQueueDone(q){
-  const pos = toScreenCenter();
-  if(q.action==='build'){ const b=q.payload; b.lvl=1; S.city.buildings.push(b); applyBuildingEffects(b,+1); pushPopFX(b); }
-  else { const b=S.city.buildings.find(x=>x.id===q.id); if(!b) return; applyBuildingEffects(b,-b.lvl); b.lvl=q.level; applyBuildingEffects(b,+b.lvl); pushPopFX(b); }
-  S.city.queue=null;
-  rebuildResbar(); haptics(12); beep(760,0.06,'square',0.05);
-}
-function pushPopFX(b){
-  const {px,py}=gridToPx(b.x,b.y);
-  S.fx.push({kind:'pop', px, py, t:0});
-}
-
-function gridToPx(x,y){
-  // convert grid coords to current screen space position
-  const px=(x*S.grid.ts - S.grid.w*S.grid.ts/2 + S.grid.ts/2)*S.cam.zoom + canvas.width/2 - S.cam.x*S.cam.zoom;
-  const py=(y*S.grid.ts - S.grid.h*S.grid.ts/2 + S.grid.ts/2)*S.cam.zoom + canvas.height/2 - S.cam.y*S.cam.zoom;
-  return {px,py};
-}
-function toScreenCenter(){ return {x:canvas.width/2,y:canvas.height/2}; }
-
-/* ================= SYSTEMS TICK ================= */
-function tick(dt){
-  const eff=getEffectiveRates();
-  for(const k of ['bois','pierre','argile','fer','or','vin','science']){
-    const cap=S.res.storage[k]??Infinity; S.res[k]=clamp(S.res[k]+(eff[k]||0)*dt,0,cap);
-  }
-  const freeBeds=Math.max(0,S.res.logements - S.res.pop);
-  const happyFactor=clamp((S.res.bonheur-80)/100,0,1.2);
-  const popGrowth=freeBeds>0 ? 0.02*happyFactor : -0.01*(1-happyFactor);
-  S.res.pop=clamp(S.res.pop + popGrowth*dt, 0, 9999);
-
-  if(S.city.queue){ S.city.queue.progress+=dt; if(S.city.queue.progress>=S.city.queue.time) onQueueDone(S.city.queue); }
-
-  // FX
-  for(const fx of S.fx){ fx.t+=dt; }
-  S.fx = S.fx.filter(f=>f.t<0.35);
-}
-
-/* ================= UI LAYER ================= */
-function rebuildResbar(){
-  const R=[["🌲","bois"],["🪨","pierre"],["🧱","argile"],["⛓️","fer"],["🪙","or"],["🍷","vin"],["🧠","science"],["👥","pop"],["🙂","bonheur"]];
-  const eff=getEffectiveRates();
-  resbar.innerHTML = R.map(([i,k])=>{
-    const hasRate = typeof eff[k]==='number' && Math.abs(eff[k])>0.0001;
-    const rate = hasRate ? ` <span class=\"small\" style=\"opacity:.8\">(${eff[k]>0?'+':''}${(eff[k]).toFixed(2)}/s)</span>` : '';
-    return `<div class=\"res-chip\"><span>${i}</span><b>${fmt(S.res[k]??0)}</b>${rate}</div>`;
-  }).join('');
-}
-function openSheet(title, html){ sheetTitle.textContent=title; sheetBody.innerHTML=html; sheet.classList.add('show'); sheet.setAttribute('aria-hidden','false'); }
-function closeSheet(){ sheet.classList.remove('show'); sheet.setAttribute('aria-hidden','true'); }
-sheet.addEventListener('click',(e)=>{ if(e.target===sheet) closeSheet(); });
-
-function sheetBuild(){
-  const cats=['prod','util','bonheur','science','eco','mil','centre','culture'];
-  let html='';
-  for(const cat of cats){
-    const list=Object.entries(BDEF).filter(([k,v])=>v.cat===cat);
-    if(!list.length) continue;
-    html+=`<div class="small" style="text-transform:uppercase;margin-top:6px">${cat}</div>`;
-    for(const [name,def] of list){
-      const c=costFor(name,1);
-      const costStr=Object.entries(c).map(([k,v])=>`${icon(k)} ${v}`).join(' ');
-      const locked = def.needsResearch && !S.city.research[def.needsResearch];
-      html+=`<div class="card">
-        <div class="row"><b>${name}</b>${locked?`<span class="tag">🔒 ${def.needsResearch}</span>`:''}</div>
-        <div class="small">${costStr}</div>
-        <div class="row"><button class="btn" ${locked?'disabled':''} data-build="${name}">Prévisualiser</button></div>
-      </div>`;
-    }
-  }
-  return html;
-}
-function sheetResearch(){
-  let html='';
-  for(const [name,r] of Object.entries(RESEARCH)){
-    const done=!!S.city.research[name]; const afford=(S.res.science||0) >= (r.cost.science||0);
-    html+=`<div class="card">
-      <div class="row"><b>${name}</b><span class="small">${done?'Terminé':'Débloque: '+r.unlocks.join(', ')}</span></div>
-      <div class="row">
-        <span class="small">Coût: 🧠 ${r.cost.science}</span>
-        ${done?'<span class="tag">✔</span>':`<button class="btn" data-r="${name}" ${afford?'':'disabled'}>Étudier</button>`}
-      </div>
-    </div>`;
-  }
-  return html;
-}
-function sheetArmy(){
-  const hasBarracks=S.city.buildings.some(b=>b.type==='Caserne');
-  let html=`<div class="row"><div><b>Légionnaires</b><div class="small">Actuels: ${S.city.army.legion}</div></div>
-    <button class="btn" id="rc-legion" ${hasBarracks?'':'disabled'}>Recruter (🪨10 ⛓️5 🪙2 👥1)</button></div>`;
-  if(!hasBarracks) html+=`<div class="small">Construis une <b>Caserne</b> pour recruter des troupes.</div>`;
-  return html;
-}
-function sheetWorld(){
-  let html='';
-  for(const p of (S.world?.provinces||[])){
-    const owned = p.owner===S.world.playerFaction;
-    const ystr = Object.entries(p.yields).map(([k,v])=>`${icon(k)} +${v.toFixed(2)}/s`).join(' ');
-    const st = S.world.diplo[p.owner];
-    const war = st? st.war:false;
-    html+=`<div class="card">
-      <div class="row"><b>${p.name}</b><span class="tag">${owned?'Possédée':('⛳ '+p.owner)}</span></div>
-      <div class="small">${ystr}</div>
-      <div class="small">Garnison: ${p.garrison.legion}</div>
-      <div class="row">
-        ${owned?'<span class="small">Sous contrôle</span>':`<button class="btn" data-attack="${p.id}">${war?'Attaquer':'Attaquer (nécessite guerre)'}</button>`}
-      </div>
-    </div>`;
-  }
-  return html;
-}
-function sheetDiplo(){
-  let html='';
-  for(const f of (S.world?.factions||[])){
-    const st=S.world.diplo[f];
-    html+=`<div class="card">
-      <div class="row"><b>${f}</b><span class="tag">Relation ${st.relation}</span></div>
-      <div class="row"><span class="small">${st.war?'⚔️ En guerre':'🕊️ Paix'}</span></div>
-      <div class="row" style="gap:6px;flex-wrap:wrap">
-        <button class="btn" data-rel="${f}">Améliorer (+10) — 🪙50</button>
-        ${st.war?`<button class="btn" data-peace="${f}">Proposer paix</button>`:`<button class="btn" data-war="${f}">Déclarer la guerre</button>`}
-        <button class="btn" data-trade="${f}" ${st.relation>=40 && !st.trade?'' :'disabled'}>${st.trade?'Commerce actif':'Accord commercial — 🪙30 (rel≥40)'}</button>
-      </div>
-    </div>`;
-  }
-  return html;
-}
-function bindSheetWorld(){
-  sheetBody.querySelectorAll('[data-attack]').forEach(btn=>{
-    btn.onclick=()=>{
-      const pid=btn.dataset.attack; const p=S.world.provinces.find(x=>x.id===pid);
-      const st=S.world.diplo[p.owner];
-      if(p.owner!==S.world.playerFaction && st && !st.war){ toast('Déclarez la guerre à '+p.owner+' dans Diplomatie.'); beep(200,0.06,'sawtooth'); return; }
-      const max=S.city.army.legion;
-      const nStr=prompt(`Combien de légionnaires envoyer ? (max ${max})`,`${Math.min(5,max)}`);
-      if(!nStr) return; const n=Number(nStr)|0;
-      const res=resolveBattle(n,pid);
-      toast(res.msg); rebuildResbar(); openSheet('Monde', sheetWorld()); bindSheetWorld();
-      beep(res.ok?640:260,0.06,res.ok?'square':'sawtooth',0.05);
-    };
-  });
-}
-function bindSheetDiplo(){
-  sheetBody.querySelectorAll('[data-rel]').forEach(b=>b.onclick=()=>{
-    const f=b.dataset.rel; const st=S.world.diplo[f];
-    if((S.res.or||0)<50) return toast('Or insuffisant');
-    S.res.or-=50; st.relation=Math.min(100, st.relation+10); rebuildResbar(); openSheet('Diplomatie', sheetDiplo()); bindSheetDiplo(); beep(560,0.04,'triangle');
-  });
-  sheetBody.querySelectorAll('[data-war]').forEach(b=>b.onclick=()=>{
-    const f=b.dataset.war; const st=S.world.diplo[f]; st.war=true; st.relation=Math.max(-100, st.relation-30);
-    toast('Guerre déclarée à '+f); openSheet('Diplomatie', sheetDiplo()); bindSheetDiplo(); beep(420,0.06,'sawtooth');
-  });
-  sheetBody.querySelectorAll('[data-peace]').forEach(b=>b.onclick=()=>{
-    const f=b.dataset.peace; const st=S.world.diplo[f]; st.war=false; st.relation=Math.min(100, st.relation+5);
-    toast('Paix signée avec '+f); openSheet('Diplomatie', sheetDiplo()); bindSheetDiplo(); beep(600,0.05,'square');
-  });
-  sheetBody.querySelectorAll('[data-trade]').forEach(b=>b.onclick=()=>{
-    const f=b.dataset.trade; const st=S.world.diplo[f];
-    if(st.trade) return; if(st.relation<40) return toast('Relation insuffisante'); if((S.res.or||0)<30) return toast('Or insuffisant');
-    S.res.or-=30; st.trade=true; rebuildResbar(); toast('Accord commercial avec '+f); openSheet('Diplomatie', sheetDiplo()); bindSheetDiplo(); beep(640,0.05,'triangle');
-  });
-}
-function sheetMenu(){
-  const themes=['default','sepia','ivory','contrast'];
-  const themeBtns = themes.map(t=>`<button class="btn" data-theme="${t}">${t}</button>`).join('');
-  return `<div class="row">
-    <div>
-      <div><b>File</b></div>
-      <div class="small">${S.city.queue? `${S.city.queue.action} ${S.city.queue.type} — reste ${Math.ceil(S.city.queue.time - S.city.queue.progress)}s` : 'vide'}</div>
     </div>
-    <button class="btn" id="btn-cancel" ${S.city.queue?'':'disabled'}>Annuler</button>
-  </div>
-  <div class="card">
-    <div class="row"><b>Mode</b><span class="small">${S.input.mode}</span></div>
-    <div class="row"><button class="btn" id="m-select">Sélection</button><button class="btn" id="m-build">Construction</button><button class="btn" id="m-up">Amélioration</button></div>
-  </div>
-  <div class="card">
-    <div class="row"><b>Thème</b><span class="small">${S.ui.theme}</span></div>
-    <div class="row" style="gap:6px;flex-wrap:wrap">${themeBtns}</div>
-  </div>
-  <div class="card">
-    <div class="row"><b>Son</b><span class="small">${S.ui.sound?'activé':'coupé'}</span></div>
-    <div class="row"><button class="btn" id="snd-on">Activer</button><button class="btn" id="snd-off">Couper</button></div>
-  </div>`;
-}
-function sheetBuilding(b){
-  const d=BDEF[b.type]; const next=costFor(b.type,b.lvl+1);
-  const nextStr=Object.entries(next).map(([k,v])=>`${icon(k)} ${v}`).join(' ');
-  let eff=[];
-  if(d.rate) eff.push('Production: '+Object.entries(d.rate).map(([k,v])=>`${icon(k)} +${v}/s`).join(' '));
-  if(d.storage) eff.push('Stockage: '+Object.entries(d.storage).map(([k,v])=>`${icon(k)} +${v}`).join(' '));
-  if(d.pop?.logements) eff.push(`Logements: +${d.pop.logements}`);
-  if(d.happy) eff.push(`Bonheur: +${d.happy}`);
-  return `<div class="card pop">
-      <div class="row"><b>${b.type}</b><span class="tag">Niveau ${b.lvl}</span></div>
-      <div class="small">${eff.join(' • ') || 'Aucun effet'}</div>
-      <div class="row"><button class="btn" id="b-up">Améliorer (${nextStr})</button></div>
-    </div>` + sheetMenu();
-}
-function bindSheetBuilding(b){
-  const up=document.getElementById('b-up'); if(up) up.onclick=()=>{ tryUpgrade(b); openSheet('Détails', sheetBuilding(b)); bindSheetBuilding(b); rebuildResbar(); };
-  bindSheetMenu();
-}
-function icon(k){ return ({bois:'🌲',pierre:'🪨',argile:'🧱',fer:'⛓️',or:'🪙',vin:'🍷',science:'🧠',pop:'👥'})[k]||k; }
 
-/* ================= DOCK & SHEET BEHAVIOR ================= */
-document.querySelectorAll('.dock .i').forEach(btn=>btn.onclick=()=>{
-  document.querySelectorAll('.dock .i').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  const tab=btn.dataset.tab; S.ui.tab=tab;
-  if(tab==='city'){ closeSheet(); }
-  else if(tab==='build'){ openSheet('Construire', sheetBuild()); bindSheetBuild(); }
-  else if(tab==='research'){ openSheet('Recherches', sheetResearch()); bindSheetResearch(); }
-  else if(tab==='army'){ openSheet('Armée', sheetArmy()); bindSheetArmy(); }
-  else if(tab==='world'){ openSheet('Monde', sheetWorld()); bindSheetWorld(); }
-  else if(tab==='diplo'){ openSheet('Diplomatie', sheetDiplo()); bindSheetDiplo(); }
-  else if(tab==='menu'){ openSheet('Menu', sheetMenu()); bindSheetMenu(); }
-  haptics(8); beep(500+rnd(-50,50),0.03,'square',0.03);
-});
-document.getElementById('fab').onclick=()=>{
-  S.ui.tab='build';
-  document.querySelectorAll('.dock .i').forEach(b=>b.classList.remove('active'));
-  document.querySelector('.dock .i[data-tab="build"]').classList.add('active');
-  openSheet('Construire', sheetBuild()); bindSheetBuild();
-  haptics(10); beep(520,0.04,'square',0.04);
-};
-document.getElementById('btn-settings').onclick=()=>{
-  openSheet('Réglages', `<div class="card">
-    <div class="row"><b>Vitesse</b><span class="small">x${S.time.speed.toFixed(1)}</span></div>
-    <div class="row"><button class="btn" id="spd-1">x1</button><button class="btn" id="spd-2">x1.5</button><button class="btn" id="spd-3">x2</button></div>
-  </div>` + sheetMenu());
-  document.getElementById('spd-1').onclick=()=>S.time.speed=1;
-  document.getElementById('spd-2').onclick=()=>S.time.speed=1.5;
-  document.getElementById('spd-3').onclick=()=>S.time.speed=2;
-  bindSheetMenu();
-};
+    <div id="construction-footer" class="construction-footer"></div>
+    <div id="modal-container" class="modal-container"></div>
+    <div id="toast-container"></div>
 
-/* Sheet binders */
-function bindSheetBuild(){
-  sheetBody.querySelectorAll('[data-build]').forEach(btn=>{
-    btn.onclick=()=>{
-      S.selectedToBuild=btn.dataset.build; S.input.mode='build'; toast('Glisse pour viser, tap pour confirmer.');
-      closeSheet();
+    <script>
+    // ===============================================================
+    // V18 - DÉFINITIONS ET ÉTAT DU JEU
+    // ===============================================================
+    const BUILDING_DEFINITIONS = {
+        'forum': { name: 'Forum Romain', icon: '🏛️', description: 'Le coeur politique et social de votre cité.',
+            baseCost: [{ res: 'gold', amount: 100 }, { res: 'marble', amount: 50 }], upgradeCostMultiplier: 1.8,
+            production: { happiness: 2 }, baseBuildTime: 30, xpGain: 50, isInteractive: true },
+        'market': { name: 'Marché', icon: '🏪', description: 'Permet d\'échanger des ressources. Améliorez-le pour de meilleures offres.',
+            baseCost: [{ res: 'gold', amount: 80 }, { res: 'food', amount: 20 }], upgradeCostMultiplier: 1.6,
+            production: { gold: 20 }, baseBuildTime: 20, xpGain: 30, isInteractive: true },
+        'farm': { name: 'Ferme', icon: '🧑‍🌾', description: 'Produit la nourriture pour votre peuple.',
+            baseCost: [{ res: 'gold', amount: 60 }], upgradeCostMultiplier: 1.5,
+            production: { food: 25 }, baseBuildTime: 15, xpGain: 25 },
+        'quarry': { name: 'Carrière', icon: '⛏️', description: 'Extrait le marbre nécessaire aux grandes constructions.',
+            baseCost: [{ res: 'gold', amount: 120 }, { res: 'food', amount: 50 }], upgradeCostMultiplier: 1.6,
+            production: { marble: 15 }, baseBuildTime: 45, xpGain: 60 },
+        'warehouse': { name: 'Entrepôt', icon: '📦', description: 'Augmente le stockage d\'or et de marbre.',
+            baseCost: [{ res: 'food', amount: 100 }], upgradeCostMultiplier: 2.0,
+            storage: { gold: 1000, marble: 500 }, baseBuildTime: 40, xpGain: 40 },
+        'granary': { name: 'Grenier', icon: '🌾', description: 'Augmente le stockage de nourriture.',
+            baseCost: [{ res: 'gold', amount: 80 }], upgradeCostMultiplier: 1.8,
+            storage: { food: 1500 }, baseBuildTime: 35, xpGain: 35 },
+        'insula': { name: 'Insula', icon: '🏘️', description: 'Fournit des logements pour votre population.',
+            baseCost: [{ res: 'food', amount: 50 }, { res: 'marble', amount: 20 }], upgradeCostMultiplier: 1.7,
+            housing: 50, baseBuildTime: 25, xpGain: 20 },
+        'pantheon': { name: 'Panthéon', icon: '🏛️✨', description: 'Honorez les dieux et recevez leurs bénédictions.',
+            baseCost: [{ res: 'gold', amount: 1000 }, { res: 'marble', amount: 500 }], upgradeCostMultiplier: 3.0,
+            baseBuildTime: 600, xpGain: 500, requires: { type: 'forum', level: 5 }, isInteractive: true },
     };
-  });
-}
-function bindSheetResearch(){
-  sheetBody.querySelectorAll('[data-r]').forEach(btn=>{
-    btn.onclick=()=>{
-      const name=btn.dataset.r, r=RESEARCH[name];
-      if((S.res.science||0) >= r.cost.science){
-        S.res.science -= r.cost.science; S.city.research[name]=true;
-        toast('Recherche terminée: '+name); rebuildResbar(); openSheet('Recherches', sheetResearch()); bindSheetResearch();
-        beep(720,0.05,'triangle',0.04);
-      } else { beep(180,0.06,'sawtooth',0.05); }
-    };
-  });
-}
-function bindSheetArmy(){
-  const rc=document.getElementById('rc-legion');
-  if(rc) rc.onclick=()=>{
-    const cost={pierre:10, fer:5, or:2, pop:1};
-    if(S.res.pop<1) return toast('Population insuffisante'), beep(200,0.06,'sawtooth');
-    if(!canAfford(cost)) return toast('Ressources insuffisantes'), beep(200,0.06,'sawtooth');
-    pay(cost); S.city.army.legion+=1; toast('Légionnaire recruté ('+S.city.army.legion+')'); rebuildResbar(); beep(560,0.05,'square',0.04);
-  };
-}
-function bindSheetMenu(){
-  const c=document.getElementById('btn-cancel'); if(c) c.onclick=cancelQueue;
-  const ms=document.getElementById('m-select'); if(ms) ms.onclick=()=>{S.input.mode='select'; toast('Mode sélection');};
-  const mb=document.getElementById('m-build'); if(mb) mb.onclick=()=>{S.input.mode='build'; toast('Mode construction');};
-  const mu=document.getElementById('m-up'); if(mu) mu.onclick=()=>{S.input.mode='upgrade'; toast('Mode amélioration');};
-  document.querySelectorAll('[data-theme]').forEach(b=>b.onclick=()=>{ S.ui.theme=b.dataset.theme; localStorage.setItem('imperium-theme',S.ui.theme); document.documentElement.setAttribute('data-theme',S.ui.theme); });
-  const so=document.getElementById('snd-on'); if(so) so.onclick=()=>{S.ui.sound=true; toast('Son activé');};
-  const sf=document.getElementById('snd-off'); if(sf) sf.onclick=()=>{S.ui.sound=false; toast('Son coupé');};
-}
-
-/* ================= TOAST ================= */
-let toastTimeout=null;
-function toast(msg){
-  const t=document.createElement('div'); t.className='toast t'; t.textContent=msg; document.body.appendChild(t);
-  if(toastTimeout) clearTimeout(toastTimeout);
-  toastTimeout=setTimeout(()=>t.remove(),1500);
-}
-
-/* ================= ONBOARDING ================= */
-const ob=document.getElementById('ob'); const obTitle=document.getElementById('ob-title'); const obBody=document.getElementById('ob-body');
-const obNext=document.getElementById('ob-next'); const obSkip=document.getElementById('ob-skip');
-const OBK='imperium-onboarding-v1';
-let obStep = localStorage.getItem(OBK)? 999 : 0;
-const steps=[
-  {title:'Bienvenue dans Imperium', body:'Glissez pour déplacer la carte. Pincez pour zoomer. Double-tap pour recentrer.'},
-  {title:'Construire', body:'Appuyez 🏗️ ou onglet 🧱, choisissez un bâtiment, puis glissez pour viser et tapez pour confirmer le placement.'},
-  {title:'Panneaux', body:'Ouvrez les onglets en bas : 🧪 Recherches, 🛡️ Armée, ☰ Menu (thèmes, vitesse, son). Bon jeu !'}
-];
-function showOnboarding(){
-  if(obStep>=steps.length) { ob.classList.remove('show'); localStorage.setItem(OBK,'done'); return; }
-  const s=steps[obStep]; obTitle.textContent=s.title; obBody.textContent=s.body; ob.classList.add('show');
-}
-if(obStep===0) showOnboarding();
-obNext.onclick=()=>{ obStep++; showOnboarding(); beep(520,0.04); };
-obSkip.onclick=()=>{ obStep=999; showOnboarding(); };
-
-/* ================= MAIN LOOP ================= */
-function frame(){
-  const n=performance.now(); S.time.dt = (n - S.time.last)/1000 * S.time.speed; S.time.last=n;
-  tick(S.time.dt); clear(); drawGrid();
-  requestAnimationFrame(frame);
-}
-
-/* ================= BOOTSTRAP ================= */
-function start(){
-  initWorld();
-  if(S.city.buildings.length===0){
-    const cx=Math.floor(S.grid.w/2), cy=Math.floor(S.grid.h/2);
-    const seed=[
-      {type:'Forum',dx:0,dy:0},
-      {type:'Scierie',dx:2,dy:0},
-      {type:'Carrière',dx:-2,dy:0},
-      {type:'Briqueterie',dx:0,dy:2},
-      {type:'Entrepôt',dx:0,dy:-2},
-      {type:'Maison',dx:3,dy:1}
+    
+    const QUESTS = [
+        { id: 0, description: "Construisez votre première Ferme.", isComplete: () => gameState.buildings.some(b => b.type === 'farm'), reward: { xp: 50, resources: [{res: 'gold', amount: 100}] } },
+        { id: 1, description: "Atteignez le niveau 2.", isComplete: () => gameState.player.level >= 2, reward: { xp: 0, resources: [{res: 'marble', amount: 50}] } },
+        { id: 2, description: "Construisez une Insula pour votre peuple.", isComplete: () => gameState.buildings.some(b => b.type === 'insula'), reward: { xp: 100, resources: [{res: 'food', amount: 200}] } },
+        { id: 3, description: "Construisez un Marché pour commercer.", isComplete: () => gameState.buildings.some(b => b.type === 'market'), reward: { xp: 150, resources: [{res: 'gold', amount: 300}] } },
     ];
-    for(const s of seed){
-      const b={id:crypto.randomUUID(),type:s.type,x:cx+s.dx,y:cy+s.dy,lvl:1};
-      S.city.buildings.push(b); applyBuildingEffects(b,+1);
-    }
-  }
-  rebuildResbar();
-  requestAnimationFrame(frame);
-}
-start();
 
-})();</script>
+    function getDefaultGameState() {
+        return {
+            player: { name: 'Marcus Aurelius', title: 'Consul', level: 1, xp: 0, avatar: 'M' },
+            resources: { gold: 500, food: 200, marble: 100, divineFavor: 0 },
+            storage: { gold: 1000, food: 1500, marble: 500, divineFavor: 100 },
+            stats: { population: 50, populationCapacity: 50, happiness: 75, happinessModifier: 1.0 },
+            production: { gold: 5, food: 10, marble: 2, happiness: 0, divineFavor: 0 },
+            buildings: Array.from({ length: 15 }, (_, i) => ({ slotId: i, type: null, level: 0 })),
+            constructionQueue: [],
+            activeQuestId: 0,
+            lastUpdate: Date.now()
+        };
+    }
+    let gameState = getDefaultGameState();
+
+    // ===============================================================
+    // MOTEUR DE JEU
+    // ===============================================================
+    function getXpForLevel(level) { return Math.floor(100 * Math.pow(1.5, level - 1)); }
+
+    function addXp(amount) {
+        if (!amount || amount === 0) return;
+        gameState.player.xp += amount;
+        const xpForNextLevel = getXpForLevel(gameState.player.level);
+        if (gameState.player.xp >= xpForNextLevel) {
+            gameState.player.xp -= xpForNextLevel;
+            gameState.player.level++;
+            showToast(`🎉 NIVEAU SUPÉRIEUR ! Vous êtes maintenant niveau ${gameState.player.level} !`, 'levelup');
+        }
+        checkQuestCompletion();
+    }
+
+    function saveGameState() {
+        gameState.lastUpdate = Date.now();
+        localStorage.setItem('imperiumCityState_v18', JSON.stringify(gameState));
+    }
+
+    function loadGameState() {
+        const savedState = localStorage.getItem('imperiumCityState_v18');
+        if (savedState) {
+            gameState = { ...getDefaultGameState(), ...JSON.parse(savedState) };
+            processOfflineProgress();
+        }
+        recalculateGameStats();
+        updateAllUI();
+    }
+
+    function processOfflineProgress() {
+        const now = Date.now();
+        const offlineTime = (now - gameState.lastUpdate) / 1000;
+        
+        const processQueue = (queue, onComplete) => {
+            const completedItems = [];
+            (queue || []).forEach(item => {
+                if (item.endTime <= now) {
+                    onComplete(item);
+                    completedItems.push(item);
+                }
+            });
+            return (queue || []).filter(item => !completedItems.includes(item));
+        };
+        gameState.constructionQueue = processQueue(gameState.constructionQueue, completeConstruction);
+
+        recalculateGameStats();
+        for (const res in gameState.production) {
+            if (gameState.resources[res] !== undefined) {
+                const gain = (gameState.production[res] / 3600) * offlineTime;
+                gameState.resources[res] = Math.min(gameState.resources[res] + gain, gameState.storage[res] || Infinity);
+            }
+        }
+        showToast(`Bienvenue, Consul !`, 'success');
+    }
+
+    function gameTick() {
+        const now = Date.now();
+        const processQueue = (queue, onComplete) => {
+            if (queue.length > 0 && now >= queue[0].endTime) {
+                onComplete(queue[0]);
+                queue.shift();
+                recalculateGameStats();
+                updateAllUI();
+                saveGameState();
+            }
+        };
+        processQueue(gameState.constructionQueue, completeConstruction);
+
+        for (const res in gameState.production) {
+            if (gameState.resources[res] !== undefined) {
+                const gainPerSecond = (gameState.production[res] * gameState.stats.happinessModifier) / 3600;
+                const currentRes = gameState.resources[res];
+                const maxStorage = gameState.storage[res] || Infinity;
+                if (currentRes < maxStorage && gainPerSecond > 0) {
+                    gameState.resources[res] = Math.min(currentRes + gainPerSecond, maxStorage);
+                } else if (gainPerSecond < 0) {
+                    gameState.resources[res] += gainPerSecond;
+                }
+            }
+        }
+        
+        if (gameState.stats.population < gameState.stats.populationCapacity && gameState.stats.happiness > 50) {
+            const growthRate = (gameState.stats.happiness / 100) * 0.1; 
+            gameState.stats.population = Math.min(gameState.stats.population + growthRate, gameState.stats.populationCapacity);
+        } else if (gameState.stats.happiness < 20) {
+            gameState.stats.population = Math.max(0, gameState.stats.population - 0.05);
+        }
+
+        updateDashboardPreviews();
+        renderTimers();
+    }
+
+    function recalculateGameStats() {
+        const baseProduction = { gold: 5, food: 10, marble: 2, happiness: 0, divineFavor: 0 };
+        const baseStorage = { gold: 1000, food: 1500, marble: 500, divineFavor: 100 };
+        let populationCapacity = 0;
+
+        gameState.buildings.forEach(building => {
+            if (building.type && building.level > 0) {
+                const def = BUILDING_DEFINITIONS[building.type];
+                if (def.production) {
+                    for (const res in def.production) { baseProduction[res] += def.production[res] * building.level; }
+                }
+                if (def.storage) {
+                    for (const res in def.storage) { baseStorage[res] += def.storage[res] * building.level; }
+                }
+                if (def.housing) {
+                    populationCapacity += def.housing * building.level;
+                }
+            }
+        });
+        
+        baseProduction.food -= Math.floor(gameState.stats.population / 10);
+
+        gameState.production = baseProduction;
+        gameState.storage = baseStorage;
+        gameState.stats.populationCapacity = populationCapacity;
+        
+        if (gameState.stats.happiness > 90) {
+            gameState.stats.happinessModifier = 1.1;
+        } else if (gameState.stats.happiness < 30) {
+            gameState.stats.happinessModifier = 0.75;
+        } else {
+            gameState.stats.happinessModifier = 1.0;
+        }
+    }
+
+    // ===============================================================
+    // FONCTIONS DE RENDU DE L'UI
+    // ===============================================================
+    function renderCityGrid() {
+        const grid = document.getElementById('buildingsGrid');
+        grid.innerHTML = '';
+        gameState.buildings.forEach(building => {
+            const slot = document.createElement('div');
+            const isConstructing = gameState.constructionQueue.some(item => item.slotId === building.slotId);
+            slot.className = `building-slot ${building.type ? 'occupied' : ''} ${isConstructing ? 'constructing' : ''}`;
+            slot.dataset.slotId = building.slotId;
+            
+            if (isConstructing) {
+                slot.innerHTML = `<div class="building-icon">🔨</div><div class="building-name">Construction...</div><div class="construction-timer"></div>`;
+            } else if (building.type) {
+                const def = BUILDING_DEFINITIONS[building.type];
+                slot.innerHTML = `<div class="building-icon">${def.icon}</div><div class="building-name">${def.name}</div><div class="building-level">Niv. ${building.level}</div>`;
+                slot.onclick = () => handleBuildingClick(building);
+            } else {
+                slot.innerHTML = `<div class="building-icon" style="font-size: 2.5rem; color: var(--gold-light);">+</div>`;
+                slot.onclick = () => handleBuildingClick(building);
+            }
+            grid.appendChild(slot);
+        });
+        renderTimers();
+    }
+    
+    function renderTimers() {
+        const now = Date.now();
+        document.querySelectorAll('.construction-timer').forEach(timerEl => {
+            const slotEl = timerEl.closest('.building-slot');
+            const slotId = parseInt(slotEl.dataset.slotId);
+            const build = gameState.constructionQueue.find(item => item.slotId === slotId);
+            if (build) {
+                const remaining = Math.max(0, build.endTime - now);
+                const seconds = Math.floor((remaining / 1000) % 60);
+                const minutes = Math.floor((remaining / (1000 * 60)) % 60);
+                const hours = Math.floor((remaining / (1000 * 60 * 60)) % 24);
+                timerEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        });
+    }
+    
+    function updateDashboardPreviews() {
+        document.getElementById('player-tile-preview').textContent = `Niveau ${gameState.player.level}`;
+        document.getElementById('resources-tile-preview').textContent = `Or : ${Math.floor(gameState.resources.gold).toLocaleString()}`;
+        document.getElementById('stats-tile-preview').textContent = `Population : ${Math.floor(gameState.stats.population).toLocaleString()}`;
+        document.getElementById('production-tile-preview').textContent = `Or/h : ${Math.round(gameState.production.gold * gameState.stats.happinessModifier).toLocaleString()}`;
+        const quest = QUESTS[gameState.activeQuestId];
+        document.getElementById('quest-tile-preview').textContent = quest ? quest.description : "Terminé";
+    }
+
+    function updateAllUI() {
+        renderCityGrid();
+        updateDashboardPreviews();
+    }
+
+    // ===============================================================
+    // ACTIONS DE JEU
+    // ===============================================================
+    function getCost(baseCosts, multiplier, level) { 
+        return baseCosts.map(cost => ({ res: cost.res, amount: Math.floor(cost.amount * Math.pow(multiplier, level)) })); 
+    }
+    function getBuildTime(baseTime, level) { return baseTime * Math.pow(1.6, level); }
+
+    function handleBuildingClick(building) {
+        if (gameState.constructionQueue.some(item => item.slotId === building.slotId)) {
+            showToast("Ce bâtiment est en cours de construction.", "error"); return;
+        }
+        if (BUILDING_DEFINITIONS[building.type]?.isInteractive) {
+            // Future interactive buildings will go here
+            return;
+        }
+        if (building.type) { // Occupied
+            const def = BUILDING_DEFINITIONS[building.type];
+            const upgradeCosts = getCost(def.baseCost, def.upgradeCostMultiplier, building.level);
+            const canAfford = upgradeCosts.every(c => gameState.resources[c.res] >= c.amount);
+            const costsHtml = upgradeCosts.map(c => `<span class="cost-item ${gameState.resources[c.res] < c.amount ? 'insufficient' : ''}">${c.amount.toLocaleString()} ${c.res}</span>`).join(', ');
+            const time = getBuildTime(def.baseBuildTime, building.level);
+            let bonusHtml = '';
+            if (def.production) bonusHtml += `Production: ${Object.entries(def.production).map(([res, val]) => `+${val} ${res}/h`).join(', ')}`;
+            if (def.storage) { if(bonusHtml) bonusHtml += '<br>'; bonusHtml += `Stockage: ${Object.entries(def.storage).map(([res, val]) => `+${val.toLocaleString()} ${res}`).join(', ')}`; }
+            if (def.housing) { if(bonusHtml) bonusHtml += '<br>'; bonusHtml += `Logements: +${def.housing.toLocaleString()}`; }
+            const body = `<p>${def.description}</p><p>Niveau actuel : <strong>${building.level}</strong></p>
+                        <div class="upgrade-info">
+                            <p><strong>Amélioration (Niv. ${building.level + 1}) :</strong></p>
+                            <p>Coût : ${costsHtml}</p>
+                            <p>Temps : ${Math.floor(time)} secondes</p>
+                            <p>Bonus : ${bonusHtml}</p>
+                        </div>`;
+            const footer = `<button class="imperium-btn danger" onclick="demolishBuilding(${building.slotId})">Détruire</button>
+                           <div>
+                               <button class="imperium-btn" onclick="closeModal()">Fermer</button>
+                               <button class="imperium-btn" onclick="startUpgrade(${building.slotId})" ${!canAfford || gameState.constructionQueue.length > 0 ? 'disabled' : ''}>Améliorer</button>
+                           </div>`;
+            showModal(`Gérer ${def.name}`, body, footer);
+        } else { // Empty
+            const buildOptions = Object.entries(BUILDING_DEFINITIONS).map(([type, def]) => {
+                const costs = getCost(def.baseCost, def.upgradeCostMultiplier, 0);
+                let canAfford = true;
+                let missingRes = "";
+                for(const cost of costs) {
+                    if(gameState.resources[cost.res] < cost.amount) {
+                        canAfford = false;
+                        missingRes = `${cost.amount - Math.floor(gameState.resources[cost.res])} ${cost.res}`;
+                        break;
+                    }
+                }
+
+                let prereqMet = true;
+                let prereqText = '';
+                if (def.requires) {
+                    const requiredBuilding = gameState.buildings.find(b => b.type === def.requires.type);
+                    if (!requiredBuilding || requiredBuilding.level < def.requires.level) {
+                        prereqMet = false;
+                        prereqText = `<div class="build-item-prereq">Requiert: ${BUILDING_DEFINITIONS[def.requires.type].name} Niv. ${def.requires.level}</div>`;
+                    }
+                }
+                const costsHtml = costs.map(c => `<span class="cost-item ${gameState.resources[c.res] < c.amount ? 'insufficient' : ''}">${c.amount.toLocaleString()} ${c.res}</span>`).join(', ');
+                return `<div class="build-item ${!canAfford || !prereqMet ? 'disabled' : ''}" ${canAfford && prereqMet ? `onclick="startBuild('${type}', ${building.slotId})"` : ''}>
+                            <div class="build-item-icon">${def.icon}</div>
+                            <div class="build-item-name">${def.name}</div>
+                            <div class="build-item-costs">${costsHtml}</div>
+                            ${prereqText}
+                        </div>`;
+            }).join('');
+            const body = `<div class="build-grid">${buildOptions}</div>`;
+            showModal('Construire un bâtiment', body, '');
+        }
+    }
+
+    function startBuild(type, slotId) {
+        if (gameState.constructionQueue.length > 0) { showToast("File de construction occupée.", "error"); return; }
+        const def = BUILDING_DEFINITIONS[type];
+        const costs = getCost(def.baseCost, def.upgradeCostMultiplier, 0);
+        
+        for(const cost of costs) {
+            if(gameState.resources[cost.res] < cost.amount) {
+                showToast(`Ressources insuffisantes : il vous manque ${cost.amount - Math.floor(gameState.resources[cost.res])} ${cost.res}.`, "error");
+                return;
+            }
+        }
+
+        costs.forEach(c => gameState.resources[c.res] -= c.amount);
+        const buildTime = getBuildTime(def.baseBuildTime, 0);
+        gameState.constructionQueue.push({ slotId, type, level: 1, endTime: Date.now() + buildTime * 1000, xpGain: def.xpGain });
+        updateAllUI();
+        saveGameState();
+        closeModal();
+    }
+
+    function startUpgrade(slotId) {
+        if (gameState.constructionQueue.length > 0) { showToast("File de construction occupée.", "error"); return; }
+        const building = gameState.buildings.find(b => b.slotId === slotId);
+        const def = BUILDING_DEFINITIONS[building.type];
+        const costs = getCost(def.baseCost, def.upgradeCostMultiplier, building.level);
+
+        for(const cost of costs) {
+            if(gameState.resources[cost.res] < cost.amount) {
+                showToast(`Ressources insuffisantes : il vous manque ${cost.amount - Math.floor(gameState.resources[cost.res])} ${cost.res}.`, "error");
+                return;
+            }
+        }
+        
+        costs.forEach(c => gameState.resources[c.res] -= c.amount);
+        const buildTime = getBuildTime(def.baseBuildTime, building.level);
+        gameState.constructionQueue.push({ slotId, type: building.type, level: building.level + 1, endTime: Date.now() + buildTime * 1000, xpGain: def.xpGain * (building.level + 1) });
+        updateAllUI();
+        saveGameState();
+        closeModal();
+    }
+    
+    function demolishBuilding(slotId) {
+        const building = gameState.buildings.find(b => b.slotId === slotId);
+        if (!building || !building.type) return;
+        const def = BUILDING_DEFINITIONS[building.type];
+        for(let i=0; i < building.level; i++){
+            const costs = getCost(def.baseCost, def.upgradeCostMultiplier, i);
+            costs.forEach(c => { gameState.resources[c.res] += c.amount * 0.5; });
+        }
+        building.type = null;
+        building.level = 0;
+        recalculateGameStats();
+        updateAllUI();
+        saveGameState();
+        closeModal();
+        showToast("Bâtiment détruit.", "success");
+    }
+
+    function completeConstruction(item) {
+        const building = gameState.buildings.find(b => b.slotId === item.slotId);
+        building.type = item.type;
+        building.level = item.level;
+        showToast(`${BUILDING_DEFINITIONS[item.type].name} (Niv. ${item.level}) terminé !`, "success");
+        addXp(item.xpGain);
+    }
+
+    function checkQuestCompletion() {
+        const quest = QUESTS[gameState.activeQuestId];
+        if (quest && quest.isComplete()) {
+            showToast(`Objectif atteint : ${quest.description}`, "success");
+            gameState.activeQuestId++;
+            addXp(quest.reward.xp);
+            quest.reward.resources.forEach(r => {
+                gameState.resources[r.res] = Math.min(gameState.resources[r.res] + r.amount, gameState.storage[r.res] || Infinity);
+            });
+        }
+    }
+
+    function collectTaxes() {
+        const gain = 500 + (gameState.stats.population * 0.5);
+        if (gameState.resources.gold + gain > gameState.storage.gold) {
+            showToast("L'entrepôt d'or est plein !", "error");
+            gameState.resources.gold = gameState.storage.gold;
+        } else {
+            gameState.resources.gold += gain;
+            showToast(`+${Math.floor(gain)} Or collecté !`, 'success');
+            addXp(10);
+        }
+        saveGameState();
+    }
+
+    function organizeGames() {
+        const cost = 200;
+        if (gameState.resources.gold < cost) { showToast("Pas assez d'or pour organiser des jeux.", "error"); return; }
+        gameState.resources.gold -= cost;
+        gameState.stats.happiness = Math.min(100, gameState.stats.happiness + 5);
+        showToast(`Bonheur +5% !`, 'success');
+        addXp(20);
+        saveGameState();
+    }
+    
+    // ===============================================================
+    // UTILITAIRES
+    // ===============================================================
+    function showModal(title, body, footer) {
+        const container = document.getElementById('modal-container');
+        container.innerHTML = `<div class="modal-backdrop" onclick="closeModal()"></div><div class="modal-content"><div class="modal-header"><h3 class="modal-title">${title}</h3><button class="modal-close-btn" onclick="closeModal()">&times;</button></div><div class="modal-body">${body}</div><div class="modal-footer">${footer}</div></div>`;
+        setTimeout(() => container.classList.add('active'), 10);
+    }
+
+    function closeModal() {
+        const container = document.getElementById('modal-container');
+        container.classList.remove('active');
+        setTimeout(() => container.innerHTML = '', 300);
+    }
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+    
+    // ===============================================================
+    // MODAL FUNCTIONS
+    // ===============================================================
+    function showPlayerModal() {
+        const xpForNextLevel = getXpForLevel(gameState.player.level);
+        const xpPercentage = (gameState.player.xp / xpForNextLevel) * 100;
+        const body = `
+            <div class="player-info" style="justify-content: center; background: none; border: none; padding: 0;">
+                <div class="player-avatar" style="width: 80px; height: 80px; font-size: 2.5rem;">${gameState.player.avatar}</div>
+                <div class="player-details" style="width: auto;">
+                    <div class="player-name" style="font-size: 1.5rem;">${gameState.player.name}</div>
+                    <div class="player-level" style="font-size: 1.1rem;">Niveau ${gameState.player.level}</div>
+                    <div class="xp-bar-container" style="width: 200px;">
+                        <div class="xp-bar-fill" style="width: ${xpPercentage}%;"></div>
+                    </div>
+                    <div class="xp-bar-text">${Math.floor(gameState.player.xp)} / ${xpForNextLevel} XP</div>
+                </div>
+            </div>
+        `;
+        showModal("Profil du Consul", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    }
+
+    function showResourcesModal() {
+        let body = '<div class="resources-display">';
+        for (const res in gameState.resources) {
+            const current = Math.floor(gameState.resources[res]);
+            const max = gameState.storage[res] || Infinity;
+            const icon = {'gold':'💰','food':'🌾','marble':'🏛️','divineFavor':'🙏'}[res];
+            body += `
+                <div class="resource-item">
+                    <span class="resource-icon">${icon}</span>
+                    <span>${res.charAt(0).toUpperCase() + res.slice(1)}</span>
+                    <span class="resource-value ${current >= max ? 'full' : ''}">${current.toLocaleString()}/${max.toLocaleString()}</span>
+                </div>
+            `;
+        }
+        body += '</div>';
+        showModal("Inventaire des Ressources", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    }
+
+    function showStatsModal() {
+        const body = `
+            <div class="city-stats">
+                <div class="stat-item">
+                    <div class="stat-value">${Math.floor(gameState.stats.population).toLocaleString()}/${gameState.stats.populationCapacity.toLocaleString()}</div>
+                    <div class="stat-label">👥 Population</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${gameState.stats.happiness}%</div>
+                    <div class="stat-label">😊 Bonheur</div>
+                </div>
+            </div>
+        `;
+        showModal("Statistiques de la Cité", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    }
+
+    function showProductionModal() {
+        let body = '<div class="production-display">';
+        body += Object.entries(gameState.production).filter(([res]) => ['gold', 'food', 'marble'].includes(res)).map(([res, rate]) => {
+            const iconMap = { gold: '�', food: '🌾', marble: '🏛️' };
+            const effectiveRate = rate * gameState.stats.happinessModifier;
+            const rateClass = effectiveRate >= 0 ? 'positive' : 'negative';
+            const sign = effectiveRate >= 0 ? '+' : '';
+            return `<div class="production-item"><div class="production-resource"><span>${iconMap[res]}</span> ${res.charAt(0).toUpperCase() + res.slice(1)}</div><div class="production-rate ${rateClass}">${sign}${Math.round(effectiveRate).toLocaleString()}</div></div>`;
+        }).join('');
+        body += '</div>';
+        showModal("Rapport de Production", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    }
+    
+    function showQuestModal() {
+        const quest = QUESTS[gameState.activeQuestId];
+        let body = '';
+        if (quest) {
+            const rewardText = quest.reward.resources.map(r => `${r.amount.toLocaleString()} ${r.res}`).join(', ') + (quest.reward.xp > 0 ? ` & ${quest.reward.xp} XP` : '');
+            body = `<div class="quest-panel"><div class="quest-title">${quest.description}</div><div class="quest-reward">Récompense : ${rewardText}</div></div>`;
+        } else {
+            body = `<div class="quest-panel"><div class="quest-title">Toutes les quêtes sont terminées !</div></div>`;
+        }
+        showModal("Objectif Actuel", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    }
+    
+    function showActionsModal() {
+        const body = `
+            <div class="quick-actions" style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+                <button class="imperium-btn" onclick="collectTaxes(); closeModal();">💰 Collecter Impôts</button>
+                <button class="imperium-btn" onclick="organizeGames(); closeModal();">🎪 Organiser Jeux</button>
+            </div>
+        `;
+        showModal("Actions Rapides", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    }
+
+    // ===============================================================
+    // INITIALISATION
+    // ===============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        loadGameState();
+        setInterval(gameTick, 1000);
+        setInterval(saveGameState, 30000);
+    });
+    </script>
 </body>
 </html>
