@@ -37,15 +37,24 @@ const BUILDING_DEFINITIONS = {
     'pantheon': { name: 'Panthéon', icon: '🏛️✨', description: 'Honorez les dieux et recevez leurs bénédictions.',
         baseCost: [{ res: 'gold', amount: 1000 }, { res: 'marble', amount: 500 }], upgradeCostMultiplier: 3.0,
         baseBuildTime: 600, xpGain: 500, requires: { type: 'forum', level: 5 }, isInteractive: true },
+    'barracks': { name: 'Caserne', icon: '⚔️', description: 'Entraînez des unités pour vos légions. Améliorez pour débloquer des unités plus fortes.',
+        baseCost: [{ res: 'gold', amount: 200 }, { res: 'food', amount: 150 }], upgradeCostMultiplier: 1.8,
+        baseBuildTime: 120, xpGain: 80, isInteractive: true },
 };
 
 const UNITS_CONFIG = {
-    legionnaire: { name: 'Légionnaire', icon: '🛡️', attack: 50, defense: 70, hp: 100, type: 'infantry', priority: 'cavalry', ability: 'testudo' },
-    archer: { name: 'Archer', icon: '🏹', attack: 60, defense: 40, hp: 80, type: 'ranged', priority: 'infantry', ability: 'volley' },
-    cavalier: { name: 'Cavalier', icon: '🐎', attack: 80, defense: 60, hp: 120, type: 'cavalry', priority: 'ranged', ability: 'charge' },
-    praetorian: { name: 'Prétorien', icon: '🦅', attack: 90, defense: 90, hp: 150, type: 'infantry', priority: 'infantry', ability: 'elite' },
-    battering_ram: { name: 'Bélier', icon: '💣', attack: 200, defense: 100, hp: 300, type: 'siege', priority: 'wall', ability: 'ram' },
-    ballista: { name: 'Baliste', icon: '🎯', attack: 150, defense: 30, hp: 120, type: 'siege', priority: 'infantry', ability: 'pierce' }
+    legionnaire: { name: 'Légionnaire', icon: '🛡️', attack: 50, defense: 70, hp: 100, type: 'infantry', priority: 'cavalry', ability: 'testudo',
+        cost: [{ res: 'gold', amount: 50 }, { res: 'food', amount: 20 }], trainTime: 60 },
+    archer: { name: 'Archer', icon: '🏹', attack: 60, defense: 40, hp: 80, type: 'ranged', priority: 'infantry', ability: 'volley',
+        cost: [{ res: 'gold', amount: 80 }, { res: 'food', amount: 10 }], trainTime: 90 },
+    cavalier: { name: 'Cavalier', icon: '🐎', attack: 80, defense: 60, hp: 120, type: 'cavalry', priority: 'ranged', ability: 'charge',
+        cost: [{ res: 'gold', amount: 120 }, { res: 'food', amount: 40 }], trainTime: 180 },
+    praetorian: { name: 'Prétorien', icon: '🦅', attack: 90, defense: 90, hp: 150, type: 'infantry', priority: 'infantry', ability: 'elite',
+        cost: [{ res: 'gold', amount: 200 }, { res: 'marble', amount: 50 }], trainTime: 300, requires: { building: 'barracks', level: 3 } },
+    battering_ram: { name: 'Bélier', icon: '💣', attack: 200, defense: 100, hp: 300, type: 'siege', priority: 'wall', ability: 'ram',
+        cost: [{ res: 'gold', amount: 300 }, { res: 'marble', amount: 100 }], trainTime: 600, requires: { building: 'barracks', level: 5 } },
+    ballista: { name: 'Baliste', icon: '🎯', attack: 150, defense: 30, hp: 120, type: 'siege', priority: 'infantry', ability: 'pierce',
+        cost: [{ res: 'gold', amount: 250 }, { res: 'marble', amount: 150 }], trainTime: 450, requires: { building: 'barracks', level: 5 } }
 };
 
 const HEROES_CONFIG = {
@@ -75,6 +84,35 @@ const QUESTS = [
     { id: 2, description: "Construisez une Insula pour votre peuple.", isComplete: (gs) => gs.city.buildings.some(b => b.type === 'insula'), reward: { xp: 100, resources: [{res: 'food', amount: 200}] } },
     { id: 3, description: "Construisez un Marché pour commercer.", isComplete: (gs) => gs.city.buildings.some(b => b.type === 'market'), reward: { xp: 150, resources: [{res: 'gold', amount: 300}] } },
 ];
+
+const TECHNOLOGY_DEFINITIONS = {
+    civic: {
+        name: 'Civique',
+        technologies: {
+            'agriculture': { name: 'Agriculture', description: 'Améliore la production des fermes de 10%.', cost: [{res: 'gold', amount: 500}], researchTime: 300,
+                effects: [{ type: 'building_production_modifier', building: 'farm', value: 0.10 }], requirements: [] },
+            'coinage': { name: 'Monnaie', description: 'Augmente la production d\'or des marchés de 15%.', cost: [{res: 'gold', amount: 1000}], researchTime: 600,
+                effects: [{ type: 'building_production_modifier', building: 'market', value: 0.15 }], requirements: ['agriculture'] },
+            'urbanism': { name: 'Urbanisme', description: 'Augmente la capacité des Insulae de 20%.', cost: [{res: 'marble', amount: 800}], researchTime: 900,
+                effects: [{ type: 'building_housing_modifier', building: 'insula', value: 0.20 }], requirements: ['coinage'] },
+        }
+    },
+    military: {
+        name: 'Militaire',
+        technologies: {
+            'professional_army': { name: 'Armée Professionnelle', description: 'Légionnaires +10% attaque & défense.', cost: [{res: 'gold', amount: 800}, {res: 'food', amount: 1000}], researchTime: 1200,
+                effects: [
+                    { type: 'unit_attribute_modifier', unit: 'legionnaire', attribute: 'attack', value: 0.10 },
+                    { type: 'unit_attribute_modifier', unit: 'legionnaire', attribute: 'defense', value: 0.10 }
+                ], requirements: [] },
+            'siege_engineering': { name: 'Génie de Siège', description: 'Unités de siège +25% d\'efficacité.', cost: [{res: 'gold', amount: 1500}, {res: 'marble', amount: 500}], researchTime: 1800,
+                effects: [
+                    { type: 'unit_attribute_modifier', unit: 'battering_ram', attribute: 'attack', value: 0.25 },
+                    { type: 'unit_attribute_modifier', unit: 'ballista', attribute: 'attack', value: 0.25 }
+                ], requirements: ['professional_army'] },
+        }
+    }
+};
 
 const GAME_CONFIG = {
     SUPPLY_CONSUMPTION_PER_1000_TROOPS: 20, // Food per turn
@@ -118,13 +156,16 @@ function getDefaultGameState() {
         },
 
         // --- Unités et Armées ---
-        units: {
+        units: { // This seems to be for the simulator, let's keep it separate
             legionnaire: { count: 100, xp: 0 },
             archer: { count: 80, xp: 0 },
             cavalier: { count: 50, xp: 0 },
             praetorian: { count: 10, xp: 0 },
             battering_ram: { count: 5, xp: 0 },
             ballista: { count: 5, xp: 0 }
+        },
+        unitPool: { // Units available for legions
+            legionnaire: 0, archer: 0, cavalier: 0, praetorian: 0, battering_ram: 0, ballista: 0
         },
         legions: [], // from world
 
@@ -146,20 +187,23 @@ function getDefaultGameState() {
             buildings: Array.from({ length: 15 }, (_, i) => ({ slotId: i, type: null, level: 0 })),
             constructionQueue: [],
             activeQuestId: 0,
+            researchQueue: [],
+            trainingQueue: [],
         },
+
+        // --- Tech ---
+        researchedTechs: [],
 
         // --- World View ---
         world: {
             turn: 1,
             territories: [
-
-                { id: 'roma', name: 'Rome', x: 45, y: 40, status: 'capital', flag: '🏛️', income: {'gold': 200, 'food': 5, 'spies': 1}, garrison: 2000, loyalty: 100, governorId: null, supplyRange: GAME_CONFIG.BASE_SUPPLY_RANGE },
-
-                { id: 'carthage', name: 'Carthage', x: 35, y: 75, status: 'enemy', flag: '🐘', strength: 12000, personality: 'aggressive' },
-                { id: 'egypt', name: 'Égypte', x: 75, y: 80, status: 'neutral', flag: '🐪', relations: 10, trait: { name: 'Grenier du monde', effect: {'food': 2} } },
-                { id: 'syracuse', name: 'Syracuse', x: 55, y: 65, status: 'neutral', flag: '🏝️', relations: 0 },
-                { id: 'athens', name: 'Athènes', x: 65, y: 50, status: 'neutral', flag: '🏺', relations: 20 },
-                { id: 'byzantium', name: 'Byzance', x: 75, y: 40, status: 'neutral', flag: '🌊', relations: 0 },
+                { id: 'roma', name: 'Rome', x: 45, y: 40, status: 'capital', flag: '🏛️', income: {'gold': 200, 'food': 5, 'spies': 1}, garrison: { legionnaire: 100 }, loyalty: 100, governorId: null, supplyRange: GAME_CONFIG.BASE_SUPPLY_RANGE, neighbors: ['syracuse', 'athens'] },
+                { id: 'carthage', name: 'Carthage', x: 35, y: 75, status: 'enemy', flag: '🐘', units: { cavalier: 60, legionnaire: 50, archer: 10 }, personality: 'aggressive', neighbors: ['syracuse'] },
+                { id: 'egypt', name: 'Égypte', x: 75, y: 80, status: 'neutral', flag: '🐪', relations: 10, trait: { name: 'Grenier du monde', effect: {'food': 2} }, neighbors: ['byzantium', 'syracuse'] },
+                { id: 'syracuse', name: 'Syracuse', x: 55, y: 65, status: 'neutral', flag: '🏝️', relations: 0, neighbors: ['roma', 'carthage', 'athens', 'egypt'] },
+                { id: 'athens', name: 'Athènes', x: 65, y: 50, status: 'neutral', flag: '🏺', relations: 20, neighbors: ['roma', 'syracuse', 'byzantium'] },
+                { id: 'byzantium', name: 'Byzance', x: 75, y: 40, status: 'neutral', flag: '🌊', relations: 0, neighbors: ['athens', 'egypt'] },
             ],
              missions: [
                 { id: 'raise_legion', title: 'Levez une Légion', description: 'Recruter votre première légion à Rome.', isComplete: (gs) => gs.legions.length > 0, reward: {'gold': 1000} },
@@ -260,6 +304,18 @@ function recalculateCityStats() {
     const baseProduction = { gold: 5, food: 10, marble: 2, happiness: 0, divineFavor: 0 };
     const baseStorage = { gold: 1000, food: 1500, marble: 500, divineFavor: 100, wood: 10000, stone: 10000, spies: 50 };
     let populationCapacity = 0;
+    const housingModifiers = {}; // e.g., { 'insula': 1.0 }
+
+    // Apply technology effects to modifiers first
+    gameState.researchedTechs.forEach(techId => {
+        const techDef = findTechnology(techId);
+        if (!techDef) return;
+        techDef.effects.forEach(effect => {
+            if (effect.type === 'building_housing_modifier') {
+                housingModifiers[effect.building] = (housingModifiers[effect.building] || 1.0) + effect.value;
+            }
+        });
+    });
 
     gameState.city.buildings.forEach(building => {
         if (building.type && building.level > 0) {
@@ -271,16 +327,38 @@ function recalculateCityStats() {
                 for (const res in def.storage) { baseStorage[res] += def.storage[res] * building.level; }
             }
             if (def.housing) {
-                populationCapacity += def.housing * building.level;
+                const modifier = housingModifiers[building.type] || 1.0;
+                populationCapacity += def.housing * building.level * modifier;
             }
         }
     });
 
     baseProduction.food -= Math.floor(gameState.city.stats.population / 10);
 
+    // Apply production technology effects
+    gameState.researchedTechs.forEach(techId => {
+        const techDef = findTechnology(techId);
+        if (!techDef) return;
+        techDef.effects.forEach(effect => {
+            if (effect.type === 'building_production_modifier') {
+                // This is a simplified model. It boosts the base production from all buildings of a type.
+                let baseBuildingProduction = 0;
+                gameState.city.buildings.forEach(b => {
+                    if (b.type === effect.building) {
+                        baseBuildingProduction += (BUILDING_DEFINITIONS[b.type].production[Object.keys(BUILDING_DEFINITIONS[b.type].production)[0]] || 0) * b.level;
+                    }
+                });
+                const resourceToBoost = Object.keys(BUILDING_DEFINITIONS[effect.building].production)[0];
+                if(baseProduction[resourceToBoost]) {
+                    baseProduction[resourceToBoost] += baseBuildingProduction * effect.value;
+                }
+            }
+        });
+    });
+
     gameState.city.production = baseProduction;
     gameState.storage = { ...gameState.storage, ...baseStorage };
-    gameState.city.stats.populationCapacity = populationCapacity;
+    gameState.city.stats.populationCapacity = Math.floor(populationCapacity);
 
     if (gameState.city.stats.happiness > 90) {
         gameState.city.stats.happinessModifier = 1.1;
@@ -289,6 +367,124 @@ function recalculateCityStats() {
     } else {
         gameState.city.stats.happinessModifier = 1.0;
     }
+}
+
+function findTechnology(techId) {
+    for (const category of Object.values(TECHNOLOGY_DEFINITIONS)) {
+        if (category.technologies[techId]) {
+            return category.technologies[techId];
+        }
+    }
+    return null;
+}
+
+function startResearch(techId) {
+    if (gameState.city.researchQueue.length > 0) {
+        return { success: false, message: "La file de recherche est déjà occupée." };
+    }
+    if (gameState.researchedTechs.includes(techId) || gameState.city.researchQueue.some(item => item.techId === techId)) {
+        return { success: false, message: "Recherche déjà effectuée ou en cours." };
+    }
+
+    const tech = findTechnology(techId);
+    if (!tech) return { success: false, message: "Technologie inconnue." };
+
+    for (const req of tech.requirements) {
+        if (!gameState.researchedTechs.includes(req)) {
+            return { success: false, message: "Prérequis non remplis." };
+        }
+    }
+
+    for (const cost of tech.cost) {
+        if (gameState.resources[cost.res] < cost.amount) {
+            return { success: false, message: "Ressources insuffisantes." };
+        }
+    }
+
+    tech.cost.forEach(c => gameState.resources[c.res] -= c.amount);
+
+    gameState.city.researchQueue.push({
+        techId: techId,
+        endTime: Date.now() + tech.researchTime * 1000,
+    });
+
+    return { success: true };
+}
+
+function completeResearch(researchItem) {
+    gameState.researchedTechs.push(researchItem.techId);
+    const tech = findTechnology(researchItem.techId);
+    // Apply immediate effects if any
+    recalculateCityStats();
+    return tech;
+}
+
+function startTraining(unitId, amount) {
+    const unitDef = UNITS_CONFIG[unitId];
+    if (!unitDef) return { success: false, message: "Unité inconnue." };
+
+    // Check requirements
+    if (unitDef.requires) {
+        const reqBuilding = gameState.city.buildings.find(b => b.type === unitDef.requires.building);
+        if (!reqBuilding || reqBuilding.level < unitDef.requires.level) {
+            return { success: false, message: `Requiert ${BUILDING_DEFINITIONS[unitDef.requires.building].name} niveau ${unitDef.requires.level}.` };
+        }
+    }
+
+    const totalCost = unitDef.cost.map(c => ({ res: c.res, amount: c.amount * amount }));
+    for (const cost of totalCost) {
+        if (gameState.resources[cost.res] < cost.amount) {
+            return { success: false, message: "Ressources insuffisantes." };
+        }
+    }
+
+    totalCost.forEach(c => gameState.resources[c.res] -= c.amount);
+
+    gameState.city.trainingQueue.push({
+        unitId: unitId,
+        amount: amount,
+        endTime: Date.now() + (unitDef.trainTime * amount) * 1000,
+    });
+
+    return { success: true };
+}
+
+function completeTraining(trainingItem) {
+    gameState.unitPool[trainingItem.unitId] = (gameState.unitPool[trainingItem.unitId] || 0) + trainingItem.amount;
+    return trainingItem;
+}
+
+function masterGameTick() {
+    const now = Date.now();
+    let stateChanged = false;
+
+    // 1. Construction Queue
+    if (gameState.city.constructionQueue.length > 0 && now >= gameState.city.constructionQueue[0].endTime) {
+        const item = gameState.city.constructionQueue.shift();
+        completeConstruction(item); // Assumes completeConstruction is defined in city-view
+        stateChanged = true;
+    }
+
+    // 2. Research Queue
+    if (gameState.city.researchQueue.length > 0 && now >= gameState.city.researchQueue[0].endTime) {
+        const item = gameState.city.researchQueue.shift();
+        completeResearch(item);
+        stateChanged = true;
+    }
+
+    // 3. Training Queue
+    if (gameState.city.trainingQueue.length > 0 && now >= gameState.city.trainingQueue[0].endTime) {
+        const item = gameState.city.trainingQueue.shift();
+        completeTraining(item);
+        stateChanged = true;
+    }
+
+    if (stateChanged) {
+        recalculateCityStats();
+        saveGameState();
+    }
+
+    return stateChanged;
 }
 
 
