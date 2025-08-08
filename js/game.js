@@ -152,6 +152,19 @@ const EVENTS = [
     }
 ];
 
+const TIPS = [
+    "Construisez plus de fermes pour augmenter votre production de nourriture et nourrir une plus grande population.",
+    "Le bonheur de votre peuple est crucial ! Un peuple heureux est plus productif.",
+    "N'oubliez pas d'améliorer vos bâtiments pour augmenter leur efficacité.",
+    "Les entrepôts et les greniers augmentent votre capacité de stockage. Indispensable pour les grands projets !",
+    "Chaque bâtiment que vous construisez ou améliorez vous rapporte de l'expérience (XP) pour monter de niveau.",
+    "Consultez l'arbre technologique pour débloquer de puissantes améliorations pour votre cité.",
+    "Les quêtes sont un excellent moyen de gagner des ressources supplémentaires et de l'XP.",
+    "Une population plus importante consomme plus de nourriture. Gardez un œil sur votre production !",
+    "Le Forum est le cœur de votre cité, il augmente le bonheur de vos citoyens.",
+    "La construction d'une caserne vous permettra de former des troupes pour défendre votre cité et conquérir de nouveaux territoires."
+];
+
 
 // ---------------------------------------------------------------
 // ÉTAT GLOBAL DU JEU (GAMESTATE)
@@ -250,7 +263,11 @@ function getDefaultGameState() {
         },
 
         // --- Meta Data ---
-        lastUpdate: Date.now()
+        lastUpdate: Date.now(),
+        lastEventTimestamp: 0,
+
+        // --- System ---
+        pendingEvents: [],
     };
 }
 
@@ -547,6 +564,20 @@ function completeTraining(trainingItem) {
     return trainingItem;
 }
 
+function triggerRandomEvent() {
+    if (!EVENTS || EVENTS.length === 0) return;
+
+    const event = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+    const effectMessage = event.effect(gameState);
+
+    gameState.pendingEvents.push({
+        title: event.title,
+        description: event.description,
+        effectMessage: effectMessage,
+    });
+    console.log(`Event triggered: ${event.title}`);
+}
+
 function masterGameTick() {
     const now = Date.now();
     let stateChanged = false;
@@ -571,6 +602,7 @@ function masterGameTick() {
         completeTraining(item);
         stateChanged = true;
     }
+
 
     // 4. Check for scenario quest completion
     checkQuestCompletion();

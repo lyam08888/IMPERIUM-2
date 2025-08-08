@@ -26,6 +26,15 @@ function initializeCityUI() {
     console.log("Initializing City View UI...");
     recalculateCityStats();
     updateAllCityUI();
+
+    // Setup periodic tip display
+    const TIP_INTERVAL = 90 * 1000; // Every 90 seconds
+    setInterval(() => {
+        if (typeof TIPS !== 'undefined' && TIPS.length > 0) {
+            const randomTip = TIPS[Math.floor(Math.random() * TIPS.length)];
+            showToast(`💡 Astuce : ${randomTip}`, 'info');
+        }
+    }, TIP_INTERVAL);
 }
 
 function cityGameTick() {
@@ -42,6 +51,17 @@ function cityGameTick() {
             if(unitDef) showToast(`${trainingInProgress.amount} ${unitDef.name}(s) ont terminé leur formation !`, "success");
         }
         updateAllCityUI();
+    }
+
+    // --- Handle Pending Events ---
+    if (gameState.pendingEvents && gameState.pendingEvents.length > 0) {
+        // Only show if no modal is currently active
+        if (!document.querySelector('#modal-container.active')) {
+            const event = gameState.pendingEvents.shift(); // Get the first event and remove it
+            const body = `<p>${event.description}</p><div style="margin-top: 1rem; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 0.25rem;"><strong>Effet :</strong> ${event.effectMessage}</div>`;
+            const footer = `<button class="imperium-btn" onclick="closeModal()">Compris</button>`;
+            showModal(`Événement : ${event.title}`, body, footer);
+        }
     }
 
     for (const res in gameState.city.production) {
@@ -392,6 +412,7 @@ function showProductionModal() {
 }
 
 function showQuestModal() {
+
     const chapter = SCENARIO.chapters[gameState.scenario.currentChapterIndex];
     const quest = getCurrentQuest();
 
