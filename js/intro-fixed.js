@@ -1,6 +1,11 @@
 // js/intro-fixed.js
 // Version corrigée avec gestion d'erreur et Battle Pass intégré
 
+// Détection du mode mobile
+function isMobile() {
+    return /Mobi|Android/i.test(navigator.userAgent);
+}
+
 // Fonction de débogage pour traquer les problèmes
 function debugLog(message, data = null) {
     console.log(`[INTRO DEBUG] ${message}`, data || '');
@@ -231,45 +236,38 @@ Cette action est IRRÉVERSIBLE !`;
     // --- Check for Saved Game ---
     function initializeIntro() {
         debugLog('Initialisation de l\'intro...');
-        
-        try {
-            const savedGame = localStorage.getItem(SAVE_KEY);
-            introButtonsContainer.innerHTML = ''; // Clear any existing buttons
+        introButtonsContainer.innerHTML = ''; // Clear any existing buttons
 
-            if (savedGame) {
-                debugLog('Sauvegarde trouvée');
-                const buttons = createContinueButtons();
-                
-                introButtonsContainer.appendChild(buttons.continueBtn);
-                introButtonsContainer.appendChild(buttons.newGameBtn);
-                introButtonsContainer.appendChild(buttons.battlePassBtn);
-            } else {
-                debugLog('Pas de sauvegarde, nouveau joueur');
-                const buttons = createGameStartButtons();
-                
-                introButtonsContainer.appendChild(buttons.startBtn);
-                introButtonsContainer.appendChild(buttons.directBtn);
-                introButtonsContainer.appendChild(buttons.unifiedBtn);
-                introButtonsContainer.appendChild(buttons.battlePassBtn);
-            }
-            
-            // Ajouter le bouton d'urgence
-            addEmergencyButton();
-            
-        } catch (error) {
-            debugLog('Erreur dans initializeIntro', error);
-            // Bouton de secours en cas d'erreur
-            const emergencyBtn = createButton(
-                '🚨 ACCÈS DIRECT AU JEU', 
-                'imperium-btn', 
-                () => safeRedirect('game.html'),
-                { 
-                    background: '#dc2626', 
-                    fontSize: '1.2em',
-                    marginTop: '20px'
+        if (isMobile()) {
+            debugLog('Appareil mobile détecté. Affichage du bouton mobile.');
+            const mobileButton = createButton(
+                '📱 Accéder à la version mobile',
+                'imperium-btn',
+                () => safeRedirect('imperium-mobile-optimized.html'),
+                {
+                    fontSize: '1.3em',
+                    padding: '15px 30px',
+                    background: 'linear-gradient(135deg, #d97706, #f59e0b)',
+                    color: 'white',
+                    border: '2px solid #b45309'
                 }
             );
-            introButtonsContainer.appendChild(emergencyBtn);
+            introButtonsContainer.appendChild(mobileButton);
+        } else {
+            debugLog('Appareil de bureau détecté. Affichage du bouton unifié.');
+            const desktopButton = createButton(
+                '🌟 Lancer la Version Unifiée',
+                'imperium-btn',
+                () => safeRedirect('imperium-unified.html'),
+                {
+                    fontSize: '1.3em',
+                    padding: '15px 30px',
+                    background: 'linear-gradient(135deg, #8b5cf6, #a855f7)',
+                    color: 'white',
+                    border: '2px solid #7c3aed'
+                }
+            );
+            introButtonsContainer.appendChild(desktopButton);
         }
     }
     
