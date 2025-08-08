@@ -26,6 +26,15 @@ function initializeCityUI() {
     console.log("Initializing City View UI...");
     recalculateCityStats();
     updateAllCityUI();
+
+    // Setup periodic tip display
+    const TIP_INTERVAL = 90 * 1000; // Every 90 seconds
+    setInterval(() => {
+        if (typeof TIPS !== 'undefined' && TIPS.length > 0) {
+            const randomTip = TIPS[Math.floor(Math.random() * TIPS.length)];
+            showToast(`💡 Astuce : ${randomTip}`, 'info');
+        }
+    }, TIP_INTERVAL);
 }
 
 function cityGameTick() {
@@ -42,6 +51,17 @@ function cityGameTick() {
             if(unitDef) showToast(`${trainingInProgress.amount} ${unitDef.name}(s) ont terminé leur formation !`, "success");
         }
         updateAllCityUI();
+    }
+
+    // --- Handle Pending Events ---
+    if (gameState.pendingEvents && gameState.pendingEvents.length > 0) {
+        // Only show if no modal is currently active
+        if (!document.querySelector('#modal-container.active')) {
+            const event = gameState.pendingEvents.shift(); // Get the first event and remove it
+            const body = `<p>${event.description}</p><div style="margin-top: 1rem; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 0.25rem;"><strong>Effet :</strong> ${event.effectMessage}</div>`;
+            const footer = `<button class="imperium-btn" onclick="closeModal()">Compris</button>`;
+            showModal(`Événement : ${event.title}`, body, footer);
+        }
     }
 
     for (const res in gameState.city.production) {
@@ -129,8 +149,9 @@ function updateDashboardPreviews() {
     document.getElementById('resources-tile-preview').textContent = `Or : ${Math.floor(gameState.resources.gold).toLocaleString()}`;
     document.getElementById('stats-tile-preview').textContent = `Population : ${Math.floor(gameState.city.stats.population).toLocaleString()}`;
     document.getElementById('production-tile-preview').textContent = `Or/h : ${Math.round(gameState.city.production.gold * gameState.city.stats.happinessModifier).toLocaleString()}`;
-    const quest = QUESTS[gameState.city.activeQuestId];
-    document.getElementById('quest-tile-preview').textContent = quest ? quest.description : "Terminé";
+
+    const quest = getCurrentQuest();
+    document.getElementById('quest-tile-preview').textContent = quest ? quest.description : "Scénario terminé !";
 
     // Update Research Tile Preview
     const researchPreview = document.getElementById('research-tile-preview');
@@ -281,19 +302,7 @@ function completeConstruction(item) {
         building.level = item.level;
         showToast(`${BUILDING_DEFINITIONS[item.type].name} (Niv. ${item.level}) terminé !`, "success");
         addXp(item.xpGain);
-        checkQuestCompletion();
-    }
-}
-
-function checkQuestCompletion() {
-    const quest = QUESTS[gameState.city.activeQuestId];
-    if (quest && quest.isComplete(gameState)) {
-        showToast(`Objectif atteint : ${quest.description}`, "success");
-        gameState.city.activeQuestId++;
-        addXp(quest.reward.xp);
-        quest.reward.resources.forEach(r => {
-            gameState.resources[r.res] = Math.min(gameState.resources[r.res] + r.amount, gameState.storage[r.res] || Infinity);
-        });
+        // checkQuestCompletion is now called in the master tick
     }
 }
 
@@ -461,6 +470,7 @@ function showProductionModal() {
 }
 
 function showQuestModal() {
+
     const activeQuests = QUESTS.filter(q => !q.isComplete(gameState));
     const completedQuests = QUESTS.filter(q => q.isComplete(gameState));
 
@@ -500,6 +510,7 @@ function switchQuestTab(btn, tabName) {
     btn.classList.add('active');
     document.querySelectorAll('.quest-tab-content').forEach(c => c.classList.remove('active'));
     document.getElementById(`quest-tab-${tabName}`).classList.add('active');
+
 }
 
 function showBarracksModal(building) {

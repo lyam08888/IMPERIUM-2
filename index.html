@@ -36,8 +36,22 @@
             </div>
             <!-- Simplified game UI for the tutorial -->
             <div id="tutorial-game-ui">
+                <div id="tutorial-header" style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 0.5rem; margin-bottom: 1rem;">
+                    <div id="tutorial-resources" style="display: flex; justify-content: space-around; font-size: 0.9rem;">
+                        <!-- Resources will be rendered here by intro.js -->
+                    </div>
+                </div>
                  <div class="buildings-grid" id="tutorialBuildingsGrid">
                     <!-- Tutorial building grid will be rendered here -->
+                </div>
+                <div id="tutorial-dashboard" style="margin-top: 1rem; display: flex; justify-content: center;">
+                    <div class="dashboard-tile" id="tutorial-objectives-tile" style="max-width: 300px;">
+                         <div class="tile-header">
+                            <span class="tile-icon">🎯</span>
+                            <h3 class="tile-title">Objectifs</h3>
+                        </div>
+                        <div class="tile-preview" id="tutorial-quest-preview">Construire une Ferme</div>
+                    </div>
                 </div>
             </div>
         </div>
