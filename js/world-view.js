@@ -64,6 +64,12 @@ function renderMap() {
         marker.style.top = `calc(${territory.y}% + 5px)`;
 
 
+        // Change color if out of supply
+        if (legion.supply <= 25) {
+            marker.style.background = 'var(--roman-red)';
+        }
+
+
         marker.addEventListener('click', (e) => { e.stopPropagation(); showLegionModal(legion); });
         mapContent.appendChild(marker);
     });
@@ -161,12 +167,60 @@ function showLegionModal(legion) {
     const modalBody = document.getElementById('modalBody');
     const modalButtons = document.getElementById('modalButtons');
 
+    const territory = gameState.world.territories.find(t => t.id === legion.locationId);
+
     modalTitle.innerHTML = legion.name;
-    let body = `<p>Général: ${legion.general}</p><p>Force: ${legion.strength} hommes</p>`;
+    let body = `<p>Général: ${legion.general}</p>
+                <p>Force: ${legion.strength} hommes</p>
+                <p>Ravitaillement: <span style="color: ${legion.supply > 25 ? 'var(--text-light)' : 'var(--error-red)'}">${legion.supply}%</span></p>`;
     modalBody.innerHTML = body;
-    modalButtons.innerHTML = `<button class="modal-btn cancel">Fermer</button>`;
+
+    let buttons = '';
+    if (territory && territory.status === 'enemy') {
+        buttons += `<button class="modal-btn" onclick="attackTerritory('${legion.id}', '${territory.id}')">Attaquer ${territory.name}</button>`;
+    }
+    buttons += `<button class="modal-btn cancel">Fermer</button>`;
+    modalButtons.innerHTML = buttons;
+
     showModal();
 }
+
+function attackTerritory(legionId, territoryId) {
+    const legion = gameState.legions.find(l => l.id === legionId);
+    const territory = gameState.world.territories.find(t => t.id === territoryId);
+
+    if (!legion || !territory) return;
+
+    // Apply supply penalty
+    const supplyModifier = Math.max(0.2, legion.supply / 100); // At 0 supply, legion fights at 20% effectiveness
+    const attackerPower = legion.strength * supplyModifier;
+    const defenderPower = territory.strength;
+
+    const victory = attackerPower > defenderPower;
+
+    if (victory) {
+        territory.status = 'controlled';
+        territory.loyalty = 50;
+        territory.strength = 0;
+        legion.strength = Math.floor(legion.strength * 0.8); // Attacker suffers 20% losses
+        showNotification(`Victoire ! ${territory.name} a été conquise !`, 'success');
+        addXp(100);
+    } else {
+        legion.strength = Math.floor(legion.strength * 0.5); // Attacker suffers 50% losses in defeat
+        territory.strength = Math.floor(territory.strength * 0.8);
+        showNotification(`Défaite... La légion a été repoussée de ${territory.name}.`, 'error');
+    }
+
+    if (legion.strength <= 0) {
+        showNotification(`${legion.name} a été anéantie !`, 'error');
+    }
+    gameState.legions = gameState.legions.filter(l => l.strength > 0);
+
+    hideModal();
+    rerenderWorldView();
+    saveGameState();
+}
+
 
 function showResourcesModal() {
     const modalTitle = document.getElementById('modalTitle');
@@ -207,7 +261,8 @@ function recruitLegion(territoryId) {
         strength: 2500,
         locationId: territoryId,
 
-        action: 'idle'
+        action: 'idle',
+        supply: 100 // Nouvelle propriété
 
     };
     gameState.legions.push(newLegion);
@@ -216,8 +271,26 @@ function recruitLegion(territoryId) {
     rerenderWorldView();
 }
 
+function getDistance(territoryA, territoryB) {
+    const dx = territoryA.x - territoryB.x;
+    const dy = territoryA.y - territoryB.y;
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
+function isLegionInSupply(legion) {
+    const legionTerritory = gameState.world.territories.find(t => t.id === legion.locationId);
+    const supplySources = gameState.world.territories.filter(t => (t.status === 'capital' || t.status === 'controlled') && t.supplyRange > 0);
+
+    for (const source of supplySources) {
+        if (getDistance(legionTerritory, source) <= source.supplyRange) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function endTurn() {
-    // Income
+    // 1. Income
 
     gameState.world.territories.forEach(t => {
         if ((t.status === 'capital' || t.status === 'controlled') && t.income) {
@@ -229,15 +302,54 @@ function endTurn() {
         }
     });
 
+    // 2. Supply & Attrition
+    let totalConsumption = 0;
+    gameState.legions.forEach(legion => {
+        // Food Consumption
+        const consumption = Math.ceil((legion.strength / 1000) * GAME_CONFIG.SUPPLY_CONSUMPTION_PER_1000_TROOPS);
+        totalConsumption += consumption;
+
+        // Supply Check & Attrition
+        if (isLegionInSupply(legion)) {
+            legion.supply = Math.min(100, legion.supply + 20); // Replenish supply
+        } else {
+            legion.supply -= 25; // Lose supply
+            showNotification(`${legion.name} est hors ravitaillement !`, 'error');
+            if (legion.supply <= 0) {
+                const attritionLosses = Math.ceil(legion.strength * 0.1); // 10% attrition
+                legion.strength -= attritionLosses;
+                showNotification(`${legion.name} subit des pertes de ${attritionLosses} dues à l'attrition !`, 'error');
+                if (legion.strength <= 0) {
+                    showNotification(`${legion.name} a été anéantie !`, 'error');
+                }
+            }
+        }
+    });
+
+    // Remove destroyed legions
+    gameState.legions = gameState.legions.filter(l => l.strength > 0);
+
+    // Deduct food
+    gameState.resources.food -= totalConsumption;
+    if (gameState.resources.food < 0) {
+        showNotification(`Famine ! Manque de nourriture pour les troupes.`, 'error');
+        // Additional penalties for famine could be added here
+        gameState.resources.food = 0;
+    }
+
 
     gameState.world.turn++;
     saveGameState();
     rerenderWorldView();
-    showNotification(`Tour ${gameState.world.turn} terminé.`, 'success');
 
+    showNotification(`Tour ${gameState.world.turn} terminé. Nourriture consommée: ${totalConsumption}`, 'success');
 }
 
 function showNotification(message, type = 'info') {
+    if (!message || message.trim() === '') {
+        return; // Do not show empty notifications
+    }
+
     const container = document.getElementById('notifications-container');
     if (!container) return;
     const notif = document.createElement('div');

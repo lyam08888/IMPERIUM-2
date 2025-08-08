@@ -155,14 +155,14 @@ function handleBuildingClick(building) {
                     prereqText = `<div style="color: var(--error-red); font-size: 0.7rem; font-style: italic; margin-top: 0.25rem;">Requiert: ${BUILDING_DEFINITIONS[def.requires.type].name} Niv. ${def.requires.level}</div>`;
                 }
             }
-
-const costsHtml = costs.map(c => `<span class="cost-item ${gameState.resources[c.res] < c.amount ? 'insufficient' : ''}">${c.amount.toLocaleString()} ${c.res}</span>`).join(', ');
-return `<div class="build-item ${!canAfford || !prereqMet ? 'disabled' : ''}" ${canAfford && prereqMet ? `onclick="startBuild('${type}', ${building.slotId})"` : ''}>
-    <div class="build-item-icon">${def.icon}</div>
-    <div class="build-item-name">${def.name}</div>
-    <div class="build-item-costs">${costsHtml}</div>
-    ${prereqText}
-</div>`;
+          
+            const costsHtml = costs.map(c => `<span style="color: ${gameState.resources[c.res] < c.amount ? 'var(--error-red)' : 'var(--text-light)'}">${c.amount.toLocaleString()} ${c.res}</span>`).join(', ');
+            return `<div class="build-item ${!canAfford || !prereqMet ? 'disabled' : ''}" ${canAfford && prereqMet ? `onclick="startBuild('${type}', ${building.slotId})"` : ''} style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-gold); border-radius: 0.75rem; padding: 0.75rem; text-align: center; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                        <div style="font-size: 1.8rem;">${def.icon}</div>
+                        <div style="font-weight: bold; margin: 0.25rem 0; color: var(--gold-light); font-size: 0.9rem;">${def.name}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">${costsHtml}</div>
+                        ${prereqText}
+                    </div>`;
 
         }).join('');
         const body = `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem;">${buildOptions}</div>`;
@@ -271,30 +271,97 @@ function showToast(message, type = 'info') {
 
 function showPlayerModal() {
     const xpForNextLevel = getXpForLevel(gameState.player.level);
-    const xpPercentage = (gameState.player.xp / xpForNextLevel) * 100;
-    const body = `...`;
+
+    const xpPercentage = xpForNextLevel > 0 ? (gameState.player.xp / xpForNextLevel) * 100 : 0;
+    const body = `
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 80px; height: 80px; font-size: 2.5rem; background: var(--dark-marble); border-radius: 50%; display: flex; align-items: center; justify-content: center;">${gameState.player.avatar}</div>
+            <div>
+                <div style="font-size: 1.5rem;">${gameState.player.name}</div>
+                <div style="font-size: 1.1rem;">Niveau ${gameState.player.level}</div>
+                <div style="width: 100%; height: 8px; background-color: #444; border-radius: 4px; margin-top: 0.5rem; overflow: hidden;">
+                    <div style="width: ${xpPercentage.toFixed(2)}%; height: 100%; background-color: var(--xp-bar);"></div>
+                </div>
+                <div style="font-size: 0.8rem;">${Math.floor(gameState.player.xp)} / ${xpForNextLevel} XP</div>
+            </div>
+        </div>
+    `;
+
     showModal("Profil du Consul", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
 }
 
 function showResourcesModal() {
-    let body = '...';
+
+    let body = '<div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem; align-items: center;">';
+    const resourceIcons = { gold: '💰', food: '🌾', marble: '🏛️', wood: '🌲', stone: '🪨', spies: '👁️', divineFavor: '🙏' };
+    for (const res in resourceIcons) {
+        if (gameState.resources[res] !== undefined) {
+            const current = Math.floor(gameState.resources[res]);
+            const max = gameState.storage[res] || Infinity;
+            body += `<span>${resourceIcons[res]} ${res.charAt(0).toUpperCase() + res.slice(1)}</span> <span style="text-align: right; color: ${current >= max ? 'var(--storage-full-red)' : 'var(--text-light)'}">${current.toLocaleString()}/${max.toLocaleString()}</span>`;
+        }
+    }
+    body += '</div>';
+
     showModal("Inventaire des Ressources", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
 }
 
 function showStatsModal() {
-    const body = `...`;
+
+    const body = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: center;">
+            <div>
+                <div style="font-size: 1.5rem; color: var(--gold-light);">${Math.floor(gameState.city.stats.population).toLocaleString()}/${gameState.city.stats.populationCapacity.toLocaleString()}</div>
+                <div style="font-size: 0.9rem;">👥 Population</div>
+            </div>
+            <div>
+                <div style="font-size: 1.5rem; color: var(--gold-light);">${gameState.city.stats.happiness}%</div>
+                <div style="font-size: 0.9rem;">😊 Bonheur</div>
+            </div>
+        </div>
+    `;
+
     showModal("Statistiques de la Cité", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
 }
 
 function showProductionModal() {
 
-    let body = '...';
+    let body = '<div class="production-display" style="display: flex; flex-direction: column; gap: 0.5rem;">';
+
+    // Production from buildings
+    Object.entries(gameState.city.production).filter(([res]) => ['gold', 'food', 'marble'].includes(res)).forEach(([res, rate]) => {
+        const iconMap = { gold: '💰', food: '🌾', marble: '🏛️' };
+        const effectiveRate = rate * gameState.city.stats.happinessModifier;
+        const rateClass = effectiveRate >= 0 ? 'positive' : 'negative';
+        const sign = effectiveRate >= 0 ? '+' : '';
+        body += `<div class="production-item" style="display: flex; justify-content: space-between;"><span>${iconMap[res]} Production</span> <span style="color: ${rateClass === 'positive' ? 'var(--success-green)' : 'var(--error-red)'}">${sign}${Math.round(effectiveRate).toLocaleString()}/h</span></div>`;
+    });
+
+    // Consumption by armies
+    const totalConsumption = gameState.legions.reduce((sum, legion) => {
+        return sum + Math.ceil((legion.strength / 1000) * GAME_CONFIG.SUPPLY_CONSUMPTION_PER_1000_TROOPS);
+    }, 0);
+    // Convert per-turn consumption to per-hour for consistency (assuming a turn is like an hour for now)
+    const hourlyConsumption = totalConsumption; // Simplified for now
+    if(hourlyConsumption > 0) {
+        body += `<div class="production-item" style="display: flex; justify-content: space-between;"><span>🌾 Entretien des armées</span> <span style="color: var(--error-red)">-${hourlyConsumption.toLocaleString()}/h</span></div>`;
+    }
+
+    body += '</div>';
 
     showModal("Rapport de Production", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
 }
 
 function showQuestModal() {
     const quest = QUESTS[gameState.city.activeQuestId];
-    let body = '...';
+
+    let body = '';
+    if (quest) {
+        const rewardText = (quest.reward.resources || []).map(r => `${r.amount.toLocaleString()} ${r.res}`).join(', ') + (quest.reward.xp > 0 ? ` & ${quest.reward.xp} XP` : '');
+        body = `<div style="text-align: center;"><div><strong>${quest.description}</strong></div><div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">Récompense : ${rewardText}</div></div>`;
+    } else {
+        body = `<div style="text-align: center;"><strong>Toutes les quêtes sont terminées !</strong></div>`;
+    }
+
     showModal("Objectif Actuel", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
 }

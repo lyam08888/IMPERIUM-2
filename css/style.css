@@ -102,4 +102,72 @@ body {
 /* --- Styles spécifiques à World View --- */
 .world-map-container { position: relative; background: radial-gradient(ellipse at center, var(--sea-blue) 0%, var(--sea-deep-blue) 100%); border-radius: 1rem; border: 2px solid var(--border-gold); flex-grow: 1; overflow: hidden; cursor: grab; }
 .world-map-container:active { cursor: grabbing; }
-/* ... (le reste des styles du monde peut être ajouté ici si nécessaire) ... */
+
+
+.world-view-ui { height: 100vh; overflow: hidden; }
+.world-view-body { height: 100%; }
+.world-view-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border-radius: 1rem; border: 2px solid var(--border-gold); overflow-y: auto; padding: 1.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.2); display: flex; flex-direction: column; }
+.world-game-layout { display: flex; flex-direction: column; gap: 1.5rem; flex-grow: 1; overflow: hidden; }
+.world-map-content { position: relative; width: 100%; height: 100%; transform-origin: 0 0; }
+.world-bottom-hud { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+.world-command-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; width: 100%; max-width: 600px; }
+.world-command-preview { color: var(--text-muted); font-style: italic; height: 1.2em; transition: opacity 0.3s; }
+
+.world-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; }
+.world-modal-content { background: linear-gradient(135deg, var(--dark-marble) 0%, var(--dark-stone) 100%); margin: auto; padding: 2rem; border: 2px solid var(--gold-primary); border-radius: 1rem; width: 90%; max-width: 600px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); text-align: center; position: relative; }
+.world-modal-close-btn { color: var(--text-muted); font-size: 28px; font-weight: bold; position: absolute; top: 10px; right: 20px; cursor: pointer; }
+.world-modal-body { color: var(--text-light); font-size: 1.1rem; line-height: 1.5; margin-bottom: 1.5rem; white-space: pre-wrap; max-height: 60vh; overflow-y: auto; text-align: left; }
+.world-modal-buttons { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; }
+.legion-marker { position: absolute; width: 24px; height: 24px; background: var(--ally-blue); border: 2px solid var(--text-light); border-radius: 0.25rem; z-index: 6; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.legion-marker:hover { transform: scale(1.5); }
+.world-marker { position: absolute; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: white; font-weight: bold; transition: all 0.3s ease; cursor: pointer; border: 2px solid rgba(255,255,255,0.7); box-shadow: 0 0 12px rgba(0,0,0,0.5); z-index: 5; }
+.world-marker:hover { transform: scale(1.4); z-index: 10; }
+.marker-icon { position: absolute; bottom: -5px; right: -5px; width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--dark-bg); font-size: 10px; display: flex; align-items: center; justify-content: center; }
+.world-marker.capital { background: var(--gold-primary); border-color: var(--gold-light); animation: pulse 2s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); } 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); } }
+.world-marker.controlled { background: var(--success-green); }
+.world-marker.enemy { background: var(--roman-red); }
+.world-marker.ally { background: var(--ally-blue); }
+.action-tile { background: rgba(30, 41, 59, 0.6); border-radius: 1rem; border: 1px solid var(--border-gold); padding: 1rem; text-align: center; cursor: pointer; transition: all 0.3s ease; }
+.action-tile:hover, .action-tile.active { border-color: var(--gold-light); transform: translateY(-2px); background: rgba(45, 55, 72, 0.8); }
+.action-tile .tile-icon { font-size: 2rem; }
+.action-tile .tile-title { font-weight: bold; margin-top: 0.5rem; }
+.notification.info { border-left-color: var(--info-blue); }
+.notification.success { border-left-color: var(--success-green); }
+.notification.error { border-left-color: var(--error-red); }
+
+/* Styles for Simulator View */
+#scout-btn { background: var(--info-blue); }
+#reset-btn { background: var(--dark-marble); }
+
+#battle-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+#battle-modal-content {
+    background: var(--dark-bg);
+    border: 2px solid var(--gold-primary);
+    border-radius: 1rem;
+    padding: 2rem;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+.battle-result {
+    display: none;
+}
+#battle-modal-footer {
+    margin-top: 1rem;
+    text-align: center;
+}
+
