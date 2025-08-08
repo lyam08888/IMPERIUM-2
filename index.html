@@ -3,106 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>IMPERIUM - Ma Cité : Roma Aeterna V19</title>
-    <meta name="description" content="Gérez votre cité romaine dans IMPERIUM - Construisez, développez, prospérez.">
-    
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23b45309'/><text x='16' y='20' text-anchor='middle' fill='white' font-family='serif' font-size='20' font-weight='bold'>I</text></svg>" type="image/svg+xml">
-
-    <!-- Stylesheets centralisés -->
+    <title>IMPERIUM - Bienvenue</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/imperium_popup.css">
-
-    <!-- Scripts de jeu -->
-    <script src="js/game.js" defer></script>
-    <script src="js/city-view.js" defer></script>
-    <script src="nav.js" defer></script>
-    <script src="js/imperium_popup.js" defer></script>
-
+    <link rel="stylesheet" href="css/intro.css">
 </head>
 <body>
-    <!-- Le contenu de nav.html sera injecté ici par nav.js -->
+    <div id="intro-container">
+        <div id="title-screen">
+            <h1 class="game-title">IMPERIUM</h1>
+            <p class="subtitle">Roma Aeterna</p>
+            <div id="intro-buttons">
+                <!-- Buttons will be dynamically added by intro.js -->
+            </div>
+        </div>
 
-    <div class="imperium-ui">
-        <div class="imperium-body">
-            <main class="main-content">
-                <!-- =============================================================== -->
-                <!-- VUE PRINCIPALE DE LA CITÉ -->
-                <!-- =============================================================== -->
-                <div id="city-view" class="view-container active">
-                    <div class="city-map-section">
-                        <div class="map-header">
-                            <h2 class="view-title">Plan de la Cité</h2>
-                        </div>
-                        <div class="buildings-grid" id="buildingsGrid">
-                            <!-- La grille des bâtiments est générée par city-view.js -->
-                        </div>
-                    </div>
-                    <div class="dashboard-grid">
-                        <div class="dashboard-tile" onclick="showPlayerModal()">
-                            <div class="tile-header">
-                                <span class="tile-icon">👤</span>
-                                <h3 class="tile-title">Profil du Consul</h3>
-                            </div>
-                            <div class="tile-preview" id="player-tile-preview">Chargement...</div>
-                        </div>
-                        <div class="dashboard-tile" onclick="showResourcesModal()">
-                             <div class="tile-header">
-                                <span class="tile-icon">💰</span>
-                                <h3 class="tile-title">Ressources</h3>
-                            </div>
-                            <div class="tile-preview" id="resources-tile-preview">Chargement...</div>
-                        </div>
-                        <div class="dashboard-tile" onclick="showStatsModal()">
-                             <div class="tile-header">
-                                <span class="tile-icon">📊</span>
-                                <h3 class="tile-title">Statistiques</h3>
-                            </div>
-                            <div class="tile-preview" id="stats-tile-preview">Chargement...</div>
-                        </div>
-                        <div class="dashboard-tile" onclick="showProductionModal()">
-                             <div class="tile-header">
-                                <span class="tile-icon">📈</span>
-                                <h3 class="tile-title">Production</h3>
-                            </div>
-                            <div class="tile-preview" id="production-tile-preview">Chargement...</div>
-                        </div>
-                        <div class="dashboard-tile" onclick="showTechModal()">
-                             <div class="tile-header">
-                                <span class="tile-icon">🔬</span>
-                                <h3 class="tile-title">Recherche</h3>
-                            </div>
-                            <div class="tile-preview" id="research-tile-preview">Chargement...</div>
-                        </div>
-                        <div class="dashboard-tile" onclick="showQuestModal()">
-                             <div class="tile-header">
-                                <span class="tile-icon">🎯</span>
-                                <h3 class="tile-title">Objectif Actuel</h3>
-                            </div>
-                            <div class="tile-preview" id="quest-tile-preview">Chargement...</div>
-                        </div>
-                        <div class="dashboard-tile" onclick="window.location.href='Simulateur.html'">
-                             <div class="tile-header">
-                                <span class="tile-icon">⚔️</span>
-                                <h3 class="tile-title">Simulateur de Combat</h3>
-                             </div>
-
-                             <div class="tile-preview">Testez la puissance de vos légions.</div>
-
-                        </div>
-                    </div>
+        <div id="cinematic-screen" class="hidden">
+            <div id="cinematic-content">
+                <p>Rome ne s'est pas faite en un jour...</p>
+                <div id="loading-bar-container">
+                    <div id="loading-bar"></div>
                 </div>
-            </main>
+                <p id="cinematic-text">Chargement de votre destinée...</p>
+            </div>
+        </div>
+
+        <div id="tutorial-screen" class="hidden">
+            <!-- The interactive tutorial will be rendered here -->
+            <div id="tutorial-overlay"></div>
+            <div id="tutorial-modal">
+                <div id="tutorial-message"></div>
+                <button id="tutorial-next-btn" class="imperium-btn">Suivant</button>
+            </div>
+            <!-- Simplified game UI for the tutorial -->
+            <div id="tutorial-game-ui">
+                 <div class="buildings-grid" id="tutorialBuildingsGrid">
+                    <!-- Tutorial building grid will be rendered here -->
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Conteneurs pour les éléments dynamiques -->
-    <div id="construction-footer" class="construction-footer"></div>
+    <!-- Modals from main game for reuse -->
     <div id="modal-container" class="modal-container"></div>
     <div id="toast-container"></div>
 
-    
-    <!-- La popup IMPERIUM sera injectée ici par imperium_popup.js -->
-
-
+    <!-- Scripts -->
+    <script src="js/game.js" defer></script>
+    <script src="js/city-view.js" defer></script>
+    <script src="js/intro.js" defer></script>
 </body>
 </html>
