@@ -235,7 +235,6 @@
                 </div>
                 <div id="view-simulator" class="view-container">
                     <div class="top-bar">
-                        <button class="small-btn" onclick="backToCity()">Retour</button>
                         <h2 class="view-title" style="margin: 0;">⚔️ IMPERIUM - Simulateur de Combat V18 ⚔️</h2>
                         <div id="resources-display" class="resources-display"></div>
                     </div>
@@ -887,17 +886,6 @@
     </script>
 
     <script>
-    function showView(id) {
-        document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
-    function openSimulator() {
-        showView('view-simulator');
-    }
-    function backToCity() {
-        showView('city-view');
-    }
-
     // ===============================================================
     // MOTEUR DE SIMULATION DE COMBAT V18
     // ===============================================================
