@@ -236,19 +236,37 @@ Cette action est IRRÉVERSIBLE !`;
     // --- Check for Saved Game ---
     function initializeIntro() {
         debugLog('Initialisation de l\'intro...');
-        introButtonsContainer.innerHTML = ''; // Assurer un seul bouton
+        introButtonsContainer.innerHTML = ''; // Réinitialiser le conteneur
 
-        const startButton = createButton(
-            '🏛️ Commencer à jouer',
-            'imperium-btn',
-            () => safeRedirect('imperium-unified.html'),
-            {
-                fontSize: '1.3em',
-                padding: '15px 30px'
+        try {
+            const savedGame = localStorage.getItem(SAVE_KEY);
+
+            if (savedGame) {
+                const { continueBtn, newGameBtn, battlePassBtn } = createContinueButtons();
+                introButtonsContainer.appendChild(continueBtn);
+                introButtonsContainer.appendChild(newGameBtn);
+                introButtonsContainer.appendChild(battlePassBtn);
+            } else {
+                const { startBtn, directBtn, unifiedBtn, battlePassBtn } = createGameStartButtons();
+                introButtonsContainer.appendChild(startBtn);
+                introButtonsContainer.appendChild(directBtn);
+                introButtonsContainer.appendChild(unifiedBtn);
+                introButtonsContainer.appendChild(battlePassBtn);
             }
-        );
 
-        introButtonsContainer.appendChild(startButton);
+            // Ajouter le bouton d'urgence après avoir rendu les boutons principaux
+            addEmergencyButton();
+        } catch (error) {
+            debugLog('Erreur lors de l\'initialisation des boutons', error);
+            // Fallback simple vers la version unifiée
+            const fallbackBtn = createButton(
+                '🏛️ Commencer à jouer',
+                'imperium-btn',
+                () => safeRedirect('imperium-unified.html'),
+                { fontSize: '1.3em', padding: '15px 30px' }
+            );
+            introButtonsContainer.appendChild(fallbackBtn);
+        }
     }
     
     function addEmergencyButton() {
