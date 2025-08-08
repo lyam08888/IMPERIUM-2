@@ -101,7 +101,7 @@ body {
 /* ... (le reste des styles du simulateur peut être ajouté ici si nécessaire) ... */
 
 /* --- Styles spécifiques à World View --- */
-.world-map-container { position: relative; background: radial-gradient(ellipse at center, var(--sea-blue) 0%, var(--sea-deep-blue) 100%); border-radius: 1rem; border: 2px solid var(--border-gold); flex-grow: 1; overflow: hidden; cursor: grab; }
+.world-map-container { position: relative; background: radial-gradient(ellipse at center, var(--sea-blue) 0%, var(--sea-deep-blue) 100%); border-radius: 1rem; border: 2px solid var(--border-gold); flex-grow: 1; overflow: hidden; cursor: grab; height: 70vh; }
 .world-map-container:active { cursor: grabbing; }
 
 
