@@ -236,39 +236,19 @@ Cette action est IRRÉVERSIBLE !`;
     // --- Check for Saved Game ---
     function initializeIntro() {
         debugLog('Initialisation de l\'intro...');
-        introButtonsContainer.innerHTML = ''; // Clear any existing buttons
+        introButtonsContainer.innerHTML = ''; // Assurer un seul bouton
 
-        if (isMobile()) {
-            debugLog('Appareil mobile détecté. Affichage du bouton mobile.');
-            const mobileButton = createButton(
-                '📱 Accéder à la version mobile',
-                'imperium-btn',
-                () => safeRedirect('imperium-mobile-optimized.html'),
-                {
-                    fontSize: '1.3em',
-                    padding: '15px 30px',
-                    background: 'linear-gradient(135deg, #d97706, #f59e0b)',
-                    color: 'white',
-                    border: '2px solid #b45309'
-                }
-            );
-            introButtonsContainer.appendChild(mobileButton);
-        } else {
-            debugLog('Appareil de bureau détecté. Affichage du bouton unifié.');
-            const desktopButton = createButton(
-                '🌟 Lancer la Version Unifiée',
-                'imperium-btn',
-                () => safeRedirect('imperium-unified.html'),
-                {
-                    fontSize: '1.3em',
-                    padding: '15px 30px',
-                    background: 'linear-gradient(135deg, #8b5cf6, #a855f7)',
-                    color: 'white',
-                    border: '2px solid #7c3aed'
-                }
-            );
-            introButtonsContainer.appendChild(desktopButton);
-        }
+        const startButton = createButton(
+            '🏛️ Commencer à jouer',
+            'imperium-btn',
+            () => safeRedirect('imperium-unified.html'),
+            {
+                fontSize: '1.3em',
+                padding: '15px 30px'
+            }
+        );
+
+        introButtonsContainer.appendChild(startButton);
     }
     
     function addEmergencyButton() {
