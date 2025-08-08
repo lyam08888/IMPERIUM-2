@@ -129,8 +129,9 @@ function updateDashboardPreviews() {
     document.getElementById('resources-tile-preview').textContent = `Or : ${Math.floor(gameState.resources.gold).toLocaleString()}`;
     document.getElementById('stats-tile-preview').textContent = `Population : ${Math.floor(gameState.city.stats.population).toLocaleString()}`;
     document.getElementById('production-tile-preview').textContent = `Or/h : ${Math.round(gameState.city.production.gold * gameState.city.stats.happinessModifier).toLocaleString()}`;
-    const quest = QUESTS[gameState.city.activeQuestId];
-    document.getElementById('quest-tile-preview').textContent = quest ? quest.description : "Terminé";
+
+    const quest = getCurrentQuest();
+    document.getElementById('quest-tile-preview').textContent = quest ? quest.description : "Scénario terminé !";
 
     // Update Research Tile Preview
     const researchPreview = document.getElementById('research-tile-preview');
@@ -281,19 +282,7 @@ function completeConstruction(item) {
         building.level = item.level;
         showToast(`${BUILDING_DEFINITIONS[item.type].name} (Niv. ${item.level}) terminé !`, "success");
         addXp(item.xpGain);
-        checkQuestCompletion();
-    }
-}
-
-function checkQuestCompletion() {
-    const quest = QUESTS[gameState.city.activeQuestId];
-    if (quest && quest.isComplete(gameState)) {
-        showToast(`Objectif atteint : ${quest.description}`, "success");
-        gameState.city.activeQuestId++;
-        addXp(quest.reward.xp);
-        quest.reward.resources.forEach(r => {
-            gameState.resources[r.res] = Math.min(gameState.resources[r.res] + r.amount, gameState.storage[r.res] || Infinity);
-        });
+        // checkQuestCompletion is now called in the master tick
     }
 }
 
@@ -403,17 +392,26 @@ function showProductionModal() {
 }
 
 function showQuestModal() {
-    const quest = QUESTS[gameState.city.activeQuestId];
+    const chapter = SCENARIO.chapters[gameState.scenario.currentChapterIndex];
+    const quest = getCurrentQuest();
 
     let body = '';
-    if (quest) {
+    if (chapter && quest) {
         const rewardText = (quest.reward.resources || []).map(r => `${r.amount.toLocaleString()} ${r.res}`).join(', ') + (quest.reward.xp > 0 ? ` & ${quest.reward.xp} XP` : '');
-        body = `<div style="text-align: center;"><div><strong>${quest.description}</strong></div><div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">Récompense : ${rewardText}</div></div>`;
+        body = `
+            <div style="text-align: center;">
+                <h4 style="color: var(--gold-light); margin-bottom: 0.5rem;">${chapter.title}</h4>
+                <p style="margin-bottom: 1rem;">${chapter.description}</p>
+                <div style="border-top: 1px solid var(--border-gold); padding-top: 1rem;">
+                    <strong>Objectif : ${quest.description}</strong>
+                    <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem;">Récompense : ${rewardText}</div>
+                </div>
+            </div>`;
     } else {
-        body = `<div style="text-align: center;"><strong>Toutes les quêtes sont terminées !</strong></div>`;
+        body = `<div style="text-align: center;"><strong>Vous avez terminé le scénario principal !</strong><p>Continuez à développer votre cité.</p></div>`;
     }
 
-    showModal("Objectif Actuel", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
+    showModal("Scénario Principal", body, `<button class="imperium-btn" onclick="closeModal()">Fermer</button>`);
 }
 
 function showBarracksModal(building) {

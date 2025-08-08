@@ -78,13 +78,6 @@ const FORMATIONS_CONFIG = {
     defensive: { name: 'Défensive' }
 };
 
-const QUESTS = [
-    { id: 0, description: "Construisez votre première Ferme.", isComplete: (gs) => gs.city.buildings.some(b => b.type === 'farm'), reward: { xp: 50, resources: [{res: 'gold', amount: 100}] } },
-    { id: 1, description: "Atteignez le niveau 2.", isComplete: (gs) => gs.player.level >= 2, reward: { xp: 0, resources: [{res: 'marble', amount: 50}] } },
-    { id: 2, description: "Construisez une Insula pour votre peuple.", isComplete: (gs) => gs.city.buildings.some(b => b.type === 'insula'), reward: { xp: 100, resources: [{res: 'food', amount: 200}] } },
-    { id: 3, description: "Construisez un Marché pour commercer.", isComplete: (gs) => gs.city.buildings.some(b => b.type === 'market'), reward: { xp: 150, resources: [{res: 'gold', amount: 300}] } },
-];
-
 const TECHNOLOGY_DEFINITIONS = {
     civic: {
         name: 'Civique',
@@ -226,9 +219,15 @@ function getDefaultGameState() {
             },
             buildings: Array.from({ length: 15 }, (_, i) => ({ slotId: i, type: null, level: 0 })),
             constructionQueue: [],
-            activeQuestId: 0,
             researchQueue: [],
             trainingQueue: [],
+        },
+
+        // --- Scenario ---
+        scenario: {
+            currentChapterIndex: 0,
+            currentQuestIndex: 0,
+            completedQuests: [],
         },
 
         // --- Tech ---
@@ -292,6 +291,60 @@ function loadGameState() {
         gameState = getDefaultGameState();
     }
 }
+
+// ---------------------------------------------------------------
+// GESTION DU SCÉNARIO
+// ---------------------------------------------------------------
+
+function getCurrentQuest() {
+    if (!SCENARIO || !SCENARIO.chapters) return null;
+    const chapter = SCENARIO.chapters[gameState.scenario.currentChapterIndex];
+    if (!chapter || !chapter.quests) return null;
+    const quest = chapter.quests[gameState.scenario.currentQuestIndex];
+    return quest || null;
+}
+
+function advanceScenario() {
+    const currentQuest = getCurrentQuest();
+    if (!currentQuest) return;
+
+    // Grant rewards
+    if (currentQuest.reward) {
+        if (currentQuest.reward.xp) addXp(currentQuest.reward.xp);
+        if (currentQuest.reward.resources) {
+            currentQuest.reward.resources.forEach(r => {
+                gameState.resources[r.res] = (gameState.resources[r.res] || 0) + r.amount;
+            });
+        }
+    }
+     gameState.scenario.completedQuests.push(currentQuest.id);
+
+    // Advance to next quest
+    const chapter = SCENARIO.chapters[gameState.scenario.currentChapterIndex];
+    if (gameState.scenario.currentQuestIndex < chapter.quests.length - 1) {
+        gameState.scenario.currentQuestIndex++;
+    } else {
+        // Advance to next chapter
+        if (gameState.scenario.currentChapterIndex < SCENARIO.chapters.length - 1) {
+            gameState.scenario.currentChapterIndex++;
+            gameState.scenario.currentQuestIndex = 0;
+        } else {
+            // End of scenario
+            console.log("Félicitations ! Vous avez terminé le scénario principal !");
+            // You could set a flag here, e.g., gameState.scenario.isComplete = true;
+        }
+    }
+}
+
+function checkQuestCompletion() {
+    const quest = getCurrentQuest();
+    if (!quest) return;
+
+    if (quest.isComplete(gameState)) {
+        advanceScenario();
+    }
+}
+
 
 // ---------------------------------------------------------------
 // LOGIQUE DE JEU CENTRALE
@@ -518,6 +571,9 @@ function masterGameTick() {
         completeTraining(item);
         stateChanged = true;
     }
+
+    // 4. Check for scenario quest completion
+    checkQuestCompletion();
 
     if (stateChanged) {
         recalculateCityStats();
