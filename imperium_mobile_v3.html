@@ -150,6 +150,8 @@ canvas{width:100%;height:100%;display:block;touch-action:none;}
       <button class="i" data-tab="build"><span class="ico">🧱</span><span class="small">Construire</span></button>
       <button class="i" data-tab="research"><span class="ico">🧪</span><span class="small">Recherches</span></button>
       <button class="i" data-tab="army"><span class="ico">🛡️</span><span class="small">Armée</span></button>
+      <button class="i" data-tab="world"><span class="ico">🗺️</span><span class="small">Monde</span></button>
+      <button class="i" data-tab="diplo"><span class="ico">🤝</span><span class="small">Diplomatie</span></button>
       <button class="i" data-tab="menu"><span class="ico">☰</span><span class="small">Menu</span></button>
     </nav>
   </div>
@@ -222,6 +224,92 @@ const RESEARCH = {
   'Tactiques': { cost:{science:80}, unlocks:['Caserne'] },
   'Navigation': { cost:{science:100}, unlocks:['Port'] }
 };
+
+// World/Diplomacy bootstrap
+function initWorld(){
+  if(S.world) return; // already in save
+  const playerFaction = 'Imperium';
+  const factions = ['Gaules','Carthage','Grecques'];
+  const provinces = [
+    { id:'latium', name:'Latium', owner:playerFaction, yields:{or:0.1, bois:0.2}, garrison:{legion:2}, power:4 },
+    { id:'etrurie', name:'Étrurie', owner:'Gaules', yields:{pierre:0.2, or:0.08}, garrison:{legion:5}, power:7 },
+    { id:'sardaigne', name:'Sardaigne', owner:'Carthage', yields:{vin:0.12, or:0.06}, garrison:{legion:6}, power:8 },
+    { id:'sicile', name:'Sicile', owner:'Carthage', yields:{bois:0.15, argile:0.15}, garrison:{legion:7}, power:9 },
+    { id:'macedoine', name:'Macédoine', owner:'Grecques', yields:{fer:0.12, or:0.09}, garrison:{legion:8}, power:10 },
+    { id:'iberia', name:'Ibérie', owner:'Gaules', yields:{bois:0.2, argile:0.2}, garrison:{legion:6}, power:8 }
+  ];
+  const diplo = {};
+  for(const f of factions){ diplo[f] = { relation: 20, war:false, trade:false }; }
+  S.world = { playerFaction, factions, provinces, diplo };
+}
+
+// Rates composition
+function getWorldRates(){
+  if(!S.world) return {};
+  const acc={};
+  for(const p of S.world.provinces){ if(p.owner===S.world.playerFaction){ for(const [k,v] of Object.entries(p.yields)) acc[k]=(acc[k]||0)+v; } }
+  return acc;
+}
+function getTradeRates(){
+  if(!S.world) return {};
+  const acc={};
+  for(const [name,st] of Object.entries(S.world.diplo||{})){
+    if(st.trade){ acc.or=(acc.or||0)+0.06; acc.vin=(acc.vin||0)+0.03; }
+  }
+  return acc;
+}
+function getUpkeepRates(){
+  const acc={};
+  const l=S.city?.army?.legion||0;
+  if(l>0){ acc.or = (acc.or||0) - 0.02*l; acc.vin = (acc.vin||0) - 0.005*l; }
+  return acc;
+}
+function mergeRates(){
+  const out={};
+  const parts=[S.rates||{}, getWorldRates(), getTradeRates(), getUpkeepRates()];
+  for(const src of parts){ for(const [k,v] of Object.entries(src)) out[k]=(out[k]||0)+v; }
+  return out;
+}
+function getEffectiveRates(){ return mergeRates(); }
+
+// Combat system
+function computePower(units){ return (units.legion||0) * 1.0; }
+function resolveBattle(sendLegions, provinceId){
+  const p=S.world.provinces.find(x=>x.id===provinceId); if(!p) return {ok:false,msg:'Province inconnue'};
+  const defenderFaction=p.owner;
+  if(defenderFaction!==S.world.playerFaction){
+    const st=S.world.diplo[defenderFaction];
+    if(st && !st.war) return {ok:false,msg:'Vous devez déclarer la guerre à '+defenderFaction};
+  }
+  sendLegions = Math.max(0, Math.min(sendLegions, S.city.army.legion));
+  if(sendLegions<=0) return {ok:false,msg:'Aucune troupe à envoyer'};
+  const atkPow = computePower({legion:sendLegions}) * (0.9 + rnd(0,0.2));
+  const defPow = computePower(p.garrison) * (0.9 + rnd(0,0.2));
+  if(atkPow>=defPow){
+    // Victory: casualties proportional
+    const lossRatio = defPow / Math.max(1, atkPow);
+    const lost = Math.max(0, Math.floor(sendLegions * lossRatio * rnd(0.6,0.9)));
+    S.city.army.legion -= Math.min(S.city.army.legion, lost);
+    p.garrison.legion = 0;
+    const prevOwner=p.owner; p.owner=S.world.playerFaction;
+    // Loot: 300s worth of province yields + base gold
+    let lootOr = 5;
+    for(const [k,v] of Object.entries(p.yields)){
+      const cap=S.res.storage[k]??Infinity;
+      const add=v*300; S.res[k]=clamp((S.res[k]||0)+add,0,cap);
+      if(k==='or') lootOr+=add;
+    }
+    S.res.or = clamp((S.res.or||0)+lootOr, 0, S.res.storage.or||Infinity);
+    return {ok:true,msg:`Victoire à ${p.name} ! Butin: 🪙 ${Math.floor(lootOr)}`};
+  } else {
+    // Defeat: casualties still occur
+    const lost = Math.max(1, Math.floor(sendLegions * rnd(0.4,0.8)));
+    S.city.army.legion -= Math.min(S.city.army.legion, lost);
+    const defLoss = Math.max(0, Math.floor((p.garrison.legion||0) * rnd(0.1,0.3)));
+    p.garrison.legion = Math.max(0, (p.garrison.legion||0) - defLoss);
+    return {ok:false,msg:`Défaite à ${p.name}… Pertes: ${lost}`};
+  }
+}
 
 /* ================= SAVE / LOAD ================= */
 const KEY='imperium-v3-single';
@@ -360,7 +448,7 @@ canvas.addEventListener('touchstart',(ev)=>{
   if(touches.length===1){
     S.input.longPress=setTimeout(()=>{
       const ww=screenToWorld(touches[0].x,touches[0].y);
-      const b=findBuilding(ww.gx,ww.gy); if(b){ openSheet('Détails', sheetBuilding(b)); }
+      const b=findBuilding(ww.gx,ww.gy); if(b){ openSheet('Détails', sheetBuilding(b)); bindSheetBuilding(b); }
     },550);
   } else if(touches.length===2){
     const dx=touches[0].x - touches[1].x, dy=touches[0].y - touches[1].y;
@@ -416,7 +504,7 @@ function onTap(px,py){
   }
   const ww=screenToWorld(px,py);
   const b=findBuilding(ww.gx,ww.gy);
-  if(b) openSheet('Détails', sheetBuilding(b));
+  if(b){ openSheet('Détails', sheetBuilding(b)); bindSheetBuilding(b); }
 }
 
 /* Ghost tip helpers */
@@ -499,8 +587,9 @@ function toScreenCenter(){ return {x:canvas.width/2,y:canvas.height/2}; }
 
 /* ================= SYSTEMS TICK ================= */
 function tick(dt){
+  const eff=getEffectiveRates();
   for(const k of ['bois','pierre','argile','fer','or','vin','science']){
-    const cap=S.res.storage[k]??Infinity; S.res[k]=clamp(S.res[k]+(S.rates[k]||0)*dt,0,cap);
+    const cap=S.res.storage[k]??Infinity; S.res[k]=clamp(S.res[k]+(eff[k]||0)*dt,0,cap);
   }
   const freeBeds=Math.max(0,S.res.logements - S.res.pop);
   const happyFactor=clamp((S.res.bonheur-80)/100,0,1.2);
@@ -516,8 +605,13 @@ function tick(dt){
 
 /* ================= UI LAYER ================= */
 function rebuildResbar(){
-  const R=[['🌲','bois'],['🪨','pierre'],['🧱','argile'],['⛓️','fer'],['🪙','or'],['🍷','vin'],['🧠','science'],['👥','pop'],['🙂','bonheur']];
-  resbar.innerHTML = R.map(([i,k])=>`<div class="res-chip"><span>${i}</span><b>${fmt(S.res[k]??0)}</b></div>`).join('');
+  const R=[["🌲","bois"],["🪨","pierre"],["🧱","argile"],["⛓️","fer"],["🪙","or"],["🍷","vin"],["🧠","science"],["👥","pop"],["🙂","bonheur"]];
+  const eff=getEffectiveRates();
+  resbar.innerHTML = R.map(([i,k])=>{
+    const hasRate = typeof eff[k]==='number' && Math.abs(eff[k])>0.0001;
+    const rate = hasRate ? ` <span class=\"small\" style=\"opacity:.8\">(${eff[k]>0?'+':''}${(eff[k]).toFixed(2)}/s)</span>` : '';
+    return `<div class=\"res-chip\"><span>${i}</span><b>${fmt(S.res[k]??0)}</b>${rate}</div>`;
+  }).join('');
 }
 function openSheet(title, html){ sheetTitle.textContent=title; sheetBody.innerHTML=html; sheet.classList.add('show'); sheet.setAttribute('aria-hidden','false'); }
 function closeSheet(){ sheet.classList.remove('show'); sheet.setAttribute('aria-hidden','true'); }
@@ -564,6 +658,75 @@ function sheetArmy(){
   if(!hasBarracks) html+=`<div class="small">Construis une <b>Caserne</b> pour recruter des troupes.</div>`;
   return html;
 }
+function sheetWorld(){
+  let html='';
+  for(const p of (S.world?.provinces||[])){
+    const owned = p.owner===S.world.playerFaction;
+    const ystr = Object.entries(p.yields).map(([k,v])=>`${icon(k)} +${v.toFixed(2)}/s`).join(' ');
+    const st = S.world.diplo[p.owner];
+    const war = st? st.war:false;
+    html+=`<div class="card">
+      <div class="row"><b>${p.name}</b><span class="tag">${owned?'Possédée':('⛳ '+p.owner)}</span></div>
+      <div class="small">${ystr}</div>
+      <div class="small">Garnison: ${p.garrison.legion}</div>
+      <div class="row">
+        ${owned?'<span class="small">Sous contrôle</span>':`<button class="btn" data-attack="${p.id}">${war?'Attaquer':'Attaquer (nécessite guerre)'}</button>`}
+      </div>
+    </div>`;
+  }
+  return html;
+}
+function sheetDiplo(){
+  let html='';
+  for(const f of (S.world?.factions||[])){
+    const st=S.world.diplo[f];
+    html+=`<div class="card">
+      <div class="row"><b>${f}</b><span class="tag">Relation ${st.relation}</span></div>
+      <div class="row"><span class="small">${st.war?'⚔️ En guerre':'🕊️ Paix'}</span></div>
+      <div class="row" style="gap:6px;flex-wrap:wrap">
+        <button class="btn" data-rel="${f}">Améliorer (+10) — 🪙50</button>
+        ${st.war?`<button class="btn" data-peace="${f}">Proposer paix</button>`:`<button class="btn" data-war="${f}">Déclarer la guerre</button>`}
+        <button class="btn" data-trade="${f}" ${st.relation>=40 && !st.trade?'' :'disabled'}>${st.trade?'Commerce actif':'Accord commercial — 🪙30 (rel≥40)'}</button>
+      </div>
+    </div>`;
+  }
+  return html;
+}
+function bindSheetWorld(){
+  sheetBody.querySelectorAll('[data-attack]').forEach(btn=>{
+    btn.onclick=()=>{
+      const pid=btn.dataset.attack; const p=S.world.provinces.find(x=>x.id===pid);
+      const st=S.world.diplo[p.owner];
+      if(p.owner!==S.world.playerFaction && st && !st.war){ toast('Déclarez la guerre à '+p.owner+' dans Diplomatie.'); beep(200,0.06,'sawtooth'); return; }
+      const max=S.city.army.legion;
+      const nStr=prompt(`Combien de légionnaires envoyer ? (max ${max})`,`${Math.min(5,max)}`);
+      if(!nStr) return; const n=Number(nStr)|0;
+      const res=resolveBattle(n,pid);
+      toast(res.msg); rebuildResbar(); openSheet('Monde', sheetWorld()); bindSheetWorld();
+      beep(res.ok?640:260,0.06,res.ok?'square':'sawtooth',0.05);
+    };
+  });
+}
+function bindSheetDiplo(){
+  sheetBody.querySelectorAll('[data-rel]').forEach(b=>b.onclick=()=>{
+    const f=b.dataset.rel; const st=S.world.diplo[f];
+    if((S.res.or||0)<50) return toast('Or insuffisant');
+    S.res.or-=50; st.relation=Math.min(100, st.relation+10); rebuildResbar(); openSheet('Diplomatie', sheetDiplo()); bindSheetDiplo(); beep(560,0.04,'triangle');
+  });
+  sheetBody.querySelectorAll('[data-war]').forEach(b=>b.onclick=()=>{
+    const f=b.dataset.war; const st=S.world.diplo[f]; st.war=true; st.relation=Math.max(-100, st.relation-30);
+    toast('Guerre déclarée à '+f); openSheet('Diplomatie', sheetDiplo()); bindSheetDiplo(); beep(420,0.06,'sawtooth');
+  });
+  sheetBody.querySelectorAll('[data-peace]').forEach(b=>b.onclick=()=>{
+    const f=b.dataset.peace; const st=S.world.diplo[f]; st.war=false; st.relation=Math.min(100, st.relation+5);
+    toast('Paix signée avec '+f); openSheet('Diplomatie', sheetDiplo()); bindSheetDiplo(); beep(600,0.05,'square');
+  });
+  sheetBody.querySelectorAll('[data-trade]').forEach(b=>b.onclick=()=>{
+    const f=b.dataset.trade; const st=S.world.diplo[f];
+    if(st.trade) return; if(st.relation<40) return toast('Relation insuffisante'); if((S.res.or||0)<30) return toast('Or insuffisant');
+    S.res.or-=30; st.trade=true; rebuildResbar(); toast('Accord commercial avec '+f); openSheet('Diplomatie', sheetDiplo()); bindSheetDiplo(); beep(640,0.05,'triangle');
+  });
+}
 function sheetMenu(){
   const themes=['default','sepia','ivory','contrast'];
   const themeBtns = themes.map(t=>`<button class="btn" data-theme="${t}">${t}</button>`).join('');
@@ -601,6 +764,10 @@ function sheetBuilding(b){
       <div class="row"><button class="btn" id="b-up">Améliorer (${nextStr})</button></div>
     </div>` + sheetMenu();
 }
+function bindSheetBuilding(b){
+  const up=document.getElementById('b-up'); if(up) up.onclick=()=>{ tryUpgrade(b); openSheet('Détails', sheetBuilding(b)); bindSheetBuilding(b); rebuildResbar(); };
+  bindSheetMenu();
+}
 function icon(k){ return ({bois:'🌲',pierre:'🪨',argile:'🧱',fer:'⛓️',or:'🪙',vin:'🍷',science:'🧠',pop:'👥'})[k]||k; }
 
 /* ================= DOCK & SHEET BEHAVIOR ================= */
@@ -612,6 +779,8 @@ document.querySelectorAll('.dock .i').forEach(btn=>btn.onclick=()=>{
   else if(tab==='build'){ openSheet('Construire', sheetBuild()); bindSheetBuild(); }
   else if(tab==='research'){ openSheet('Recherches', sheetResearch()); bindSheetResearch(); }
   else if(tab==='army'){ openSheet('Armée', sheetArmy()); bindSheetArmy(); }
+  else if(tab==='world'){ openSheet('Monde', sheetWorld()); bindSheetWorld(); }
+  else if(tab==='diplo'){ openSheet('Diplomatie', sheetDiplo()); bindSheetDiplo(); }
   else if(tab==='menu'){ openSheet('Menu', sheetMenu()); bindSheetMenu(); }
   haptics(8); beep(500+rnd(-50,50),0.03,'square',0.03);
 });
@@ -708,6 +877,7 @@ function frame(){
 
 /* ================= BOOTSTRAP ================= */
 function start(){
+  initWorld();
   if(S.city.buildings.length===0){
     const cx=Math.floor(S.grid.w/2), cy=Math.floor(S.grid.h/2);
     const seed=[
