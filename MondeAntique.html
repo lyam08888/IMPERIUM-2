@@ -17,7 +17,27 @@
     <script src="js/game.js" defer></script>
     <script src="js/world-view.js" defer></script>
     <script src="nav.js" defer></script>
-
+    <script src="js/combat-simulator.js" defer></script>
+    <style>
+        #battle-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        #battle-modal-content { background: var(--dark-bg); border: 2px solid var(--gold-primary); border-radius: 1rem; padding: 2rem; width: 90%; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column; }
+        .modal-footer { margin-top: 1rem; text-align: center; }
+        .battle-result { background: rgba(15, 23, 42, 0.9); border-radius: 1rem; border: 2px solid var(--gold-primary); padding: 2rem; margin-top: 1rem; display: none; }
+        .battle-result.show { display: block; animation: slideInUp 0.5s ease; }
+        .battle-result.victory { border-color: var(--success-green); }
+        .battle-result.defeat { border-color: var(--roman-red); }
+        .result-header { text-align: center; margin-bottom: 2rem; }
+        .result-title { font-size: 2.5rem; font-weight: bold; }
+        .result-details { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+        @media (min-width: 768px) { .result-details { grid-template-columns: 1fr 1fr; } }
+        .result-section-title { color: var(--gold-primary); font-weight: bold; margin-bottom: 1rem; }
+        .losses-list, .loot-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .loss-item, .loot-item { display: flex; justify-content: space-between; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 0.3rem; }
+        .loss-count { color: var(--roman-red); font-weight: bold; }
+        .loot-amount { color: var(--success-green); font-weight: bold; }
+        .battle-report { background: rgba(0,0,0,0.3); border-radius: 0.5rem; padding: 1rem; margin-top: 1.5rem; max-height: 250px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; grid-column: 1 / -1; }
+        .small-btn { font-size: 0.9rem; padding: 0.4rem 0.8rem; border-radius: 0.5rem; color: white; transition: transform 0.2s, background-color 0.2s; border: none; cursor: pointer; }
+    </style>
 </head>
 <body>
     <div id="loader">
@@ -61,6 +81,24 @@
             <div id="modalBody" class="world-modal-body"></div>
             <div id="modalButtons" class="world-modal-buttons"></div>
 
+        </div>
+    </div>
+
+    <div id="battle-modal-overlay">
+        <div id="battle-modal-content">
+            <div id="battle-result" class="battle-result">
+                <div class="result-header"><div id="result-title" class="result-title"></div></div>
+                <div class="result-details">
+                    <div><h4 class="result-section-title">Pertes Attaquant</h4><div id="attacker-losses" class="losses-list"></div></div>
+                    <div><h4 class="result-section-title">Pertes Défenseur</h4><div id="defender-losses" class="losses-list"></div></div>
+                    <div id="loot-section"><h4 class="result-section-title">Butin</h4><div id="battle-loot" class="loot-list"></div></div>
+                </div>
+            </div>
+            <div class="battle-report" id="battle-report"></div>
+            <div class="modal-footer">
+                <button class="small-btn" id="skip-battle-btn">Passer</button>
+                <button class="small-btn" id="close-modal-btn" style="display:none;">Fermer</button>
+            </div>
         </div>
     </div>
 
