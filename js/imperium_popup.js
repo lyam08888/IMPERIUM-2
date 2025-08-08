@@ -146,10 +146,10 @@ function moveDashboardTiles() {
     const actionsGrid = document.getElementById('imperium-actions-grid');
 
     if (dashboardGrid && actionsGrid) {
-        while (dashboardGrid.firstChild) {
-            actionsGrid.appendChild(dashboardGrid.firstChild);
-        }
-        dashboardGrid.remove();
+        const tilesToMove = dashboardGrid.querySelectorAll('.movable-tile');
+        tilesToMove.forEach(tile => {
+            actionsGrid.appendChild(tile);
+        });
         actionsGrid.classList.add('dashboard-grid-popup');
     }
 }
