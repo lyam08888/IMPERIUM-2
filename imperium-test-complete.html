@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Test Complet IMPERIUM - Toutes Fonctionnalités</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c1810, #1a0f08);
+            color: #e8dcc6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(44, 24, 16, 0.9);
+            border: 3px solid #b45309;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 50px rgba(180, 83, 9, 0.5);
+        }
+
+        .test-title {
+            font-size: 2.5em;
+            color: #d4651f;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .test-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid #8b4513;
+        }
+
+        .test-section h3 {
+            color: #f59e0b;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #b45309, #d4651f);
+            border: 2px solid #8b4513;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .test-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(180, 83, 9, 0.4);
+        }
+
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .test-success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            color: #22c55e;
+        }
+
+        .test-error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .test-warning {
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid #f59e0b;
+            color: #f59e0b;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .log-area {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-ok { background: #22c55e; }
+        .status-error { background: #ef4444; }
+        .status-warning { background: #f59e0b; }
+        .status-pending { background: #6b7280; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🏛️ IMPERIUM - Test Complet V20</h1>
+        
+        <div class="test-section">
+            <h3>🚀 Tests de Base</h3>
+            <button class="test-button" onclick="testBasicSystems()">Tester Systèmes de Base</button>
+            <button class="test-button" onclick="testGameState()">Tester État du Jeu</button>
+            <button class="test-button" onclick="testResourceSystem()">Tester Ressources</button>
+            <div id="basic-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🏛️ Tests de Construction</h3>
+            <button class="test-button" onclick="testBuildings()">Tester Bâtiments</button>
+            <button class="test-button" onclick="testUpgrades()">Tester Améliorations</button>
+            <button class="test-button" onclick="testProduction()">Tester Production</button>
+            <div id="building-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>⚔️ Tests de Combat</h3>
+            <button class="test-button" onclick="testBattleSystem()">Tester Système de Combat</button>
+            <button class="test-button" onclick="testUnits()">Tester Unités</button>
+            <button class="test-button" onclick="testNavalCombat()">Tester Combat Naval</button>
+            <div id="battle-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🌍 Tests d'Interface</h3>
+            <button class="test-button" onclick="testMobileInterface()">Tester Interface Mobile</button>
+            <button class="test-button" onclick="testPopupSystem()">Tester Popups</button>
+            <button class="test-button" onclick="testNavigation()">Tester Navigation</button>
+            <div id="interface-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>⭐ Tests Premium</h3>
+            <button class="test-button" onclick="testBattlePass()">Tester Battle Pass</button>
+            <button class="test-button" onclick="testAchievements()">Tester Succès</button>
+            <button class="test-button" onclick="testDiplomacy()">Tester Diplomatie</button>
+            <div id="premium-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>💾 Tests de Persistance</h3>
+            <button class="test-button" onclick="testSaveLoad()">Tester Sauvegarde/Chargement</button>
+            <button class="test-button" onclick="testLocalStorage()">Tester Stockage Local</button>
+            <div id="save-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Rapport Global</h3>
+            <button class="test-button" onclick="runAllTests()">🧪 LANCER TOUS LES TESTS</button>
+            <button class="test-button" onclick="generateReport()">📋 Générer Rapport</button>
+            <div id="global-results"></div>
+            <div id="test-log" class="log-area" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Scripts du jeu -->
+    <script src="js/game.js"></script>
+    <script src="js/shared-utils.js"></script>
+    <script src="js/unified-game-controller.js"></script>
+    <script src="js/BattleManager.js"></script>
+    <script src="js/battle-pass-system.js"></script>
+    <script src="js/achievement-system.js"></script>
+
+    <script>
+        // Variables globales de test
+        let testResults = {
+            basic: [],
+            buildings: [],
+            battle: [],
+            interface: [],
+            premium: [],
+            save: []
+        };
+
+        let testLog = [];
+
+        // Utilitaires de test
+        function logTest(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            testLog.push(`[${timestamp}] ${type.toUpperCase()}: ${message}`);
+            updateTestLog();
+        }
+
+        function updateTestLog() {
+            const logArea = document.getElementById('test-log');
+            logArea.innerHTML = testLog.join('\n');
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        function showTestResult(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            const result = document.createElement('div');
+            result.className = `test-result test-${type}`;
+            result.innerHTML = `<span class="status-indicator status-${type === 'success' ? 'ok' : type === 'error' ? 'error' : 'warning'}"></span>${message}`;
+            container.appendChild(result);
+            logTest(message, type);
+        }
+
+        // Tests de base
+        function testBasicSystems() {
+            const container = document.getElementById('basic-results');
+            container.innerHTML = '';
+            
+            logTest('Test des systèmes de base...');
+            
+            // Test Game.js
+            try {
+                if (typeof BUILDING_DEFINITIONS !== 'undefined') {
+                    showTestResult('basic-results', '✅ BUILDING_DEFINITIONS chargé', 'success');
+                } else {
+                    showTestResult('basic-results', '❌ BUILDING_DEFINITIONS manquant', 'error');
+                }
+            } catch (e) {
+                showTestResult('basic-results', `❌ Erreur BUILDING_DEFINITIONS: ${e.message}`, 'error');
+            }
+
+            // Test UNITS_CONFIG
+            try {
+                if (typeof UNITS_CONFIG !== 'undefined') {
+                    const unitCount = Object.keys(UNITS_CONFIG).length;
+                    showTestResult('basic-results', `✅ UNITS_CONFIG chargé (${unitCount} unités)`, 'success');
+                } else {
+                    showTestResult('basic-results', '❌ UNITS_CONFIG manquant', 'error');
+                }
+            } catch (e) {
+                showTestResult('basic-results', `❌ Erreur UNITS_CONFIG: ${e.message}`, 'error');
+            }
+
+            // Test gameState
+            try {
+                if (typeof gameState !== 'undefined') {
+                    showTestResult('basic-results', '✅ gameState accessible', 'success');
+                } else {
+                    showTestResult('basic-results', '⚠️ gameState non initialisé', 'warning');
+                }
+            } catch (e) {
+                showTestResult('basic-results', `❌ Erreur gameState: ${e.message}`, 'error');
+            }
+        }
+
+        function testGameState() {
+            const container = document.getElementById('basic-results');
+            
+            logTest('Test de l\'état du jeu...');
+            
+            try {
+                // Initialiser gameState si nécessaire
+                if (typeof initializeGameState === 'function') {
+                    initializeGameState();
+                    showTestResult('basic-results', '✅ gameState initialisé', 'success');
+                } else {
+                    showTestResult('basic-results', '❌ Fonction initializeGameState manquante', 'error');
+                    return;
+                }
+
+                // Vérifier les propriétés essentielles
+                const requiredProps = ['resources', 'buildings', 'army', 'level', 'xp'];
+                let missingProps = [];
+                
+                requiredProps.forEach(prop => {
+                    if (!gameState.hasOwnProperty(prop)) {
+                        missingProps.push(prop);
+                    }
+                });
+
+                if (missingProps.length === 0) {
+                    showTestResult('basic-results', '✅ Toutes les propriétés gameState présentes', 'success');
+                } else {
+                    showTestResult('basic-results', `⚠️ Propriétés manquantes: ${missingProps.join(', ')}`, 'warning');
+                }
+
+            } catch (e) {
+                showTestResult('basic-results', `❌ Erreur test gameState: ${e.message}`, 'error');
+            }
+        }
+
+        function testResourceSystem() {
+            const container = document.getElementById('basic-results');
+            
+            logTest('Test du système de ressources...');
+            
+            try {
+                // Test des ressources de base
+                const expectedResources = ['gold', 'food', 'marble', 'wood'];
+                let resourcesOK = true;
+                
+                expectedResources.forEach(resource => {
+                    if (!gameState.resources.hasOwnProperty(resource)) {
+                        showTestResult('basic-results', `❌ Ressource manquante: ${resource}`, 'error');
+                        resourcesOK = false;
+                    }
+                });
+
+                if (resourcesOK) {
+                    showTestResult('basic-results', '✅ Toutes les ressources de base présentes', 'success');
+                }
+
+                // Test des fonctions de ressources
+                if (typeof updateResources === 'function') {
+                    showTestResult('basic-results', '✅ Fonction updateResources disponible', 'success');
+                } else {
+                    showTestResult('basic-results', '❌ Fonction updateResources manquante', 'error');
+                }
+
+                if (typeof canAfford === 'function') {
+                    showTestResult('basic-results', '✅ Fonction canAfford disponible', 'success');
+                } else {
+                    showTestResult('basic-results', '❌ Fonction canAfford manquante', 'error');
+                }
+
+            } catch (e) {
+                showTestResult('basic-results', `❌ Erreur test ressources: ${e.message}`, 'error');
+            }
+        }
+
+        function testBuildings() {
+            const container = document.getElementById('building-results');
+            container.innerHTML = '';
+            
+            logTest('Test du système de bâtiments...');
+            
+            try {
+                // Compter les bâtiments définis
+                const buildingCount = Object.keys(BUILDING_DEFINITIONS).length;
+                showTestResult('building-results', `✅ ${buildingCount} bâtiments définis`, 'success');
+
+                // Vérifier la cohérence des définitions
+                let invalidBuildings = [];
+                Object.entries(BUILDING_DEFINITIONS).forEach(([key, building]) => {
+                    if (!building.name || !building.icon || !building.baseCost) {
+                        invalidBuildings.push(key);
+                    }
+                });
+
+                if (invalidBuildings.length === 0) {
+                    showTestResult('building-results', '✅ Toutes les définitions de bâtiments valides', 'success');
+                } else {
+                    showTestResult('building-results', `⚠️ Bâtiments avec définitions incomplètes: ${invalidBuildings.join(', ')}`, 'warning');
+                }
+
+                // Test fonctions de construction
+                if (typeof buildBuilding === 'function') {
+                    showTestResult('building-results', '✅ Fonction buildBuilding disponible', 'success');
+                } else {
+                    showTestResult('building-results', '❌ Fonction buildBuilding manquante', 'error');
+                }
+
+            } catch (e) {
+                showTestResult('building-results', `❌ Erreur test bâtiments: ${e.message}`, 'error');
+            }
+        }
+
+        function testUpgrades() {
+            const container = document.getElementById('building-results');
+            
+            logTest('Test du système d\'améliorations...');
+            
+            try {
+                if (typeof upgradeBuilding === 'function') {
+                    showTestResult('building-results', '✅ Fonction upgradeBuilding disponible', 'success');
+                } else {
+                    showTestResult('building-results', '❌ Fonction upgradeBuilding manquante', 'error');
+                }
+
+                if (typeof calculateUpgradeCost === 'function') {
+                    showTestResult('building-results', '✅ Fonction calculateUpgradeCost disponible', 'success');
+                } else {
+                    showTestResult('building-results', '❌ Fonction calculateUpgradeCost manquante', 'error');
+                }
+
+            } catch (e) {
+                showTestResult('building-results', `❌ Erreur test améliorations: ${e.message}`, 'error');
+            }
+        }
+
+        function testProduction() {
+            const container = document.getElementById('building-results');
+            
+            logTest('Test du système de production...');
+            
+            try {
+                if (typeof updateProduction === 'function') {
+                    showTestResult('building-results', '✅ Fonction updateProduction disponible', 'success');
+                } else {
+                    showTestResult('building-results', '❌ Fonction updateProduction manquante', 'error');
+                }
+
+                // Test calcul de production
+                if (typeof calculateProduction === 'function') {
+                    showTestResult('building-results', '✅ Fonction calculateProduction disponible', 'success');
+                } else {
+                    showTestResult('building-results', '❌ Fonction calculateProduction manquante', 'error');
+                }
+
+            } catch (e) {
+                showTestResult('building-results', `❌ Erreur test production: ${e.message}`, 'error');
+            }
+        }
+
+        function testBattleSystem() {
+            const container = document.getElementById('battle-results');
+            container.innerHTML = '';
+            
+            logTest('Test du système de combat...');
+            
+            try {
+                // Test BattleManager
+                if (typeof BattleManager === 'function') {
+                    showTestResult('battle-results', '✅ Classe BattleManager disponible', 'success');
+                } else {
+                    showTestResult('battle-results', '❌ Classe BattleManager manquante', 'error');
+                }
+
+                // Test configuration des unités
+                const unitCount = Object.keys(UNITS_CONFIG).length;
+                showTestResult('battle-results', `✅ ${unitCount} unités configurées`, 'success');
+
+                // Vérifier les domaines de combat
+                let landUnits = 0, seaUnits = 0;
+                Object.values(UNITS_CONFIG).forEach(unit => {
+                    if (unit.domain === 'land') landUnits++;
+                    else if (unit.domain === 'sea') seaUnits++;
+                });
+
+                showTestResult('battle-results', `✅ ${landUnits} unités terrestres, ${seaUnits} unités navales`, 'success');
+
+            } catch (e) {
+                showTestResult('battle-results', `❌ Erreur test combat: ${e.message}`, 'error');
+            }
+        }
+
+        function testUnits() {
+            const container = document.getElementById('battle-results');
+            
+            logTest('Test des unités...');
+            
+            try {
+                if (typeof trainUnit === 'function') {
+                    showTestResult('battle-results', '✅ Fonction trainUnit disponible', 'success');
+                } else {
+                    showTestResult('battle-results', '❌ Fonction trainUnit manquante', 'error');
+                }
+
+                // Vérifier les héros
+                const heroCount = Object.keys(HEROES_CONFIG).length;
+                showTestResult('battle-results', `✅ ${heroCount} héros configurés`, 'success');
+
+            } catch (e) {
+                showTestResult('battle-results', `❌ Erreur test unités: ${e.message}`, 'error');
+            }
+        }
+
+        function testNavalCombat() {
+            const container = document.getElementById('battle-results');
+            
+            logTest('Test du combat naval...');
+            
+            try {
+                // Tester création d'un combat naval
+                const seaUnits = Object.entries(UNITS_CONFIG).filter(([_, unit]) => unit.domain === 'sea');
+                if (seaUnits.length > 0) {
+                    showTestResult('battle-results', `✅ Combat naval supporté (${seaUnits.length} types de navires)`, 'success');
+                } else {
+                    showTestResult('battle-results', '❌ Aucune unité navale trouvée', 'error');
+                }
+
+            } catch (e) {
+                showTestResult('battle-results', `❌ Erreur test combat naval: ${e.message}`, 'error');
+            }
+        }
+
+        function testMobileInterface() {
+            const container = document.getElementById('interface-results');
+            container.innerHTML = '';
+            
+            logTest('Test de l\'interface mobile...');
+            
+            try {
+                // Test responsive design
+                const viewport = window.innerWidth;
+                if (viewport < 768) {
+                    showTestResult('interface-results', '✅ Interface mobile détectée', 'success');
+                } else {
+                    showTestResult('interface-results', '⚠️ Interface desktop détectée', 'warning');
+                }
+
+                // Test CSS mobile
+                const mobileCSS = document.querySelector('link[href*="mobile"]');
+                if (mobileCSS) {
+                    showTestResult('interface-results', '✅ CSS mobile chargé', 'success');
+                } else {
+                    showTestResult('interface-results', '⚠️ CSS mobile non détecté', 'warning');
+                }
+
+            } catch (e) {
+                showTestResult('interface-results', `❌ Erreur test interface mobile: ${e.message}`, 'error');
+            }
+        }
+
+        function testPopupSystem() {
+            const container = document.getElementById('interface-results');
+            
+            logTest('Test du système de popups...');
+            
+            try {
+                if (typeof showPopup === 'function') {
+                    showTestResult('interface-results', '✅ Fonction showPopup disponible', 'success');
+                } else {
+                    showTestResult('interface-results', '❌ Fonction showPopup manquante', 'error');
+                }
+
+                // Test UnifiedPopupSystem
+                if (typeof window.UnifiedPopupSystem === 'object') {
+                    showTestResult('interface-results', '✅ UnifiedPopupSystem chargé', 'success');
+                } else {
+                    showTestResult('interface-results', '⚠️ UnifiedPopupSystem non disponible', 'warning');
+                }
+
+            } catch (e) {
+                showTestResult('interface-results', `❌ Erreur test popups: ${e.message}`, 'error');
+            }
+        }
+
+        function testNavigation() {
+            const container = document.getElementById('interface-results');
+            
+            logTest('Test de la navigation...');
+            
+            try {
+                // Test des liens de navigation
+                const navLinks = ['game.html', 'imperium-unified.html', 'imperium-mobile.html'];
+                let workingLinks = 0;
+
+                navLinks.forEach(link => {
+                    fetch(link, { method: 'HEAD' })
+                        .then(response => {
+                            if (response.ok) {
+                                workingLinks++;
+                                showTestResult('interface-results', `✅ ${link} accessible`, 'success');
+                            } else {
+                                showTestResult('interface-results', `❌ ${link} inaccessible`, 'error');
+                            }
+                        })
+                        .catch(() => {
+                            showTestResult('interface-results', `❌ ${link} introuvable`, 'error');
+                        });
+                });
+
+            } catch (e) {
+                showTestResult('interface-results', `❌ Erreur test navigation: ${e.message}`, 'error');
+            }
+        }
+
+        function testBattlePass() {
+            const container = document.getElementById('premium-results');
+            container.innerHTML = '';
+            
+            logTest('Test du Battle Pass...');
+            
+            try {
+                if (typeof window.BattlePassSystem === 'object') {
+                    showTestResult('premium-results', '✅ BattlePassSystem chargé', 'success');
+                } else {
+                    showTestResult('premium-results', '❌ BattlePassSystem manquant', 'error');
+                }
+
+            } catch (e) {
+                showTestResult('premium-results', `❌ Erreur test Battle Pass: ${e.message}`, 'error');
+            }
+        }
+
+        function testAchievements() {
+            const container = document.getElementById('premium-results');
+            
+            logTest('Test du système de succès...');
+            
+            try {
+                if (typeof window.AchievementSystem === 'object') {
+                    showTestResult('premium-results', '✅ AchievementSystem chargé', 'success');
+                } else {
+                    showTestResult('premium-results', '❌ AchievementSystem manquant', 'error');
+                }
+
+            } catch (e) {
+                showTestResult('premium-results', `❌ Erreur test succès: ${e.message}`, 'error');
+            }
+        }
+
+        function testDiplomacy() {
+            const container = document.getElementById('premium-results');
+            
+            logTest('Test du système de diplomatie...');
+            
+            try {
+                if (typeof window.DiplomacySystem === 'object') {
+                    showTestResult('premium-results', '✅ DiplomacySystem chargé', 'success');
+                } else {
+                    showTestResult('premium-results', '❌ DiplomacySystem manquant', 'error');
+                }
+
+            } catch (e) {
+                showTestResult('premium-results', `❌ Erreur test diplomatie: ${e.message}`, 'error');
+            }
+        }
+
+        function testSaveLoad() {
+            const container = document.getElementById('save-results');
+            container.innerHTML = '';
+            
+            logTest('Test de la sauvegarde/chargement...');
+            
+            try {
+                if (typeof saveGame === 'function') {
+                    showTestResult('save-results', '✅ Fonction saveGame disponible', 'success');
+                } else {
+                    showTestResult('save-results', '❌ Fonction saveGame manquante', 'error');
+                }
+
+                if (typeof loadGame === 'function') {
+                    showTestResult('save-results', '✅ Fonction loadGame disponible', 'success');
+                } else {
+                    showTestResult('save-results', '❌ Fonction loadGame manquante', 'error');
+                }
+
+            } catch (e) {
+                showTestResult('save-results', `❌ Erreur test sauvegarde: ${e.message}`, 'error');
+            }
+        }
+
+        function testLocalStorage() {
+            const container = document.getElementById('save-results');
+            
+            logTest('Test du stockage local...');
+            
+            try {
+                // Test localStorage disponible
+                if (typeof Storage !== 'undefined') {
+                    showTestResult('save-results', '✅ localStorage disponible', 'success');
+                    
+                    // Test écriture/lecture
+                    localStorage.setItem('imperium_test', 'test_value');
+                    const testValue = localStorage.getItem('imperium_test');
+                    
+                    if (testValue === 'test_value') {
+                        showTestResult('save-results', '✅ localStorage fonctionnel', 'success');
+                        localStorage.removeItem('imperium_test');
+                    } else {
+                        showTestResult('save-results', '❌ localStorage dysfonctionnel', 'error');
+                    }
+                } else {
+                    showTestResult('save-results', '❌ localStorage non supporté', 'error');
+                }
+
+            } catch (e) {
+                showTestResult('save-results', `❌ Erreur test localStorage: ${e.message}`, 'error');
+            }
+        }
+
+        function runAllTests() {
+            const container = document.getElementById('global-results');
+            container.innerHTML = '';
+            testLog = [];
+            
+            showTestResult('global-results', '🚀 Lancement de tous les tests...', 'success');
+            document.getElementById('test-log').style.display = 'block';
+            
+            // Exécuter tous les tests avec délais
+            setTimeout(() => {
+                testBasicSystems();
+                testGameState();
+                testResourceSystem();
+            }, 500);
+            
+            setTimeout(() => {
+                testBuildings();
+                testUpgrades();
+                testProduction();
+            }, 1000);
+            
+            setTimeout(() => {
+                testBattleSystem();
+                testUnits();
+                testNavalCombat();
+            }, 1500);
+            
+            setTimeout(() => {
+                testMobileInterface();
+                testPopupSystem();
+                testNavigation();
+            }, 2000);
+            
+            setTimeout(() => {
+                testBattlePass();
+                testAchievements();
+                testDiplomacy();
+            }, 2500);
+            
+            setTimeout(() => {
+                testSaveLoad();
+                testLocalStorage();
+                generateReport();
+            }, 3000);
+        }
+
+        function generateReport() {
+            const container = document.getElementById('global-results');
+            
+            logTest('Génération du rapport final...');
+            
+            setTimeout(() => {
+                const totalTests = testLog.length;
+                const successTests = testLog.filter(log => log.includes('SUCCESS')).length;
+                const errorTests = testLog.filter(log => log.includes('ERROR')).length;
+                const warningTests = testLog.filter(log => log.includes('WARNING')).length;
+                
+                container.innerHTML += `
+                    <div class="test-result test-success">
+                        <h4>📊 RAPPORT FINAL</h4>
+                        <p><strong>Total des tests :</strong> ${totalTests}</p>
+                        <p><strong>Tests réussis :</strong> ${successTests} ✅</p>
+                        <p><strong>Tests avec erreurs :</strong> ${errorTests} ❌</p>
+                        <p><strong>Tests avec avertissements :</strong> ${warningTests} ⚠️</p>
+                        <p><strong>Taux de réussite :</strong> ${Math.round((successTests / totalTests) * 100)}%</p>
+                    </div>
+                `;
+                
+                const score = Math.round((successTests / totalTests) * 100);
+                if (score >= 90) {
+                    showTestResult('global-results', '🏆 EXCELLENT ! Le jeu est très bien intégré et fonctionnel.', 'success');
+                } else if (score >= 70) {
+                    showTestResult('global-results', '✅ BIEN ! Le jeu fonctionne avec quelques améliorations possibles.', 'success');
+                } else if (score >= 50) {
+                    showTestResult('global-results', '⚠️ MOYEN ! Le jeu nécessite des corrections importantes.', 'warning');
+                } else {
+                    showTestResult('global-results', '❌ CRITIQUE ! Le jeu nécessite des corrections majeures.', 'error');
+                }
+                
+                logTest(`Rapport final généré - Score: ${score}%`);
+            }, 500);
+        }
+
+        // Auto-initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            logTest('Interface de test chargée');
+            setTimeout(() => {
+                testBasicSystems();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
