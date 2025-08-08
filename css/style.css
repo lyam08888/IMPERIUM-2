@@ -29,9 +29,10 @@ body {
         linear-gradient(135deg, var(--dark-bg) 0%, var(--dark-stone) 100%);
     color: var(--text-light);
     overflow-y: auto;
+    overflow-x: hidden;
 }
 .imperium-ui { display: flex; flex-direction: column; min-height: 100vh; position: relative; z-index: 10; padding-bottom: 80px; }
-.imperium-body { max-width: 1200px; margin: 0 auto; width: 100%; padding: 1.5rem 2rem; }
+.imperium-body { max-width: 1200px; margin: 0 auto; width: 100%; padding: 1.5rem 1rem; }
 .view-title { font-size: 2.2rem; font-weight: bold; color: var(--gold-primary); margin-bottom: 2rem; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
 
 /* --- Boutons --- */
@@ -76,7 +77,6 @@ body {
 .city-map-section { background: rgba(15, 23, 42, 0.8); border-radius: 1rem; border: 1px solid var(--border-gold); padding: 1.5rem; margin-bottom: 2rem; }
 .map-header { margin-bottom: 2rem; }
 .buildings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; min-height: 400px; }
-@media (min-width: 768px) { .buildings-grid { grid-template-columns: repeat(5, 1fr); } }
 .building-slot { background: rgba(30, 41, 59, 0.6); border: 2px dashed var(--text-muted); border-radius: 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; min-height: 120px; padding: 0.5rem; position: relative; }
 .building-slot:hover:not(.constructing) { border-color: var(--gold-light); background: rgba(217, 119, 6, 0.15); transform: translateY(-5px); }
 .building-slot.occupied { border-style: solid; border-color: var(--border-gold); }
