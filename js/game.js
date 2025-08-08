@@ -119,6 +119,46 @@ const GAME_CONFIG = {
     BASE_SUPPLY_RANGE: 15, // Using percentage of map for distance
 };
 
+const EVENTS = [
+    {
+        title: "Bonne Récolte",
+        description: "Les dieux ont souri à vos agriculteurs. La production de nourriture est augmentée de 50% pour ce tour.",
+        effect: (gs) => {
+            const foodBonus = gs.city.production.food * 0.5;
+            gs.resources.food += foodBonus;
+            return `Nourriture gagnée : +${Math.floor(foodBonus)}`;
+        }
+    },
+    {
+        title: "Découverte de Marbre",
+        description: "Une nouvelle veine de marbre de haute qualité a été découverte dans vos carrières.",
+        effect: (gs) => {
+            gs.resources.marble += 250;
+            return `Marbre gagné : +250`;
+        }
+    },
+    {
+        title: "Agitation Populaire",
+        description: "Le peuple est mécontent des impôts. La loyauté dans tous vos territoires contrôlés baisse de 10.",
+        effect: (gs) => {
+            gs.world.territories.forEach(t => {
+                if (t.status === 'controlled' || t.status === 'capital') {
+                    t.loyalty = Math.max(0, t.loyalty - 10);
+                }
+            });
+            return `La loyauté a diminué.`;
+        }
+    },
+    {
+        title: "Inspiration Divine",
+        description: "Vos prêtres ont reçu une vision. Vous gagnez 20 Faveur Divine.",
+        effect: (gs) => {
+            gs.resources.divineFavor = Math.min(gs.storage.divineFavor, gs.resources.divineFavor + 20);
+            return `Faveur Divine gagnée : +20`;
+        }
+    }
+];
+
 
 // ---------------------------------------------------------------
 // ÉTAT GLOBAL DU JEU (GAMESTATE)

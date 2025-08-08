@@ -85,6 +85,7 @@ function renderCommandGrid() {
     commandGrid.innerHTML = `
         <div class="action-tile active" data-action="command"><div class="tile-icon">🏛️</div><div class="tile-title">Commandement</div></div>
         <div class="action-tile" data-action="missions"><div class="tile-icon">🎯</div><div class="tile-title">Missions</div></div>
+        <div class="action-tile" data-action="spying"><div class="tile-icon">👁️</div><div class="tile-title">Espionnage</div></div>
         <div class="action-tile" data-action="resources"><div class="tile-icon">💰</div><div class="tile-title">Ressources</div></div>
         <div class="action-tile" data-action="end-turn"><div class="tile-icon">✅</div><div class="tile-title">Fin du Tour</div></div>
     `;
@@ -102,6 +103,7 @@ function updatePreview(action) {
     switch(action) {
         case 'command': text = 'Gérez les aspects internes et externes de votre empire.'; break;
         case 'missions': text = 'Consultez vos objectifs actuels.'; break;
+        case 'spying': text = `Utilisez vos espions pour découvrir les secrets de vos rivaux. Espions disponibles : ${gameState.resources.spies}`; break;
         case 'resources': text = `Or: ${Math.floor(gameState.resources.gold).toLocaleString()}`; break;
         case 'end-turn': text = `Passez au tour suivant (Tour ${gameState.world.turn}).`; break;
     }
@@ -141,8 +143,64 @@ function setupEventListeners() {
             const action = tile.dataset.action;
             if (action === 'end-turn') endTurn();
             if (action === 'resources') showResourcesModal();
+            if (action === 'spying') showSpyActionModal();
         });
     }
+}
+
+function showSpyActionModal() {
+    if (gameState.resources.spies < 1) {
+        showNotification("Vous n'avez pas d'espions disponibles.", "error");
+        return;
+    }
+
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalButtons = document.getElementById('modalButtons');
+
+    modalTitle.innerHTML = "Action d'Espionnage";
+    let body = `<p>Sélectionnez une cible pour votre mission d'espionnage (coût : 1 espion).</p><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">`;
+
+    gameState.world.territories.forEach(territory => {
+        if (territory.status !== 'capital' && territory.status !== 'controlled') {
+            body += `<button class="imperium-btn" style="padding: 1rem;" onclick="performSpyMission('${territory.id}')">${territory.flag} ${territory.name}</button>`;
+        }
+    });
+    body += `</div>`;
+
+    modalBody.innerHTML = body;
+    modalButtons.innerHTML = `<button class="modal-btn cancel" style="margin-top: 1rem;">Annuler</button>`;
+    showModal();
+}
+
+function performSpyMission(territoryId) {
+    const cost = 1;
+    if (gameState.resources.spies < cost) {
+        showNotification("Pas assez d'espions.", "error");
+        return;
+    }
+
+    gameState.resources.spies -= cost;
+    const targetTerritory = gameState.world.territories.find(t => t.id === territoryId);
+
+    // Simple success chance
+    const successChance = 0.7; // 70%
+    if (Math.random() < successChance) {
+        let report = `Rapport d'espionnage de ${targetTerritory.name}: `;
+        if (targetTerritory.units && Object.keys(targetTerritory.units).length > 0) {
+            const units = Object.entries(targetTerritory.units).map(([id, count]) => `${UNITS_CONFIG[id].icon} ${count}`).join(', ');
+            report += `Forces détectées : ${units}.`;
+        } else {
+            report += "Aucune force militaire significative détectée.";
+        }
+        showNotification(report, 'success');
+    } else {
+        showNotification(`Votre espion a été capturé en essayant d'infiltrer ${targetTerritory.name} !`, 'error');
+    }
+
+    hideModal();
+    rerenderWorldView(); // To update spy count in preview
+    saveGameState();
 }
 
 function showTerritoryModal(territory) {
@@ -518,8 +576,34 @@ function declareWar(territoryId) {
     saveGameState();
 }
 
+function showEventModal(event) {
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalButtons = document.getElementById('modalButtons');
+
+    modalTitle.innerHTML = `Événement : ${event.title}`;
+
+    const effectResult = event.effect(gameState);
+
+    modalBody.innerHTML = `<p>${event.description}</p><p><em>${effectResult}</em></p>`;
+    modalButtons.innerHTML = `<button class="modal-btn" onclick="hideModal()">Continuer</button>`;
+
+    showModal();
+}
+
 function endTurn() {
-    // 0. Legion Movement Phase
+    // 0. Event Phase (has a chance to trigger)
+    if (Math.random() < 0.25) { // 25% chance of an event
+        const randomEvent = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+        showEventModal(randomEvent);
+        saveGameState();
+        rerenderWorldView();
+        // The rest of the turn will proceed after the user closes the event modal.
+        // For simplicity, we'll process the event and then the turn.
+        // A more advanced implementation might pause the turn until the modal is closed.
+    }
+
+    // 1. Legion Movement Phase
     gameState.legions.forEach(legion => {
         if (legion.action === 'moving' && legion.targetId) {
             legion.locationId = legion.targetId;
