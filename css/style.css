@@ -113,14 +113,18 @@ body {
     border: 2px solid var(--border-gold);
     padding: 1.5rem;
     box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+/* Make view-container a grid for layout purposes */
+#city-view, .world-view-container {
     display: grid;
-    grid-template-columns: 1fr 350px; /* Main content and dashboard */
+    grid-template-columns: 1fr 350px;
     gap: 1.5rem;
     transition: grid-template-columns 0.3s ease-in-out;
     position: relative;
 }
 
-.world-view-container.dashboard-collapsed {
+.view-container.dashboard-collapsed {
     grid-template-columns: 1fr 40px; /* Make space only for the toggle button */
 }
 
@@ -149,11 +153,11 @@ body {
     background-color: var(--gold-primary);
 }
 
-.world-view-container.dashboard-collapsed #dashboard-toggle-btn {
+.view-container.dashboard-collapsed #dashboard-toggle-btn {
     right: 1.5rem; /* Adjust position when collapsed */
 }
 
-.world-view-container.dashboard-collapsed .dashboard-grid {
+.view-container.dashboard-collapsed .dashboard-grid {
     display: none;
 }
 
