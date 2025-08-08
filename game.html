@@ -25,6 +25,8 @@
     <script src="js/advanced-economy.js" defer></script>
     <script src="js/analytics-system.js" defer></script>
     <script src="js/competition-system.js" defer></script>
+    <script src="js/battle-pass-system.js" defer></script>
+    <script src="js/battle-pass-integration.js" defer></script>
     
     <script src="js/scenario.js" defer></script>
     <script src="js/city-view.js" defer></script>
@@ -105,9 +107,15 @@
                                 <span class="tile-icon">⚔️</span>
                                 <h3 class="tile-title">Simulateur de Combat</h3>
                              </div>
-
                              <div class="tile-preview">Testez la puissance de vos légions.</div>
-
+                        </div>
+                        
+                        <div class="dashboard-tile" onclick="showBattlePassModal()">
+                             <div class="tile-header">
+                                <span class="tile-icon">🎖️</span>
+                                <h3 class="tile-title">Battle Pass Impérial</h3>
+                             </div>
+                             <div class="tile-preview" id="battle-pass-tile-preview">Progression vers les récompenses légendaires.</div>
                         </div>
                     </div>
                 </div>

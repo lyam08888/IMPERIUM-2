@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Test Complet - IMPERIUM avec Battle Pass</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c1810, #1a0f08);
+            color: #e8dcc6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .test-container {
+            max-width: 800px;
+            background: rgba(44, 24, 16, 0.9);
+            border: 3px solid #b45309;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 0 50px rgba(180, 83, 9, 0.5);
+        }
+
+        .test-title {
+            font-size: 2.5em;
+            color: #d4651f;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .test-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid #8b4513;
+        }
+
+        .test-section h3 {
+            color: #d4651f;
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #b45309, #d4651f);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            margin: 8px 10px 8px 0;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(180, 83, 9, 0.5);
+        }
+
+        .test-button.primary {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+        }
+
+        .test-button.warning {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        }
+
+        .test-button.danger {
+            background: linear-gradient(135deg, #dc2626, #f87171);
+        }
+
+        .test-result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .test-result.success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            color: #22c55e;
+        }
+
+        .test-result.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding-left: 20px;
+        }
+
+        .feature-list li {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-list li::before {
+            content: '✅';
+            font-size: 1.2em;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.online {
+            background: #22c55e;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.offline {
+            background: #ef4444;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .battle-pass-preview {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1));
+            border: 2px solid #f59e0b;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            background: rgba(0, 0, 0, 0.5);
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🧪 TEST COMPLET IMPERIUM</h1>
+        
+        <!-- Section Navigation -->
+        <div class="test-section">
+            <h3>🧭 Navigation et Points d'Entrée</h3>
+            <p>Testez tous les points d'accès au jeu :</p>
+            
+            <button class="test-button primary" onclick="testAccess('index.html')">
+                🏠 Page d'Accueil Principale
+            </button>
+            <button class="test-button primary" onclick="testAccess('START-UNIFIED.html')">
+                🚀 Launcher Unifié
+            </button>
+            <button class="test-button" onclick="testAccess('game.html')">
+                🏛️ Jeu Classique
+            </button>
+            <button class="test-button" onclick="testAccess('imperium-unified.html')">
+                🌟 Version Unifiée
+            </button>
+            
+            <div id="navigation-result" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Section Battle Pass -->
+        <div class="test-section">
+            <h3>🎖️ Battle Pass Système (NOUVEAU !)</h3>
+            <p>Testez le nouveau système de Battle Pass avec 100 niveaux :</p>
+            
+            <button class="test-button warning" onclick="testBattlePass()">
+                🎖️ Ouvrir Battle Pass
+            </button>
+            <button class="test-button warning" onclick="simulateXPGain()">
+                ⚡ Simuler Gain XP
+            </button>
+            <button class="test-button warning" onclick="testBattlePassIntegration()">
+                🔗 Test Intégration
+            </button>
+            
+            <div class="battle-pass-preview">
+                <h4 style="color: #f59e0b;">📊 Status Battle Pass</h4>
+                <div class="status-indicator online"></div><span id="bp-status">Chargement...</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="bp-progress" style="width: 0%"></div>
+                </div>
+                <div id="bp-info">Niveau 1/100 - 0 XP</div>
+            </div>
+            
+            <div id="battlepass-result" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Section Fonctionnalités du Jeu -->
+        <div class="test-section">
+            <h3>⚙️ Fonctionnalités Principales</h3>
+            <p>Vérification des systèmes du jeu :</p>
+            
+            <ul class="feature-list">
+                <li>Construction de bâtiments avec XP Battle Pass</li>
+                <li>Système de combat avec récompenses</li>
+                <li>Gestion des ressources automatique</li>
+                <li>Objectifs et quêtes avec progression</li>
+                <li>Interface responsive et intuitive</li>
+                <li>Sauvegardes automatiques sécurisées</li>
+                <li>Notifications et effets visuels</li>
+                <li>Pass de Combat 100 niveaux</li>
+            </ul>
+            
+            <button class="test-button" onclick="runComprehensiveTest()">
+                🔄 Test Complet Automatique
+            </button>
+            
+            <div id="features-result" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Section Debug -->
+        <div class="test-section">
+            <h3>🛠️ Outils de Débogage</h3>
+            <p>Outils pour diagnostiquer les problèmes :</p>
+            
+            <button class="test-button" onclick="checkConsoleErrors()">
+                📋 Vérifier Erreurs Console
+            </button>
+            <button class="test-button" onclick="testLocalStorage()">
+                💾 Test LocalStorage
+            </button>
+            <button class="test-button danger" onclick="resetAllData()">
+                🔥 Reset Complet
+            </button>
+            <button class="test-button" onclick="downloadLog()">
+                📄 Télécharger Log
+            </button>
+            
+            <div id="debug-result" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Section Actions Rapides -->
+        <div class="test-section">
+            <h3>⚡ Actions Rapides</h3>
+            <p>Accès direct aux fonctionnalités :</p>
+            
+            <button class="test-button primary" onclick="quickStartGame()">
+                🎮 Démarrage Rapide
+            </button>
+            <button class="test-button primary" onclick="quickStartWithBattlePass()">
+                🎖️ Démarrage + Battle Pass
+            </button>
+            <button class="test-button" onclick="showGameStats()">
+                📈 Statistiques
+            </button>
+            
+            <div id="actions-result" class="test-result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Scripts de test -->
+    <script>
+        let testLog = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            testLog.push(`[${timestamp}] ${type.toUpperCase()}: ${message}`);
+            console.log(`[TEST ${type.toUpperCase()}] ${message}`);
+        }
+        
+        function showResult(sectionId, message, success = true) {
+            const element = document.getElementById(sectionId);
+            element.style.display = 'block';
+            element.className = `test-result ${success ? 'success' : 'error'}`;
+            element.textContent = message;
+        }
+        
+        function testAccess(url) {
+            log(`Test d'accès à ${url}`);
+            
+            // Tester si l'URL existe
+            fetch(url)
+                .then(response => {
+                    if (response.ok) {
+                        showResult('navigation-result', `✅ ${url} accessible - Redirection...`, true);
+                        setTimeout(() => {
+                            window.location.href = url;
+                        }, 1000);
+                    } else {
+                        showResult('navigation-result', `❌ ${url} non trouvé (${response.status})`, false);
+                    }
+                })
+                .catch(error => {
+                    showResult('navigation-result', `❌ Erreur d'accès à ${url}: ${error.message}`, false);
+                    log(`Erreur accès ${url}: ${error.message}`, 'error');
+                });
+        }
+        
+        function testBattlePass() {
+            log('Test du Battle Pass System');
+            
+            if (typeof window !== 'undefined') {
+                // Charger le Battle Pass si pas encore fait
+                if (!window.battlePassSystem) {
+                    const script = document.createElement('script');
+                    script.src = 'js/battle-pass-system.js';
+                    script.onload = () => {
+                        setTimeout(() => {
+                            if (window.battlePassSystem) {
+                                window.battlePassSystem.showBattlePassUI();
+                                showResult('battlepass-result', '✅ Battle Pass ouvert avec succès !', true);
+                            } else {
+                                showResult('battlepass-result', '❌ Battle Pass non initialisé', false);
+                            }
+                        }, 500);
+                    };
+                    document.head.appendChild(script);
+                } else {
+                    window.battlePassSystem.showBattlePassUI();
+                    showResult('battlepass-result', '✅ Battle Pass ouvert !', true);
+                }
+            }
+        }
+        
+        function simulateXPGain() {
+            log('Simulation de gain XP');
+            
+            if (window.battlePassSystem) {
+                const xpGained = 250;
+                const leveledUp = window.battlePassSystem.addXP(xpGained);
+                showResult('battlepass-result', `✅ +${xpGained} XP ajoutés ${leveledUp ? '- NIVEAU SUPÉRIEUR!' : ''}`, true);
+                updateBattlePassStatus();
+            } else {
+                showResult('battlepass-result', '❌ Battle Pass non disponible', false);
+            }
+        }
+        
+        function testBattlePassIntegration() {
+            log('Test de l\'intégration Battle Pass');
+            
+            const integrationScript = document.createElement('script');
+            integrationScript.src = 'js/battle-pass-integration.js';
+            integrationScript.onload = () => {
+                showResult('battlepass-result', '✅ Intégration Battle Pass chargée', true);
+            };
+            integrationScript.onerror = () => {
+                showResult('battlepass-result', '❌ Erreur chargement intégration', false);
+            };
+            document.head.appendChild(integrationScript);
+        }
+        
+        function updateBattlePassStatus() {
+            if (window.battlePassSystem) {
+                const progress = window.battlePassSystem.getCurrentProgress();
+                document.getElementById('bp-status').textContent = `Actif - Niveau ${progress.currentLevel}`;
+                document.getElementById('bp-progress').style.width = `${progress.progressPercent}%`;
+                document.getElementById('bp-info').textContent = 
+                    `Niveau ${progress.currentLevel}/${progress.maxLevel} - ${progress.xpForNextLevel} XP restants`;
+            } else {
+                document.getElementById('bp-status').textContent = 'Non chargé';
+                document.getElementById('bp-progress').style.width = '0%';
+            }
+        }
+        
+        function runComprehensiveTest() {
+            log('Démarrage du test complet');
+            showResult('features-result', '🔄 Test en cours...', true);
+            
+            const tests = [
+                () => new Promise(resolve => {
+                    // Test des scripts
+                    const scripts = ['js/game.js', 'js/battle-pass-system.js'];
+                    Promise.all(scripts.map(script => fetch(script)))
+                        .then(() => resolve('✅ Scripts principaux'))
+                        .catch(() => resolve('❌ Scripts manquants'));
+                }),
+                () => new Promise(resolve => {
+                    // Test localStorage
+                    try {
+                        localStorage.setItem('test', 'ok');
+                        localStorage.removeItem('test');
+                        resolve('✅ LocalStorage');
+                    } catch {
+                        resolve('❌ LocalStorage');
+                    }
+                }),
+                () => new Promise(resolve => {
+                    // Test console errors
+                    const errors = testLog.filter(log => log.includes('ERROR'));
+                    resolve(errors.length === 0 ? '✅ Aucune erreur' : `⚠️ ${errors.length} erreurs`);
+                })
+            ];
+            
+            Promise.all(tests.map(test => test()))
+                .then(results => {
+                    showResult('features-result', results.join(' | '), !results.some(r => r.includes('❌')));
+                });
+        }
+        
+        function checkConsoleErrors() {
+            const errors = testLog.filter(log => log.includes('ERROR'));
+            if (errors.length === 0) {
+                showResult('debug-result', '✅ Aucune erreur détectée dans la console', true);
+            } else {
+                showResult('debug-result', `❌ ${errors.length} erreurs trouvées - Voir console F12`, false);
+                console.error('Erreurs détectées:', errors);
+            }
+        }
+        
+        function testLocalStorage() {
+            try {
+                const testData = { test: true, timestamp: Date.now() };
+                localStorage.setItem('imperium_test', JSON.stringify(testData));
+                const retrieved = JSON.parse(localStorage.getItem('imperium_test'));
+                localStorage.removeItem('imperium_test');
+                
+                showResult('debug-result', '✅ LocalStorage fonctionne correctement', true);
+            } catch (error) {
+                showResult('debug-result', `❌ Erreur LocalStorage: ${error.message}`, false);
+            }
+        }
+        
+        function resetAllData() {
+            if (confirm('⚠️ Êtes-vous sûr de vouloir TOUT effacer ?\n\nCette action supprimera :\n• Toutes les sauvegardes\n• Le Battle Pass\n• Tous les progrès\n\nCette action est IRRÉVERSIBLE !')) {
+                try {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    showResult('debug-result', '✅ Toutes les données ont été effacées', true);
+                    log('Reset complet effectué', 'info');
+                    
+                    setTimeout(() => location.reload(), 2000);
+                } catch (error) {
+                    showResult('debug-result', `❌ Erreur lors du reset: ${error.message}`, false);
+                }
+            }
+        }
+        
+        function downloadLog() {
+            const logContent = testLog.join('\n');
+            const blob = new Blob([logContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `imperium-test-log-${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showResult('debug-result', '✅ Log téléchargé avec succès', true);
+        }
+        
+        function quickStartGame() {
+            log('Démarrage rapide du jeu');
+            
+            // Créer une sauvegarde de test
+            const quickGameState = {
+                player: { name: "Test Consul", level: 5, xp: 500 },
+                resources: { gold: 1000, food: 800, marble: 600 },
+                city: {
+                    buildings: [
+                        { slotId: 0, type: 'farm', level: 2 },
+                        { slotId: 1, type: 'house', level: 1 }
+                    ].concat(Array(10).fill().map((_, i) => ({ slotId: i + 2, type: null, level: 0 }))),
+                    activeQuestId: 2,
+                    constructionQueue: []
+                }
+            };
+            
+            localStorage.setItem('imperium_v19_gamestate', JSON.stringify(quickGameState));
+            showResult('actions-result', '✅ État de jeu créé - Redirection...', true);
+            
+            setTimeout(() => {
+                window.location.href = 'game.html';
+            }, 1500);
+        }
+        
+        function quickStartWithBattlePass() {
+            quickStartGame();
+            
+            // Créer un état Battle Pass avancé
+            setTimeout(() => {
+                if (window.battlePassSystem) {
+                    window.battlePassSystem.currentLevel = 10;
+                    window.battlePassSystem.currentXP = 15000;
+                    window.battlePassSystem.saveBattlePassData();
+                }
+            }, 500);
+        }
+        
+        function showGameStats() {
+            const saved = localStorage.getItem('imperium_v19_gamestate');
+            const battlePass = localStorage.getItem('imperium_battle_pass');
+            
+            let stats = '📊 STATISTIQUES DU JEU\n\n';
+            
+            if (saved) {
+                const game = JSON.parse(saved);
+                stats += `👤 Joueur: ${game.player?.name || 'Inconnu'}\n`;
+                stats += `🏆 Niveau: ${game.player?.level || 1}\n`;
+                stats += `💰 Or: ${game.resources?.gold || 0}\n`;
+                stats += `🏗️ Bâtiments: ${game.city?.buildings?.filter(b => b.type).length || 0}\n\n`;
+            } else {
+                stats += '❌ Aucune sauvegarde trouvée\n\n';
+            }
+            
+            if (battlePass) {
+                const bp = JSON.parse(battlePass);
+                stats += `🎖️ Battle Pass: Niveau ${bp.currentLevel || 1}\n`;
+                stats += `⚡ XP Total: ${bp.currentXP || 0}\n`;
+                stats += `🏆 Récompenses: ${bp.unlockedRewards?.length || 0}\n`;
+            } else {
+                stats += '🎖️ Battle Pass: Non initialisé\n';
+            }
+            
+            alert(stats);
+            showResult('actions-result', '✅ Statistiques affichées', true);
+        }
+        
+        // Auto-update Battle Pass status
+        setInterval(updateBattlePassStatus, 2000);
+        updateBattlePassStatus();
+        
+        // Log des erreurs globales
+        window.addEventListener('error', (event) => {
+            log(`Erreur JS: ${event.message} (${event.filename}:${event.lineno})`, 'error');
+        });
+        
+        log('Page de test chargée avec succès');
+    </script>
+</body>
+</html>

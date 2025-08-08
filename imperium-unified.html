@@ -17,6 +17,8 @@
     <!-- Scripts de jeu dans l'ordre de dépendance -->
     <script src="js/game.js" defer></script>
     <script src="js/shared-utils.js" defer></script>
+    <script src="js/battle-pass-system.js" defer></script>
+    <script src="js/battle-pass-integration.js" defer></script>
     <script src="js/unified-popup-system.js" defer></script>
     <script src="js/unified-game-controller.js" defer></script>
     <script src="js/scenario.js" defer></script>
@@ -297,6 +299,9 @@
             </button>
             <button class="nav-floating-btn" onclick="popupSystem.showDiplomacy()" title="Diplomatie">
                 🤝
+            </button>
+            <button class="nav-floating-btn" onclick="showBattlePassModal()" title="Battle Pass Impérial" style="background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #fbbf24;">
+                🎖️
             </button>
             <button class="nav-floating-btn" onclick="popupSystem.showSettings()" title="Paramètres">
                 ⚙️
